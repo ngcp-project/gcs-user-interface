@@ -3,9 +3,9 @@ export default {
   data() {
     return {
       isNavbarOpen: false,
-      misson_one_status: "Not Started",
-      misson_two_status: "Not Started",
-      misson_three_status: "Not Started",
+      misson_one_status: "Done",
+      misson_two_status: "In Progress",
+      misson_three_status: "initiated",
     };
   },
   methods: {
