@@ -1,7 +1,8 @@
 module.exports = {
 	// set your styleguidist configuration here
 	title: 'Default Style Guide',
-	 components: 'src/components/Greet.vue',
+	serverPort: 6061,
+	// components: 'src/components/**/[A-Z]*.vue',
 	// defaultExample: true,
 	// sections: [
 	//   {
