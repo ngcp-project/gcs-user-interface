@@ -3,15 +3,29 @@
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import Greet from "./components/Greet.vue";
 import Navbar from "./components/Navbar.vue";
+import Camera from "./components/Camera.vue";
 </script>
 
 <template>
   <div>
     <Navbar/>
   </div>
-  <div class="container">
+  <div class="grid">
+    <div>
+      <Camera/>
+    </div>
+    <div>
+      <Camera/>
+    </div>
+    <div>
+      <Camera/>
+    </div>
+    <div>
+      <Camera/>
+    </div>
+  </div>
+  <!-- <div class="container">
     <h1>Welcome to Tauri!</h1>
-
     <div class="row">
       <a href="https://vitejs.dev" target="_blank">
         <img src="/vite.svg" class="logo vite" alt="Vite logo" />
@@ -41,8 +55,7 @@ import Navbar from "./components/Navbar.vue";
       >
     </p>
 
-    <Greet />
-  </div>
+  </div> -->
 </template>
 
 <style scoped>
@@ -52,5 +65,12 @@ import Navbar from "./components/Navbar.vue";
 
 .logo.vue:hover {
   filter: drop-shadow(0 0 2em #249b73);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  grid-template-rows: repeat(2, 46vh); /* 2 rows */
+  max-width: 100vw; /* Limit width to viewport width */
+  max-height: 100vh; /* Limit height to viewport height */
 }
 </style>
