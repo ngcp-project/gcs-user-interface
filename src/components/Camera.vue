@@ -2,20 +2,20 @@
   export default {
     data() {
       return {
-        streams: []
+        
       };
     },
     mounted() {
-      this.initWebcams();
+      this.initCam();
     },
     methods: {
-      async initWebcams() {
+      async initCam() {
         try {
           const constraints = { video: true };
           const stream = await navigator.mediaDevices.getUserMedia(constraints);
           this.streams.push(stream);
         } catch (error) {
-          console.error('Error accessing webcam:', error);
+          console.error('Error accessing camera:', error);
         }
       }
     }
