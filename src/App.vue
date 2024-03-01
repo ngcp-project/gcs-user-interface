@@ -4,26 +4,14 @@
 import Greet from "./components/Greet.vue";
 import Navbar from "./components/Navbar.vue";
 import Camera from "./components/Camera.vue";
+import { RouterView } from "vue-router";
 </script>
 
 <template>
   <div>
     <Navbar/>
   </div>
-  <div class="grid">
-    <div>
-      <Camera/>
-    </div>
-    <div>
-      <Camera/>
-    </div>
-    <div>
-      <Camera/>
-    </div>
-    <div>
-      <Camera/>
-    </div>
-  </div>
+  <RouterView/>
   <!-- <div class="container">
     <h1>Welcome to Tauri!</h1>
     <div class="row">
