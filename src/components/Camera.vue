@@ -1,34 +1,39 @@
   <script>
   export default {
+    props: ['cameraNumber'],
     data() {
       return {
-        
+        localIp: 'http://192.168.1.173', //maybe change accordingly
+        port: '5000', //maybe change accordingly
+        cameraUrls: { 
+          1: 'video_feed', //cam url here
+          2: 'video_feed2',
+
+        }
       };
     },
     mounted() {
-      this.initCam();
+      // this.initCam();
     },
     methods: {
-      async initCam() {
-        try {
-          const constraints = { video: true };
-          const stream = await navigator.mediaDevices.getUserMedia(constraints);
-          this.streams.push(stream);
-        } catch (error) {
-          console.error('Error accessing camera:', error);
-        }
+      // async initCam() {
+      //   try {
+      //     const constraints = { video: true };
+      //     const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      //     this.streams.push(stream);
+      //   } catch (error) {
+      //     console.error('Error accessing camera:', error);
+      //   }
+      // },
+        getCameraImageUrl(cameraNumber) {
+          return `${this.localIp}:${this.port}/${this.cameraUrls[cameraNumber]}`;
       }
     }
   };
   </script>
   <template>
-    <!-- <div class="app">
-        <div class="video-section" v-for="(stream, index) in streams" :key="index">
-          <video ref="videoPlayer" :srcObject="stream" controls></video>
-      </div>
-    </div> -->
     <div class="box video-section">
-        <video ref="videoPlayer" :srcObject="stream" controls></video>
+        <img :src="getCameraImageUrl(cameraNumber)">
     </div>
   </template>
   <style scoped>
@@ -40,10 +45,10 @@
   }
   
   .video-section {
-    width: 100%; /* Adjust according to your layout */
-    height: 100%; /* Adjust according to your layout */
+    width: 100%; 
+    height: 100%; 
     box-sizing: border-box;
-    border: 2px solid #ccc; /* Adding a small border */
+    border: 2px solid #ccc; 
   }
   
   .video-section video {
@@ -51,7 +56,7 @@
     height: 100%;
   }
   .box{
-    border: 2px solid #030303; /* Adding a small border */
+    border: 2px solid #030303; 
   }
   </style>
   

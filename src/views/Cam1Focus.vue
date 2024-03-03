@@ -8,14 +8,5 @@ import Camera from "../components/Camera.vue";
         <div>
             <Camera :cameraNumber="1"/>
         </div>
-        <div>
-            <Camera :cameraNumber="2"/>
-        </div>
-        <div>
-            <Camera :cameraNumber="2"/>
-        </div>
-        <div>
-            <Camera :cameraNumber="1"/>
-        </div>
     </div>
 </template>
