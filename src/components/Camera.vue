@@ -33,16 +33,16 @@
   </script>
   <template>
     <div class="box video-section">
-        <img :src="getCameraImageUrl(cameraNumber)">
+        <img :src="getCameraImageUrl(cameraNumber)" class="video-image">
     </div>
   </template>
   <style scoped>
-  .app {
+  /* .app {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-  }
+  } */
   
   .video-section {
     width: 100%; 
@@ -51,9 +51,10 @@
     border: 2px solid #ccc; 
   }
   
-  .video-section video {
+  .video-image {
     width: 100%;
     height: 100%;
+    /* object-fit: contain; */
   }
   .box{
     border: 2px solid #030303; 

@@ -5,7 +5,7 @@ import Camera from "../components/Camera.vue";
 
 <template>
     <div class="camera-container">
-        <Camera :cameraNumber="1" />
+        <Camera :cameraNumber="2" />
     </div>
 </template>
   
