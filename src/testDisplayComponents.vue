@@ -8,13 +8,13 @@ import Connection from './components/VehicleStatus/Connection.vue';
 <template>
   <h2>Below is the Connection component</h2>
   <div class="border_div">
-    <Connection :latency=100 />                    <!-- pass in latency into latency prop !-->
+    <Connection :latency=56 />                    <!-- pass in latency into latency prop !-->
   </div>
 
 
   <h2>Below is the Battery component</h2>
   <div class="border_div">
-    <Battery :percentage=6 :charging="false"/>    <!-- pass in the current percentage into percentage prop. charging is a boolean !-->
+    <Battery :percentage=12 :charging="false"/>    <!-- pass in the current percentage into percentage prop. charging is a boolean !-->
   </div>
 
 </template>

@@ -4,13 +4,13 @@
             <div v-if="latency == 0" class="grayed_bar" style='height: 20%'></div>
             <div v-else class="bar" style='height: 20%'></div>
 
-            <div v-if="latency <= 30" class="grayed_bar" style='height: 40%'></div>
+            <div v-if="latency >= 70 || latency == 0" class="grayed_bar" style='height: 40%'></div>
             <div v-else class="bar" style='height: 40%'></div>
 
-            <div v-if="latency <= 50" class="grayed_bar" style='height: 60%'></div>
+            <div v-if="latency >= 60 || latency == 0" class="grayed_bar" style='height: 60%'></div>
             <div v-else class="bar" style='height: 60%'></div>
 
-            <div v-if="latency <= 70" class="grayed_bar" style='height: 80%'></div>
+            <div v-if="latency >= 40 || latency == 0" class="grayed_bar" style='height: 80%'></div>
             <div v-else class="bar" style='height: 80%'></div>
         </div>
         <span class="connection_number">{{ latency }} ms</span>
