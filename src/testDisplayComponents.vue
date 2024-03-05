@@ -1,18 +1,20 @@
-<script setup>
-import Battery from './components/Battery.vue';
+<!-- Using this to see how the Battery and Connection components look -->
 
+<script setup>
+import Battery from './components/VehicleStatus/Battery.vue';
+import Connection from './components/VehicleStatus/Connection.vue';
 </script>
 
 <template>
   <h2>Below is the Connection component</h2>
-  <!-- <div class="bruh">
-    <Connection :latency=20 />
-  </div> -->
+  <div class="border_div">
+    <Connection :latency=100 />                    <!-- pass in latency into latency prop !-->
+  </div>
 
 
   <h2>Below is the Battery component</h2>
   <div class="border_div">
-    <Battery :percentage=10 :charging="false"/>
+    <Battery :percentage=6 :charging="false"/>    <!-- pass in the current percentage into percentage prop. charging is a boolean !-->
   </div>
 
 </template>
