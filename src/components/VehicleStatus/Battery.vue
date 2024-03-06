@@ -50,10 +50,8 @@
     .outer_div {
         display: flex;
         position: relative;
-        /* height: 110px;
-        width: 225px;     */
-        height: 12%;
-        width: 12%;  
+        height: 18%;
+        width: 18%; 
     }
 
     .battery_widget {

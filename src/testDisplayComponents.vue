@@ -6,15 +6,21 @@ import Connection from './components/VehicleStatus/Connection.vue';
 </script>
 
 <template>
-  <h2>Below is the Connection component</h2>
+  <!-- <h2>Below is the Connection component</h2>
   <div class="border_div">
-    <Connection :latency=56 />                    <!-- pass in latency into latency prop !-->
-  </div>
+    <Connection :latency=100 />                    
+  </div> -->
 
 
-  <h2>Below is the Battery component</h2>
+  <!-- <h2>Below is the Battery component</h2>
   <div class="border_div">
-    <Battery :percentage=12 :charging="false"/>    <!-- pass in the current percentage into percentage prop. charging is a boolean !-->
+    <Battery :percentage=12 :charging="false"/>    pass in the current percentage into percentage prop. charging is a boolean ! -->
+  <!-- </div> -->
+
+  <h2>Below is both in one div</h2>
+  <div class="border_div_2">
+    <Battery :percentage=12 :charging="false" class="additional_battery_prop"/>    
+    <Connection :latency=56 />                    
   </div>
 
 </template>
@@ -28,6 +34,20 @@ import Connection from './components/VehicleStatus/Connection.vue';
   width: 400px;
   /* height: 100px;
   width: 200px;  */
+}
+
+.border_div_2 {
+  display: flex;
+  border: 0.4em solid black;
+  height: 180px;
+  width: 380px;
+  /* height: 100px;
+  width: 200px;  */
+}
+
+.additional_battery_prop {
+  top: 4%;
+  margin-right: 2%;
 }
 
 </style>

@@ -1,6 +1,6 @@
 <template>
     <div class="outer_div">
-        <div class="container">
+        <div class="connection-container">
             <div v-if="latency == 0" class="grayed_bar" style='height: 20%'></div>
             <div v-else class="bar" style='height: 20%'></div>
 
@@ -40,15 +40,15 @@
         height: 25%;
         width: 10%;  
     }
-    .container {
+    .connection-container {
         position: relative;
         justify-content: center;
         display: flex;
-        gap: 0.1em;
+        gap: 0.05em;
         height: 100%;
         width: 100%;
         border-radius: 12%;
-        background-color: white;
+        /* background-color: white; */
     }
     .bar {
         width:100%;
@@ -69,7 +69,8 @@
         position: absolute;
         left: 110%;
         bottom: 0%;
-        width: 120%;
+        width: 180%;
+        font-size:0.8em;
     }
     
 </style> 
