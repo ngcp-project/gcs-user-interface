@@ -7,36 +7,45 @@ import Camera from "../components/Camera.vue";
 
 <template>
     <div class="grid">
-        <div style="position: relative;">
+        <div style="position: relative; display: flex;">
             <Camera :cameraNumber="2"/>
-            <div class="status_div">        <!-- the Battery and Connection component's size is dependent on its parent element. So changing 'status_div' size will change their size-->
+            <Battery :percentage=85 :charging="false" class="battery_test"/>
+            <Connection :latency=65 class="connection_test"/>   
+            <!-- the Battery and Connection component's size is dependent on its parent element. So changing 'status_div' size will change their size-->
+            <!-- <div class="status_div">        
                 <Battery :percentage=89 :charging="false" class="adjust_Battery"/>
                 <Connection :latency=65 />   
-            </div>
+            </div> -->
         </div>
 
-        <div style="position: relative;">
+        <div style="position: relative; display: flex;">
             <Camera :cameraNumber="2"/>
-            <div class="status_div">
+            <Battery :percentage=12 :charging="false" class="battery_test"/>
+            <Connection :latency=3 class="connection_test"/>  
+            <!-- <div class="status_div">
                 <Battery :percentage=12 :charging="false" class="adjust_Battery"/>
                 <Connection :latency=3 />   
-            </div>
+            </div> -->
         </div>
 
-        <div style="position: relative;">
+        <div style="position: relative; display: flex;">
             <Camera :cameraNumber="2"/>
-            <div class="status_div">
+            <Battery :percentage=46 :charging="false" class="battery_test"/>
+            <Connection :latency=82 class="connection_test"/>   
+            <!-- <div class="status_div">
                 <Battery :percentage=46 :charging="false" class="adjust_Battery"/>
                 <Connection :latency=82 />   
-            </div>
+            </div> -->
         </div>
 
-        <div style="position: relative;">
+        <div style="position: relative; display: flex;">
             <Camera :cameraNumber="1"/>
-            <div class="status_div">
+            <Battery :percentage=0 :charging="false" class="battery_test"/>
+            <Connection :latency=5 class="connection_test"/>   
+            <!-- <div class="status_div">
                 <Battery :percentage=0 :charging="false" class="adjust_Battery"/>
                 <Connection :latency=5 />   
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
@@ -57,5 +66,21 @@ it directly in their file component's style*/
   .adjust_Battery {
     top: 5%;
     margin-right: 3%; 
+  }
+
+  .battery_test {
+    position:absolute; 
+    height: 7%;
+    width: 6.3%;
+    top: 4%; 
+    left: 2%;
+  }
+
+  .connection_test {
+    position:absolute; 
+    height: 11%;
+    width: 4%; 
+    top: 1%;
+    left: 9.5%;
   }
 </style>
