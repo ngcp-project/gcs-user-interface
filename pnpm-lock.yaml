@@ -8914,7 +8914,6 @@ packages:
       '@vue/devtools-api': 6.6.1
       vue: 3.2.45
     dev: false
-
   /vue-style-loader@4.1.3:
     resolution: {integrity: sha512-sFuh0xfbtpRlKfm39ss/ikqs9AbKCoXZBpHeVZ8Tx650o0k0q/YCM7FRvigtxpACezfq6af+a7JeqVTWvncqDg==}
     dependencies:
