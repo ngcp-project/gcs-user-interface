@@ -16,7 +16,7 @@ import Camera from "../components/Camera.vue";
         </div>
 
         <div style="position: relative;">
-            <Camera :cameraNumber="2"/>
+            <Camera :cameraNumber="1"/>
             <div class="status_div">
                 <Battery :percentage=12 :charging="false" class="adjust_Battery"/>
                 <Connection :latency=3 />   
@@ -24,7 +24,7 @@ import Camera from "../components/Camera.vue";
         </div>
 
         <div style="position: relative;">
-            <Camera :cameraNumber="2"/>
+            <Camera :cameraNumber="1"/>
             <div class="status_div">
                 <Battery :percentage=46 :charging="false" class="adjust_Battery"/>
                 <Connection :latency=82 />   
@@ -32,7 +32,7 @@ import Camera from "../components/Camera.vue";
         </div>
 
         <div style="position: relative;">
-            <Camera :cameraNumber="1"/>
+            <Camera :cameraNumber="2"/>
             <div class="status_div">
                 <Battery :percentage=0 :charging="false" class="adjust_Battery"/>
                 <Connection :latency=5 />   
