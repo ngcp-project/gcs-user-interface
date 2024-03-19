@@ -2,6 +2,8 @@
     import Battery from './VehicleStatus/Battery.vue';
     import Connection from './VehicleStatus/Connection.vue';
     import VehicleTitle from './VehicleStatus/VehicleTitle.vue';
+    import EmergencyStop from './VehicleStatus/EmergencyStop.vue';
+    import Open from './VehicleStatus/Open.vue';
 
     export default {
         props: {
@@ -12,7 +14,9 @@
         components: {
             VehicleTitle,
             Battery,
-            Connection
+            Connection,
+            EmergencyStop,
+            Open
         },
         // computed: {
         //     batteryPercentage(): number {
@@ -33,7 +37,8 @@
         </div>
 
         <div class="right-container">
-
+            <Open class="adjust-open-button"></Open>
+            <EmergencyStop class="adjust-emergency-button"/>
         </div>
     </div>
 </template>
@@ -70,19 +75,29 @@
     }
 
     .adjust-battery {
-        height: 19%;
-        width: 36%;
+        height: 17%;
+        width: 34.5%;
         margin-top: auto;
         margin-left: 8%;
     }
 
     .adjust-connection {
-        height: 30%;
-        width: 28%; 
-        margin-top: 1%;
+        height: 28%;
+        width: 26%; 
+        margin-top: 2%;
         margin-bottom: 4%;  
         margin-left: 10%; 
     }
- 
 
+    .adjust-emergency-button {
+        margin-top: auto;
+        margin-bottom: 4%;  
+        margin-left: 20%;
+    }
+
+    .adjust-open-button {
+        margin-top: 4%;
+        margin-left: 60%;
+    }
+ 
 </style> 

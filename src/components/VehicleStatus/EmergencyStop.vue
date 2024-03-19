@@ -1,9 +1,9 @@
 <template>
-    <div class="outer_div">
-   
+    <div class="emergency-stop-div">
+        <button class="emergency-button"> EMERGENCY STOP </button>
     </div>
     
-    </template>
+</template>
     
 <script lang="ts">
 
@@ -11,53 +11,33 @@
         data() {
             return {};    
         },
-        props: {
-            latency: { required: true, type: Number},
-        },
-        computed: {
-        }
+        // props: {
+        // },
+        // computed: {
+        // }
     };
 </script>
     
     
 <style scoped>
-    .outer_div {
-        display: flex;
+    .emergency-stop-div {
         position: relative;
-        height: 25%;
-        width: 10%;  
+        display: flex;
+        height: 20%;
+        width: 70%;  
+        text-align: center;
     }
-    .connection-container {
+
+    .emergency-button {
         position: relative;
-        justify-content: center;
-        display: flex;
-        gap: 0.05em;
-        height: 100%;
+        display: inline-block;
         width: 100%;
-        border-radius: 12%;
-        /* background-color: white; */
+        height: 100%;
+        background-color: rgb(255, 57, 57);
+        font-size: 1em;
+    } 
+
+    .emergency-button:hover {
+        background-color: rgb(192, 40, 40);
     }
-    .bar {
-        width:100%;
-        background-color: white;
-        border: 0.1em solid black;
-        margin-top: auto;
-        border-radius: 20%;
-    }
-    .grayed_bar {
-        width:100%;
-        background-color: rgb(136, 135, 135);
-        border: 0.1em solid black;
-        margin-top: auto;
-        opacity: 0.2;
-        border-radius: 20%;
-    }
-    .connection_number {
-        position: absolute;
-        left: 110%;
-        bottom: 0%;
-        width: 180%;
-        font-size:0.8em;
-    }
-    
 </style> 

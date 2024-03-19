@@ -1,6 +1,7 @@
 <template>
     <div class="vehicle-title-container">
-        <div class="vehicle-name-div"> {{ vehicleName }}</div>
+        <div class="vehicle-name-div"> {{ vehicleName }} </div>
+
         <div class="vehicle-status-div">Status: {{ vehicleStatus }}</div>
     </div>
     
@@ -11,7 +12,8 @@
     export default {
         props: {
             vehicleName: { required: true, type: String },
-            vehicleStatus: { required: true, type: String }
+            vehicleStatus: { required: true, type: String },
+            vehicleIcon: { type: Object }
         }
     };
 </script>
@@ -28,13 +30,20 @@
 
     .vehicle-name-div {
         position: relative;
-        font-size: 2.5em;
+        font-size: 2.3em;
     }
 
     .vehicle-status-div {
         position: relative;
-        font-size: 1.5em;  
-        margin-top: 5%;;
+        font-size: 1.6em;  
+        margin-top: 5%;
+    }
+
+    .vehicle-icon {
+        position: relative;
+        width: 12%;
+        height: 12%;
+        /* vertical-align: middle; */
     }
 
 </style> 
