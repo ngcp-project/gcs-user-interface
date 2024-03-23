@@ -4,25 +4,24 @@
     import VehicleTitle from './VehicleStatus/VehicleTitle.vue';
     import EmergencyStop from './VehicleStatus/EmergencyStop.vue';
     import Open from './VehicleStatus/Open.vue';
+    import Coordinate from './VehicleStatus/Coordinate.vue';
 
     export default {
         props: {
             vehicleName: { required: true, type: String},
             vehicleStatus: { required: true, type: String},
             batteryPct: {required: true, type: Number},
+            latency: { required: true, type: Number },
+            coordinates: { required: true, type: Object }
         },
         components: {
             VehicleTitle,
             Battery,
             Connection,
             EmergencyStop,
-            Open
+            Open,
+            Coordinate
         },
-        // computed: {
-        //     batteryPercentage(): number {
-        //         return this.batteryPct;
-        //     }
-        // },
     };
 </script>
 
@@ -33,11 +32,12 @@
         <div class="left-container">
             <VehicleTitle :vehicleName="vehicleName" :vehicleStatus="vehicleStatus"/>
             <Battery :percentage = "batteryPct" :charging="false" class="adjust-battery"/>
-            <Connection :latency=65 class="adjust-connection"/> 
+            <Connection :latency="latency" class="adjust-connection"/> 
         </div>
 
         <div class="right-container">
             <Open class="adjust-open-button"></Open>
+            <Coordinate :coordinates="coordinates" class="adjust-coordinates"></Coordinate>
             <EmergencyStop class="adjust-emergency-button"/>
         </div>
     </div>
@@ -98,6 +98,11 @@
     .adjust-open-button {
         margin-top: 4%;
         margin-left: 60%;
+    }
+
+    .adjust-coordinates {
+        margin-top: 10%;
+        margin-left: 20%;   
     }
  
 </style> 
