@@ -36,7 +36,14 @@
                 <Battery :percentage = "batteryPct" :charging="false" class="adjust-battery"/>
                 <span style="margin-top: 4%; font-size: 1.4em;">{{ batteryPct }}%</span>
             </div>
-            <Connection :latency="latency" class="adjust-connection"/> 
+            <!-- <Connection :latency="latency" class="adjust-connection"/>  -->
+            <div class="connection-status-container">
+                <Connection :latency="latency" class="adjust-connection"/> 
+                <div class="connection-status-specifics">
+                    <span style="font-size: 0.9em;">Connection: </span>
+                    <span style="font-size: 0.9em;">Last Packet: </span>
+                </div>
+            </div>
         </div>
 
         <!-- Right side of container (Open button, Coordinates, Emergency Stop)-->
@@ -72,6 +79,22 @@
         margin-top: auto;
     }
 
+    .connection-status-container {
+        display: flex;
+        position: relative;
+        width: 100%; 
+        height: 30%;
+        /* margin-bottom: 2%;  
+        margin-left: 10%;  */
+    }
+
+    .connection-status-specifics {
+        display: flex;
+        flex-direction: column;
+        padding-left: 5%;
+        padding-top: 5%;
+    }
+
     .left-container {
         position: relative;
         display: flex;
@@ -88,7 +111,9 @@
         width: 63%; 
     }
 
-/* below is CSS adjustment for battery by itself */
+/* --- These adjust the sizing and positions of the individual components --- */
+
+/* below is CSS adjustment for Battery component if it was by itself */
     /* .adjust-battery {
         height: 17%;
         width: 36%;
@@ -102,12 +127,19 @@
         margin-left: 8%;
     }
 
-    .adjust-connection {
+/* below is CSS adjustment for the Connection component if it was by itself */
+    /* .adjust-connection {
         height: 28%;
         width: 26%; 
         margin-top: 2%;
         margin-bottom: 4%;  
         margin-left: 10%; 
+    } */
+
+    .adjust-connection {
+        height: 90%;
+        width: 26%; 
+        padding-left: 10%;
     }
 
     .adjust-emergency-button {

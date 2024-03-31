@@ -38,7 +38,7 @@ let testCoordinateObject2 = {
 .screen_div {
     display: flex;
     border: 0.003em solid black;
-    height: 85vh;
+    height: 88vh;
     width: 99vw;
 }
 
