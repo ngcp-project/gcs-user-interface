@@ -37,9 +37,14 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "Interface",
+        "title": "Camera Screen",
         "width": 800,
         "height": 600
+      },
+      {
+        "label": "StaticScreen",
+        "title": "Over View",
+        "url": "http://localhost:4000/#/1"
       }
     ]
   }

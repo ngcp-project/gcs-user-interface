@@ -9,7 +9,11 @@ const cameraID = Number(route.params.id); // Assuming we're using camera Number
 
 <template>
     <div class="camera-container">
-        <Camera :cameraID=cameraID />
+        <div class="camera-wrapper">
+            <router-link to="/" class="back">Back</router-link>
+            <Camera :cameraID="cameraID" />
+            <!-- Back button -->
+        </div>
     </div>
 </template>
   
@@ -21,4 +25,19 @@ const cameraID = Number(route.params.id); // Assuming we're using camera Number
     justify-content: center; /* Center the child element horizontally */
     align-items: center; /* Center the child element vertically */
 }
+.camera-wrapper {
+    position: relative; /* For positioning the button relative to the camera */
+    height: 100%; 
+    width: 100%;
+}
+.back {
+    position: absolute; /* Position the button relative to the container */
+    top: 10px;
+    left: 10px; 
+    padding: 5px 10px;
+    border: none;
+    background-color: lightgray;
+    color: black;
+    cursor: pointer;
+  }
 </style>
