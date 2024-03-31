@@ -5,7 +5,7 @@
             <div :class="percentageCSS" :style="[percentage > 15 ? { width: percentage + '%' } : { width: '15%'}]"></div>
         </div>
         <div class="battery_widget"></div> 
-        <img class="lightingSymbol" :class="batteryStatus" src="..\assets\lightning-icon-png-5.png" >
+        <img class="lightingSymbol" :class="batteryStatus" src="..\..\assets\lightning-icon-png-5.png" >
     </div>
     
 </template>
@@ -50,10 +50,8 @@
     .outer_div {
         display: flex;
         position: relative;
-        /* height: 110px;
-        width: 225px;     */
-        height: 12%;
-        width: 12%;  
+        height: 18%;
+        width: 18%; 
     }
 
     .battery_widget {

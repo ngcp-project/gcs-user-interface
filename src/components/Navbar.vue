@@ -20,7 +20,6 @@ export default {
     <nav style="background-color: #011949; padding: 10px;">
       <div style="display: flex; align-items: center;">
         <router-link to="/" style="text-decoration: none;">
-          <img src="../assets/NGCP.svg" alt="" width="40" height="24">
           <span style="font-weight: bold; font-size: 1.2rem; margin-left: 10px;">NG</span>
           <span style="font-weight: bold; font-size: 1.2rem; color: white">CP</span>
         </router-link>
