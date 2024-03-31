@@ -1,14 +1,23 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import Battery from '../components/VehicleStatus/Battery.vue';
 import Connection from '../components/VehicleStatus/Connection.vue';
-
 import Camera from "../components/Camera.vue";
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const handleClick = (cameraID:number) => {
+  console.log("camera:" , cameraID);
+  router.push(`/CamFocus/${cameraID}`);}
 </script>
+
+
 
 <template>
     <div class="grid">
-        <div style="position: relative; display: flex;">
-            <Camera :cameraNumber="2"/>
+        <div class="hover" style="position: relative; display: flex;" @click="handleClick(2)">
+            <Camera :cameraID="2"/>
             <Battery :percentage=85 :charging="false" class="battery_test"/>
             <Connection :latency=65 class="connection_test"/>   
             <!-- the Battery and Connection component's size is dependent on its parent element. So changing 'status_div' size will change their size-->
@@ -18,8 +27,8 @@ import Camera from "../components/Camera.vue";
             </div> -->
         </div>
 
-        <div style="position: relative; display: flex;">
-            <Camera :cameraNumber="2"/>
+        <div class="hover" style="position: relative; display: flex;" @click="handleClick(1)">
+            <Camera :cameraID="1"/>
             <Battery :percentage=12 :charging="false" class="battery_test"/>
             <Connection :latency=3 class="connection_test"/>  
             <!-- <div class="status_div">
@@ -28,8 +37,8 @@ import Camera from "../components/Camera.vue";
             </div> -->
         </div>
 
-        <div style="position: relative; display: flex;">
-            <Camera :cameraNumber="2"/>
+        <div class="hover" style="position: relative; display: flex;" @click="handleClick(1)">
+            <Camera :cameraID="1"/>
             <Battery :percentage=46 :charging="false" class="battery_test"/>
             <Connection :latency=82 class="connection_test"/>   
             <!-- <div class="status_div">
@@ -38,8 +47,8 @@ import Camera from "../components/Camera.vue";
             </div> -->
         </div>
 
-        <div style="position: relative; display: flex;">
-            <Camera :cameraNumber="1"/>
+        <div class="hover" style="position: relative; display: flex;" @click="handleClick(1)">
+            <Camera :cameraID="1"/>
             <Battery :percentage=0 :charging="false" class="battery_test"/>
             <Connection :latency=5 class="connection_test"/>   
             <!-- <div class="status_div">
@@ -82,5 +91,9 @@ it directly in their file component's style*/
     width: 4%; 
     top: 1%;
     left: 9.5%;
+  }
+
+  .hover{
+    cursor: pointer;
   }
 </style>
