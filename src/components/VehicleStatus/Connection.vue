@@ -13,7 +13,7 @@
             <div v-if="latency >= 40 || latency == 0" class="grayed_bar" style='height: 80%'></div>
             <div v-else class="bar" style='height: 80%'></div>
         </div>
-        <span class="connection_number">{{ latency }} ms</span>
+        <!-- <span class="connection_number">{{ latency }} ms</span> -->
     </div>
     
     </template>

@@ -31,10 +31,15 @@
         <!-- Left side of container (Name, Status, Battery, Connection)-->
         <div class="left-container">
             <VehicleTitle :vehicleName="vehicleName" :vehicleStatus="vehicleStatus"/>
-            <Battery :percentage = "batteryPct" :charging="false" class="adjust-battery"/>
+            <!-- <Battery :percentage = "batteryPct" :charging="false" class="adjust-battery"/> -->
+            <div class="battery-status-container">
+                <Battery :percentage = "batteryPct" :charging="false" class="adjust-battery"/>
+                <span style="margin-top: 4%; font-size: 1.4em;">{{ batteryPct }}%</span>
+            </div>
             <Connection :latency="latency" class="adjust-connection"/> 
         </div>
 
+        <!-- Right side of container (Open button, Coordinates, Emergency Stop)-->
         <div class="right-container">
             <Open class="adjust-open-button"></Open>
             <Coordinate :coordinates="coordinates" class="adjust-coordinates"></Coordinate>
@@ -48,7 +53,7 @@
     .status_container {
         display: flex;
         position: relative;
-        height: 200px;
+        height: 100%;
 
         /* width: 25%;  */
         width: 100%; 
@@ -58,12 +63,21 @@
         color: black;
     }
 
+    .battery-status-container {
+        display: flex;
+        position: relative;
+        width: 100%; 
+        height: 20%;
+        gap: 6%;
+        margin-top: auto;
+    }
+
     .left-container {
         position: relative;
         display: flex;
         flex-direction: column;
         height: 100%;
-        width: 40%;
+        width: 37%;
     }
 
     .right-container {
@@ -71,13 +85,20 @@
         display: flex;
         flex-direction: column;
         height: 100%;   
-        width: 60%; 
+        width: 63%; 
     }
 
-    .adjust-battery {
+/* below is CSS adjustment for battery by itself */
+    /* .adjust-battery {
         height: 17%;
-        width: 34.5%;
+        width: 36%;
         margin-top: auto;
+        margin-left: 8%;
+    } */
+
+    .adjust-battery {
+        height: 84%;
+        width: 38%;
         margin-left: 8%;
     }
 

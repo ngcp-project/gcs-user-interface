@@ -34,7 +34,8 @@
         width: 100%;
         height: 100%;
         background-color: rgb(255, 57, 57);
-        font-size: 1em;
+        font-size: 0.96em;
+        transition: background-color 0.20s;
     } 
 
     .emergency-button:hover {
