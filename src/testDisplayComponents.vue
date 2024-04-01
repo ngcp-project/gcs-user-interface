@@ -3,8 +3,8 @@
 <script setup>
 import Coordinate from './components/VehicleStatus/Coordinate.vue';
 import Altitude from './components/FlightComponents/Altitude.vue';
-import Altimeter from './components/FlightComponents/Altimeter.vue'
-import Airspeed from './components/FlightComponents/Airspeed.vue'
+import Altimeter from './components/FlightComponents/Altimeter.vue';
+import Airspeed from './components/FlightComponents/Airspeed.vue';
 
 let testObject = {
         longitude: -177.9325790,
@@ -13,11 +13,19 @@ let testObject = {
 </script>
 
 <template>
-  <!-- <Status :batteryPct=48 :vehicleName="'ERU'" :vehicleStatus="'Offline'"/> -->
 
-  <Altitude :pitch=2 :roll=10></Altitude>
-  <Altimeter :altitude=200></Altimeter>
-  <Airspeed :airspeed=60></Airspeed>
+  <div class="altitude-outer-div">
+    <Altitude :pitch=2 :roll=10></Altitude>
+  </div>
+
+  <div class="altimeter-outer-div">
+    <Altimeter :altitude=200></Altimeter>
+  </div>
+
+  <div class="altitude-outer-div">
+    <Airspeed :airspeed=100></Airspeed>
+  </div>
+  
 
 </template>
 
@@ -32,5 +40,14 @@ let testObject = {
   width: 200px;  */
 }
 
+.altitude-outer-div {
+  height: 50;
+  width: 10%;
+}
+
+.altimeter-outer-div {
+  height: 50;
+  width: 10%;
+}
 
 </style>

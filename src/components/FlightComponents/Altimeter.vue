@@ -14,14 +14,19 @@ export  default {
 
 <template>
 	<div class="altimeter-div">
-		<Altimeter :size="220" :altitude="altitude"/>
+		<Altimeter :size="200" :altitude="altitude"/>
+        <span style="font-size: 1.2em;"> Altitude: {{ altitude }} ft/s</span>
 	</div>
 </template>
 
 <style scoped>
     .altimeter-div {
+        position: relative;
         height: 100%;
-        width:100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         border: 1px solid black;
     }
 

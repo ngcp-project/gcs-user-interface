@@ -14,14 +14,19 @@ export  default {
 
 <template>
 	<div class="airspeed-div">
-		<Airspeed :size="220" :airspeed="airspeed"/>
+		<Airspeed :size="200" :airspeed="airspeed"/>
+        <span style="font-size: 1.2em;"> Airspeed: {{ airspeed }} ft/s</span>
 	</div>
 </template>
 
 <style scoped>
     .airspeed-div {
+        position: relative;
         height: 100%;
-        width:100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         border: 1px solid black;
     }
 
