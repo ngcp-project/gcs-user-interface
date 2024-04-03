@@ -3,25 +3,22 @@
 <script setup>
 import Battery from './components/VehicleStatus/Battery.vue';
 import Connection from './components/VehicleStatus/Connection.vue';
+import Status from "./components/VehicleStatusComponent.vue";
+import yuh from "./components/VehicleStatus/VehicleTitle.vue"
+import Coordinate from './components/VehicleStatus/Coordinate.vue'
+
+
+let testObject = {
+        longitude: -177.9325790,
+        latitude: 33.9325790
+    }
 </script>
 
 <template>
-  <!-- <h2>Below is the Connection component</h2>
-  <div class="border_div">
-    <Connection :latency=100 />                    
-  </div> -->
+  <!-- <Status :batteryPct=48 :vehicleName="'ERU'" :vehicleStatus="'Offline'"/> -->
 
+  <Coordinate :coordinates="testObject"></Coordinate>
 
-  <!-- <h2>Below is the Battery component</h2>
-  <div class="border_div">
-    <Battery :percentage=12 :charging="false"/>    pass in the current percentage into percentage prop. charging is a boolean ! -->
-  <!-- </div> -->
-
-  <h2>Below is both in one div</h2>
-  <div class="border_div_2">
-    <Battery :percentage=12 :charging="false" class="additional_battery_prop"/>    
-    <Connection :latency=56 />                    
-  </div>
 
 </template>
 
