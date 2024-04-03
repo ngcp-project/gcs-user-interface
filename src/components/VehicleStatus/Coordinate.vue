@@ -22,8 +22,7 @@
         position: relative;
         display: flex;
         flex-direction: column;
-        width: 75%;
-        /* border: 0.05em solid black; */
+        width: 92%;
     }
 
     .coordinate-div {

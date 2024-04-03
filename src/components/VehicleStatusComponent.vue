@@ -31,17 +31,15 @@
         <!-- Left side of container (Name, Status, Battery, Connection)-->
         <div class="left-container">
             <VehicleTitle :vehicleName="vehicleName" :vehicleStatus="vehicleStatus"/>
-            <!-- <Battery :percentage = "batteryPct" :charging="false" class="adjust-battery"/> -->
             <div class="battery-status-container">
                 <Battery :percentage = "batteryPct" :charging="false" class="adjust-battery"/>
                 <span style="margin-top: 4%; font-size: 1.4em;">{{ batteryPct }}%</span>
             </div>
-            <!-- <Connection :latency="latency" class="adjust-connection"/>  -->
             <div class="connection-status-container">
                 <Connection :latency="latency" class="adjust-connection"/> 
                 <div class="connection-status-specifics">
-                    <span style="font-size: 0.9em;">Connection: </span>
-                    <span style="font-size: 0.9em;">Last Packet: </span>
+                    <span style="font-size: 0.9em;">Connection:</span>
+                    <span style="font-size: 0.9em;">Last Packet: {{ latency }} </span>
                 </div>
             </div>
         </div>
@@ -61,13 +59,27 @@
         display: flex;
         position: relative;
         height: 100%;
-
         /* width: 25%;  */
         width: 100%; 
-
         border: 0.1em solid black;
         background-color: white;
         color: black;
+    }
+
+    .left-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 46%;
+    }
+
+    .right-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;   
+        width: 54%; 
     }
 
     .battery-status-container {
@@ -84,78 +96,43 @@
         position: relative;
         width: 100%; 
         height: 30%;
-        /* margin-bottom: 2%;  
-        margin-left: 10%;  */
+        margin-bottom: 2%;  
+      /*  margin-left: 10%;  */
     }
 
     .connection-status-specifics {
         display: flex;
         flex-direction: column;
-        padding-left: 5%;
-        padding-top: 5%;
+        padding-left: 3%;
+        padding-top: 6%;
     }
-
-    .left-container {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        width: 37%;
-    }
-
-    .right-container {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        height: 100%;   
-        width: 63%; 
-    }
-
-/* --- These adjust the sizing and positions of the individual components --- */
-
-/* below is CSS adjustment for Battery component if it was by itself */
-    /* .adjust-battery {
-        height: 17%;
-        width: 36%;
-        margin-top: auto;
-        margin-left: 8%;
-    } */
 
     .adjust-battery {
         height: 84%;
-        width: 38%;
+        width: 34%;
         margin-left: 8%;
     }
 
-/* below is CSS adjustment for the Connection component if it was by itself */
-    /* .adjust-connection {
-        height: 28%;
-        width: 26%; 
-        margin-top: 2%;
-        margin-bottom: 4%;  
-        margin-left: 10%; 
-    } */
-
     .adjust-connection {
-        height: 90%;
+        height: 92%;
         width: 26%; 
         padding-left: 10%;
     }
 
     .adjust-emergency-button {
         margin-top: auto;
-        margin-bottom: 4%;  
-        margin-left: 20%;
+        margin-bottom: 5%;  
+        margin-left: 10%;
     }
 
     .adjust-open-button {
         margin-top: 4%;
-        margin-left: 60%;
+        margin-left: 58%;
     }
 
     .adjust-coordinates {
-        margin-top: 10%;
-        margin-left: 20%;   
+        margin-top: 18%;
+        margin-left: 8%;   
     }
  
 </style> 
