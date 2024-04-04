@@ -106,7 +106,7 @@
     }
 
     #battery_progress {
-        background-color: rgb(116, 194, 92); 
+        background-color: rgb(83, 255, 83); 
         border-radius: 12%;
         height:100%;
         width: 100%; 
@@ -132,7 +132,7 @@
         height:100%;
     }
     .normalPercent {
-        background-color: rgb(116, 194, 92); 
+        background-color: rgb(87, 255, 87); 
         border-radius: 12%;
     }
 
