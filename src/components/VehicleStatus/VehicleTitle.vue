@@ -30,11 +30,6 @@
         padding-left: 6%;
     }
 
-    /* .vehicle-name-div {
-        position: relative;
-        font-size: 2.3em;
-    } */
-
     .vehicle-name-div {
         position: relative;
         display: flex;

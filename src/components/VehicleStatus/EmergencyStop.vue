@@ -1,15 +1,33 @@
 <template>
     <div class="emergency-stop-div">
-        <button class="emergency-button"> EMERGENCY STOP </button>
+        <button class="emergency-button" @click="showEmergencyModal"> EMERGENCY STOP </button>
+        <EmergencyStopModal :vehicle-name="vehicleName" v-show="showModal" @close="closeEmergencyModal"></EmergencyStopModal>
     </div>
     
 </template>
     
 <script lang="ts">
+    import EmergencyStopModal from './EmergencyStopModal.vue';
 
     export default {
+        components: {
+            EmergencyStopModal
+        },
         data() {
-            return {};    
+            return {
+                showModal: false
+            };    
+        },
+        props: {
+            vehicleName: { required: true, type: String},
+        },
+        methods: {
+            showEmergencyModal() {
+                this.showModal = true;
+            },
+            closeEmergencyModal() {
+                this.showModal = false;
+            }
         }
     };
 </script>

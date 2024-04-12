@@ -48,7 +48,7 @@
         <div class="right-container">
             <Open class="adjust-open-button"></Open>
             <Coordinate :coordinates="coordinates" class="adjust-coordinates"></Coordinate>
-            <EmergencyStop class="adjust-emergency-button"/>
+            <EmergencyStop :vehicleName="vehicleName" class="adjust-emergency-button"/>
         </div>
     </div>
 </template>
