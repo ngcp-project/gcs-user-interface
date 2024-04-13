@@ -7,15 +7,15 @@ const socket = ref<WebSocket | null>(null);
 const receivedData = ref<any>(null);
 
 // Reactive variables for user input
-const key = ref("Vehicle 2");
-const speed = ref<number>(1.1);
-const pitch = ref<number>(2.2);
-const yaw = ref<number>(3.3);
-const roll = ref<number>(4.4);
-const altitude = ref<number>(5.5);
-const batteryLife = ref<number>(6.6);
-const latitude = ref<number>(7.7);
-const longitude = ref<number>(8.8);
+const key = ref("Vehicle");
+const speed = ref<number>(0);
+const pitch = ref<number>(0);
+const yaw = ref<number>(0);
+const roll = ref<number>(0);
+const altitude = ref<number>(0);
+const batteryLife = ref<number>(0);
+const latitude = ref<number>(0);
+const longitude = ref<number>(0);
 
 // Function to establish the WebSocket connection
 function establishWebSocketConnection() {
@@ -94,7 +94,10 @@ onBeforeUnmount(() => {
       <p><strong>Altitude:</strong> {{ receivedData.altitude }}</p>
       <p><strong>Battery Life:</strong> {{ receivedData.batteryLife }}</p>
       <p><strong>Last Updated:</strong> {{ receivedData.lastUpdated }}</p>
-      <p><strong>Current Position:</strong> Latitude: {{ receivedData.currentPosition.latitude }}, Longitude: {{ receivedData.currentPosition.longitude }}</p>
+      <p><strong>Current Position:</strong> 
+        <p>Latitude: {{ receivedData.currentPosition.latitude }}</p>
+        <P>Longitude: {{ receivedData.currentPosition.longitude }}</P>
+      </p>
       <p><strong>Vehicle Status:</strong> {{ receivedData.vehicleStatus }}</p>
     </div>
     <div v-else>
@@ -123,22 +126,22 @@ onBeforeUnmount(() => {
         <label>Roll:</label>
         <input type="number" v-model="roll" step="0.1" />
       </div>
-      <div>
+      <!-- <div>
         <label>Altitude:</label>
         <input type="number" v-model="altitude" step="0.1" />
-      </div>
-      <div>
+      </div> -->
+      <!-- <div>
         <label>Battery Life:</label>
         <input type="number" v-model="batteryLife" step="0.1" />
-      </div>
-      <div>
+      </div> -->
+      <!-- <div>
         <label>Latitude:</label>
         <input type="number" v-model="latitude" step="0.1" />
       </div>
       <div>
         <label>Longitude:</label>
         <input type="number" v-model="longitude" step="0.1" />
-      </div>
+      </div> -->
       <button type="submit">Send Updated Data</button>
     </form>
   </div>

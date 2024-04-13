@@ -17,7 +17,7 @@ wss.on('connection', (ws) => {
 
     // Sample vehicle data object
     let vehicleData = {
-        key: 'Vehicle 3',
+        key: 'ERU',
         speed: 1.1,
         pitch: 2.2,
         yaw: 3.3,
