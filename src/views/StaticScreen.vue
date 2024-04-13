@@ -5,28 +5,33 @@ import NavBar from '../components/Navbar.vue';
 import { onMounted, ref } from 'vue';
 
 const receivedData = ref<any>(null);
-const battery1 = ref(0);
+const batteryPct = ref(0);
 const latitude = ref<number>(7.7);
 const longitude = ref<number>(8.8);
+const testCoordinate = ref({longitude: 0, latitude: 0})
+const dummyConnection = ref(0);
 // create websocket connection once Static Screen finishes initial rendering
 onMounted(() => {
-    let client = new WebSocket('ws://localhost:5135/');
+    // let client = new WebSocket('ws://localhost:5135/');
+    // uncomment below to use other local websocket server for data for single vehicle widget in Static Screen
+    let client = new WebSocket('ws://localhost:3000/');
     console.log("Connected to server");
 
     client.addEventListener("message", (event) => {
-        // Handle incoming message
         const data = JSON.parse(event.data);
         receivedData.value = data; 
+
         console.log("Received data:", receivedData);
-        battery1.value = receivedData.value.batteryLife;
+        batteryPct.value = receivedData.value.battery;
+        testCoordinate.value.latitude = receivedData.value.currentPosition.latitude;
+        testCoordinate.value.longitude = receivedData.value.currentPosition.longitude;
+        dummyConnection.value = receivedData.value.dummy_connection;
     });
 });
 
 // --- testing with dummy reactive data --- //
 //let battery1 = ref(100); 
 let battery2 = ref(50);
-let connection = ref(100);
-let testCoordinate = ref({longitude: 40.748440, latitude: -73.984559})
 let testCoordinateObject1 = {
         longitude: -177.9325790,
         latitude: 33.9325790
@@ -63,7 +68,7 @@ let testCoordinateObject2 = {
     </p> -->
     <div class="four-status-rightside">
         <!-- For final product, pass in a Vehicle Object instead that contains all of the information for the VehicleStatusComponent to display-->
-        <Status :batteryPct=battery1 :latency=connection :coordinates="testCoordinate" :vehicleName="'ERU'" :vehicleStatus="'In Use'"/>
+        <Status :batteryPct=batteryPct :latency=dummyConnection :coordinates=testCoordinate :vehicleName="'ERU'" :vehicleStatus="'In Use'"/>
         <Status :batteryPct=67 :latency=30 :coordinates="testCoordinateObject1" :vehicleName="'MEA'" :vehicleStatus="'Standby'"/>
         <Status :batteryPct=0 :latency=100 :coordinates="testCoordinateObject2" :vehicleName="'MRA'" :vehicleStatus="'Offline'"/>
         <Status :batteryPct=10 :latency=0 :coordinates="testCoordinateObject1" :vehicleName="'FRA'" :vehicleStatus="'Offline'"/>

@@ -17,22 +17,40 @@ websocketServer.on('connection', (socket) => {
     // Log a message when a new client connects
     console.log('client connected.');
 
+    let vehicleData = {
+        battery: 6.6,
+        currentPosition: {
+            latitude: 7.7,
+            longitude: 8.8,
+        },
+        dummy_connection: 0,
+        vehicleStatus: 0,
+    }
+
     // continuously send random battery values to client
-    setInterval(() => {
-        battery = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
-        socket.send(battery);
-     }, 1000);
+    var count = 89;
+    var counterIncrement = -1;
+    const testBattery = setInterval(function() {
+        count = count+counterIncrement;
+        if (count == 0 || count == 100 ) {
+            counterIncrement = -counterIncrement;
+        }
+        vehicleData.battery = count;
+        socket.send(JSON.stringify(vehicleData));
+    }, 100);
 
     // continuously send random coordinate values to client
-    // setInterval(() => {
-    //     longitute = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
-    //     latitutde = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
-    //     let testCoordinateObject = {
-    //         longitude: longitute,
-    //         latitude: latitutde
-    //     } 
-    //     socket.send(JSON.stringify(testCoordinateObject));       
-    // }, 100);
+    setInterval(() => {
+        vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
+        vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
+        socket.send(JSON.stringify(vehicleData));
+    }, 100);
+
+    // continuously send random connection values to client
+    setInterval(() => {
+        vehicleData.dummy_connection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
+        socket.send(JSON.stringify(vehicleData));
+     }, 1000);
 
     // Listen for incoming WebSocket messages
     socket.on('message', (message) => {
