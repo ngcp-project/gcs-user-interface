@@ -4,19 +4,26 @@ import Status from '../components/VehicleStatusComponent.vue';
 import NavBar from '../components/Navbar.vue';
 import { onMounted, ref } from 'vue';
 
+const receivedData = ref<any>(null);
+const battery1 = ref(0);
+const latitude = ref<number>(7.7);
+const longitude = ref<number>(8.8);
 // create websocket connection once Static Screen finishes initial rendering
 onMounted(() => {
-    let client = new WebSocket('ws://localhost:3000/');
+    let client = new WebSocket('ws://localhost:5135/');
     console.log("Connected to server");
 
     client.addEventListener("message", (event) => {
-        console.log(`Message from server: ${event.data}`);
-        battery1.value = event.data;
+        // Handle incoming message
+        const data = JSON.parse(event.data);
+        receivedData.value = data; 
+        console.log("Received data:", receivedData);
+        battery1.value = receivedData.value.batteryLife;
     });
 });
 
 // --- testing with dummy reactive data --- //
-let battery1 = ref(100); 
+//let battery1 = ref(100); 
 let battery2 = ref(50);
 let connection = ref(100);
 let testCoordinate = ref({longitude: 40.748440, latitude: -73.984559})
@@ -51,7 +58,9 @@ let testCoordinateObject2 = {
   <div class="screen_div">
     <!-- Map component will be placed below -->
     <div class="map_div"></div>
-
+    <!-- <p v-if="receivedData && receivedData.currentPosition">
+        Latitude: {{ receivedData.currentPosition.latitude }}, Longitude: {{ receivedData.currentPosition.longitude }}
+    </p> -->
     <div class="four-status-rightside">
         <!-- For final product, pass in a Vehicle Object instead that contains all of the information for the VehicleStatusComponent to display-->
         <Status :batteryPct=battery1 :latency=connection :coordinates="testCoordinate" :vehicleName="'ERU'" :vehicleStatus="'In Use'"/>
