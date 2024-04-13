@@ -1,5 +1,6 @@
 <script setup lang="ts">
-
+import mockWS from "../components/mockWS.vue";
+ 
 
 </script>
 
@@ -7,7 +8,7 @@
     <div class="grid">
         <div>
             <h1>
-                TESTESTES
+                <mockWS/>
             </h1>
         </div>
     </div>
