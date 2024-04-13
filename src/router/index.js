@@ -3,7 +3,7 @@ import HomeScreen from "../views/HomeScreen.vue";
 import StaticScreen from "../views/StaticScreen.vue";
 import Cam2Focus from "../views/Cam2Focus.vue";
 import CamFocus from "../views/CamFocus.vue";
-import test from "../views/test.vue";
+import mockWS from "../views/mockWS.vue";
 
 
 const routes = [
@@ -11,7 +11,7 @@ const routes = [
   { path: '/1', component: StaticScreen },
   { path: '/2', component: Cam2Focus },
   { path: '/CamFocus/:id', component: CamFocus },
-  { path: '/test', component: test },
+  { path: '/test', component: mockWS },
 ]
 
 const router = createRouter({

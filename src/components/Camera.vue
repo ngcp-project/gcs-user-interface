@@ -3,7 +3,7 @@
     props: ['cameraID'],
     data() {
       return {
-        localIp: 'http://172.20.10.8', //maybe change accordingly .env?
+        localIp: 'http://192.168.1.65', //maybe change accordingly .env?
         port: '5000', //maybe change accordingly
         cameraUrls: { 
           1: 'video_feed', //cam url here
