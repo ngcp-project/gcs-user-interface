@@ -2,8 +2,25 @@
 import Camera from "../components/Camera.vue";
 import Status from '../components/VehicleStatusComponent.vue';
 import NavBar from '../components/Navbar.vue';
+import { onMounted, ref } from 'vue';
 
-let testCoordinateObject = {
+// create websocket connection once Static Screen finishes initial rendering
+onMounted(() => {
+    let client = new WebSocket('ws://localhost:3000/');
+    console.log("Connected to server");
+
+    client.addEventListener("message", (event) => {
+        console.log(`Message from server: ${event.data}`);
+        battery1.value = event.data;
+    });
+});
+
+// --- testing with dummy reactive data --- //
+let battery1 = ref(100); 
+let battery2 = ref(50);
+let connection = ref(100);
+let testCoordinate = ref({longitude: 40.748440, latitude: -73.984559})
+let testCoordinateObject1 = {
         longitude: -177.9325790,
         latitude: 33.9325790
     }
@@ -11,6 +28,23 @@ let testCoordinateObject2 = {
     longitude: 40.748440,
     latitude: -73.984559
 }
+
+// --- functions to change reactive data randomly to test if individual vue components re-render ---- //
+// var count = 89;
+// var counterIncrement = -1;
+// const testBattery = setInterval(function() {
+//     count = count+counterIncrement;
+//     if (count == 0 || count == 100 ) {
+//         counterIncrement = -counterIncrement;
+//     }
+//     battery1.value = count;
+//     battery2.value = count;
+//     connection.value = count;
+//  }, 100);
+// const testCoords = setInterval(function() {
+//     testCoordinate.value.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
+//     testCoordinate.value.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
+// }, 100);
 </script>
 
 <template>
@@ -20,10 +54,10 @@ let testCoordinateObject2 = {
 
     <div class="four-status-rightside">
         <!-- For final product, pass in a Vehicle Object instead that contains all of the information for the VehicleStatusComponent to display-->
-        <Status :batteryPct=100 :latency=50 :coordinates="testCoordinateObject2" :vehicleName="'ERU'" :vehicleStatus="'In Use'"/>
-        <Status :batteryPct=48 :latency=30 :coordinates="testCoordinateObject" :vehicleName="'MEA'" :vehicleStatus="'Standby'"/>
+        <Status :batteryPct=battery1 :latency=connection :coordinates="testCoordinate" :vehicleName="'ERU'" :vehicleStatus="'In Use'"/>
+        <Status :batteryPct=67 :latency=30 :coordinates="testCoordinateObject1" :vehicleName="'MEA'" :vehicleStatus="'Standby'"/>
         <Status :batteryPct=0 :latency=100 :coordinates="testCoordinateObject2" :vehicleName="'MRA'" :vehicleStatus="'Offline'"/>
-        <Status :batteryPct=10 :latency=0 :coordinates="testCoordinateObject" :vehicleName="'FRA'" :vehicleStatus="'Offline'"/>
+        <Status :batteryPct=10 :latency=0 :coordinates="testCoordinateObject1" :vehicleName="'FRA'" :vehicleStatus="'Offline'"/>
     </div>
   </div>
 
