@@ -1,6 +1,6 @@
   <script>
   export default {
-    props: ['cameraNumber'],
+    props: ['cameraID'],
     data() {
       return {
         localIp: 'http://localhost', //maybe change accordingly .env?
@@ -25,15 +25,15 @@
       //     console.error('Error accessing camera:', error);
       //   }
       // },
-        getCameraImageUrl(cameraNumber) {
-          return `${this.localIp}:${this.port}/${this.cameraUrls[cameraNumber]}`;
+        getCameraImageUrl(cameraID) {
+          return `${this.localIp}:${this.port}/${this.cameraUrls[cameraID]}`;
       }
     }
   };
   </script>
   <template>
     <div class="box video-section">
-        <img :src="getCameraImageUrl(cameraNumber)" class="video-image">
+        <img :src="getCameraImageUrl(cameraID)" class="video-image">
     </div>
   </template>
   <style scoped>

@@ -1,7 +1,9 @@
 <template>
     <div class="vehicle-title-container">
-        <div class="vehicle-name-div"> {{ vehicleName }} </div>
-
+        <div class="vehicle-name-div"> 
+                {{ vehicleName }} 
+              <!--  <img src="../../assets/MEA.png" class="vehicle-icon"></img>--> 
+        </div>
         <div class="vehicle-status-div">Status: {{ vehicleStatus }}</div>
     </div>
     
@@ -28,22 +30,26 @@
         padding-left: 6%;
     }
 
+    /* .vehicle-name-div {
+        position: relative;
+        font-size: 2.3em;
+    } */
+
     .vehicle-name-div {
         position: relative;
+        display: flex;
         font-size: 2.3em;
     }
 
     .vehicle-status-div {
         position: relative;
-        font-size: 1.6em;  
+        font-size: 1.4em;  
         margin-top: 5%;
     }
 
     .vehicle-icon {
         position: relative;
-        width: 12%;
-        height: 12%;
-        /* vertical-align: middle; */
+        width: 22%;
     }
 
 </style> 

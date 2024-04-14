@@ -10,11 +10,7 @@
     export default {
         data() {
             return {};    
-        },
-        // props: {
-        // },
-        // computed: {
-        // }
+        }
     };
 </script>
     
@@ -24,7 +20,7 @@
         position: relative;
         display: flex;
         height: 20%;
-        width: 70%;  
+        width: 78%;  
         text-align: center;
     }
 
@@ -34,7 +30,8 @@
         width: 100%;
         height: 100%;
         background-color: rgb(255, 57, 57);
-        font-size: 1em;
+        font-size: 0.96em;
+        transition: background-color 0.20s;
     } 
 
     .emergency-button:hover {

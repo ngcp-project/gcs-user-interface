@@ -1,8 +1,5 @@
 <template>
-    <!-- <div class="open-button-div">
-        <button class="open-button">OPEN</button>
-    </div> -->
-    <button class="test-open-button">OPEN</button>
+    <button class="open-button">OPEN</button>
 </template>
     
 <script lang="ts">
@@ -10,41 +7,24 @@
     export default {
         data() {
             return {};    
-        },
-        // props: {
-        // },
-        // computed: {
-        // }
+        }
     };
 </script>
     
     
 <style scoped>
-    .open-button-div {
-        position: relative;
-        height: 25%;
-        width: 35%;  
-    }
-
     .open-button {
         position: relative;
-        display: inline-block;
-        width: 100%;
-        height: 100%;
-        background-color: #011949;
-        font-size: 1.3em;
-    } 
-
-    .test-open-button {
-        position: relative;
-        display: inline-block;
+        display: flex;
+        justify-content: center;
         width: 30%;
-        height: 20%;
+        height: 18%;
         background-color: #011949;
         font-size: 1em;
+        transition: background-color 0.20s;
     } 
 
-    .test-open-button:hover {
-        background-color: #03369b;
+    .open-button:hover {
+        background-color: #194398;
     }
 </style> 
