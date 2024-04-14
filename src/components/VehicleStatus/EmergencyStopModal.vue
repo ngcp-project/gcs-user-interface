@@ -3,6 +3,7 @@
     <div class="modal-backdrop" @click="closeFromOutside">
       <div class="modal">
         <header class="modal-header">
+          <img src="../../assets/stop-symbol.png" class="stop-icon"></img> 
           <slot name="header">
             Emergency Stop
           </slot>
@@ -17,7 +18,7 @@
   
         <footer class="modal-footer">
           <button type="button" class="modal-button no-button" @click="close"> No </button>
-          <button type="button" class="modal-button yes-button" @click="close"> Yes </button>
+          <button type="button" class="modal-button yes-button" @click="sendStopCommand"> Yes </button>
         </footer>
       </div>
     </div>
@@ -33,6 +34,10 @@
             vehicleName: { required: true, type: String},
         },
         methods: {
+            sendStopCommand() {
+              console.log("Pressed yes to send stop command for " + this.vehicleName);
+              this.close();
+            },
             close() {
                 this.$emit('close');
             },
@@ -74,7 +79,9 @@
   .modal-header {
     position: relative;
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
+    gap: 2%;
+    /* padding: 15px; */
     padding: 15px;
 
     font-size: 1.2em;
@@ -157,7 +164,8 @@
     transform: translateY(-40px);
     transition: transform .3s ease;
   }
-  /* .modal-fade-enter-active .modal, 
-  .modal-fade-leave-active .modal {
-  } */
+
+  .stop-icon {
+    width: 5%;
+  }
 </style>    

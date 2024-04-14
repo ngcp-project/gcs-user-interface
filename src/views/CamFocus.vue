@@ -8,6 +8,7 @@ const cameraID = Number(route.params.id); // Assuming we're using camera Number
 </script>
 
 <template>
+  <div class="cam-focus-screen-div">
     <div class="camera-container">
         <div class="camera-wrapper">
             <router-link to="/" class="back">Back</router-link>
@@ -15,11 +16,21 @@ const cameraID = Number(route.params.id); // Assuming we're using camera Number
             <!-- Back button -->
         </div>
     </div>
+
+    <div class="vehicle-info-container"></div>
+</div>
 </template>
   
 <style scoped>
+.cam-focus-screen-div {
+    display:flex;
+    height: 90vh; 
+    width: 100%;
+}
+
 .camera-container {
-    height: 90vh; /* Set the height of the container to 100% of the viewport height */
+    /* height: 90vh;  */
+    height: 100%; 
     width: 75%;
     display: flex; /* Use flexbox to align items vertically */
     justify-content: center; /* Center the child element horizontally */
@@ -40,4 +51,9 @@ const cameraID = Number(route.params.id); // Assuming we're using camera Number
     color: black;
     cursor: pointer;
   }
+  .vehicle-info-container {
+    height: 100%; 
+    width: 25%;
+    /* background-color: pink; */
+}
 </style>
