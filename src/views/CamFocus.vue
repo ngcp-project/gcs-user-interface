@@ -1,5 +1,7 @@
 <script setup lang="ts">
-
+import Airspeed from "../components/FlightComponents/Airspeed.vue";
+import Altimeter from "../components/FlightComponents/Altimeter.vue";
+import Altitude from "../components/FlightComponents/Altitude.vue";
 import Camera from "../components/Camera.vue";
 import { useRoute } from 'vue-router';
 const route = useRoute();
@@ -17,7 +19,19 @@ const cameraID = Number(route.params.id); // Assuming we're using camera Number
         </div>
     </div>
 
-    <div class="vehicle-info-container"></div>
+  <div class="vehicle-info-container">
+    <div class="flight-indicator">
+        <Altitude :pitch=2 :roll=10></Altitude>
+    </div>
+
+    <div class="flight-indicator">
+        <Altimeter :altitude=200></Altimeter>
+    </div>
+
+    <div class="flight-indicator">
+        <Airspeed :airspeed=100></Airspeed>
+    </div>
+  </div>
 </div>
 </template>
   
@@ -52,8 +66,18 @@ const cameraID = Number(route.params.id); // Assuming we're using camera Number
     cursor: pointer;
   }
   .vehicle-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1%;
     height: 100%; 
     width: 25%;
     /* background-color: pink; */
 }
+.flight-indicator{
+    position: relative;
+    width: 45%;
+    border: 1px solid black;
+    padding-bottom: 2%;
+}
+
 </style>
