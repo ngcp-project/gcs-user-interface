@@ -1,12 +1,10 @@
-<!-- Using this to see how the Battery and Connection components look -->
+<!-- Using this to see how the our components look -->
 
 <script setup>
-import Battery from './components/VehicleStatus/Battery.vue';
-import Connection from './components/VehicleStatus/Connection.vue';
-import Status from "./components/VehicleStatusComponent.vue";
-import yuh from "./components/VehicleStatus/VehicleTitle.vue"
-import Coordinate from './components/VehicleStatus/Coordinate.vue'
-
+import Coordinate from './components/VehicleStatus/Coordinate.vue';
+import Altitude from './components/FlightComponents/Altitude.vue';
+import Altimeter from './components/FlightComponents/Altimeter.vue';
+import Airspeed from './components/FlightComponents/Airspeed.vue';
 
 let testObject = {
         longitude: -177.9325790,
@@ -15,10 +13,19 @@ let testObject = {
 </script>
 
 <template>
-  <!-- <Status :batteryPct=48 :vehicleName="'ERU'" :vehicleStatus="'Offline'"/> -->
 
-  <Coordinate :coordinates="testObject"></Coordinate>
+  <div class="altitude-outer-div">
+    <Altitude :pitch=2 :roll=10></Altitude>
+  </div>
 
+  <div class="altimeter-outer-div">
+    <Altimeter :altitude=200></Altimeter>
+  </div>
+
+  <div class="altitude-outer-div">
+    <Airspeed :airspeed=100></Airspeed>
+  </div>
+  
 
 </template>
 
@@ -33,18 +40,14 @@ let testObject = {
   width: 200px;  */
 }
 
-.border_div_2 {
-  display: flex;
-  border: 0.4em solid black;
-  height: 180px;
-  width: 380px;
-  /* height: 100px;
-  width: 200px;  */
+.altitude-outer-div {
+  height: 50;
+  width: 10%;
 }
 
-.additional_battery_prop {
-  top: 4%;
-  margin-right: 2%;
+.altimeter-outer-div {
+  height: 50;
+  width: 10%;
 }
 
 </style>
