@@ -34,6 +34,12 @@ devDependencies:
   '@vitejs/plugin-vue':
     specifier: ^4.0.0
     version: 4.0.0(vite@4.2.1)(vue@3.2.45)
+  '@vue-leaflet/vue-leaflet':
+    specifier: ^0.10.1
+    version: 0.10.1(leaflet@1.9.4)
+  leaflet:
+    specifier: ^1.9.4
+    version: 1.9.4
   typescript:
     specifier: ^4.9.5
     version: 4.9.5
@@ -989,6 +995,19 @@ packages:
       vue: ^3.2.25
     dependencies:
       vite: 4.2.1(@types/node@18.7.10)
+      vue: 3.2.45
+    dev: true
+
+  /@vue-leaflet/vue-leaflet@0.10.1(leaflet@1.9.4):
+    resolution: {integrity: sha512-RNEDk8TbnwrJl8ujdbKgZRFygLCxd0aBcWLQ05q/pGv4+d0jamE3KXQgQBqGAteE1mbQsk3xoNcqqUgaIGfWVg==}
+    peerDependencies:
+      '@types/leaflet': ^1.5.7
+      leaflet: ^1.6.0
+    peerDependenciesMeta:
+      '@types/leaflet':
+        optional: true
+    dependencies:
+      leaflet: 1.9.4
       vue: 3.2.45
     dev: true
 
@@ -5107,6 +5126,10 @@ packages:
     dependencies:
       picocolors: 1.0.0
       shell-quote: 1.8.1
+    dev: true
+
+  /leaflet@1.9.4:
+    resolution: {integrity: sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==}
     dev: true
 
   /leven@2.1.0:
