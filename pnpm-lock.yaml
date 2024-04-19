@@ -11,6 +11,9 @@ dependencies:
   vue:
     specifier: ^3.2.45
     version: 3.2.45
+  vue-flight-indicators:
+    specifier: ^0.1.1
+    version: 0.1.1(vue@3.2.45)
   vue-router:
     specifier: ^4.3.0
     version: 4.3.0(vue@3.2.45)
@@ -8734,6 +8737,14 @@ packages:
       vue-inbrowser-compiler-independent-utils: 4.71.1(vue@3.2.45)
     dev: true
 
+  /vue-flight-indicators@0.1.1(vue@3.2.45):
+    resolution: {integrity: sha512-Qwu7IMl2/IRiB7mtyi5C/rt+ty4jJNkvsjCU8GiuFNp2NcYGaQlUhzQmIeQBbjgTBA/Tnh0sy+rQXjIp7rymeA==}
+    peerDependencies:
+      vue: '>=2.0.0'
+    dependencies:
+      vue: 3.2.45
+    dev: false
+
   /vue-hot-reload-api@2.3.4:
     resolution: {integrity: sha512-BXq3jwIagosjgNVae6tkHzzIk6a8MHFtzAdwhnV5VlvPTFxDCvIttgSiHWjdGoTJvXtmRu5HacExfdarRcFhog==}
     dev: true
@@ -8914,6 +8925,7 @@ packages:
       '@vue/devtools-api': 6.6.1
       vue: 3.2.45
     dev: false
+
   /vue-style-loader@4.1.3:
     resolution: {integrity: sha512-sFuh0xfbtpRlKfm39ss/ikqs9AbKCoXZBpHeVZ8Tx650o0k0q/YCM7FRvigtxpACezfq6af+a7JeqVTWvncqDg==}
     dependencies:
