@@ -38,7 +38,8 @@ wss.on('connection', (ws) => {
      // continuously send random battery values to client
     setInterval(() => {
         vehicleData.altitude = Math.random() * 10000; 
-        vehicleData.batteryLife = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
+        // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
+        vehicleData.batteryLife = Math.round(Math.random() * (100)) / 100;
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();

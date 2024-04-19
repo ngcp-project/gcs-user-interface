@@ -3,7 +3,7 @@
     <div class="modal-backdrop" @click="closeFromOutside">
       <div class="modal">
         <header class="modal-header">
-          <img src="../../assets/stop-symbol.png" class="stop-icon"></img> 
+          <img src="../../assets/stop-symbol.png" class="stop-icon"/>
           <slot name="header">
             Emergency Stop
           </slot>

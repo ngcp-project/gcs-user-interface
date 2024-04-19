@@ -32,19 +32,19 @@ onMounted(() => {
     });
 
     // -- uncomment below to use test-websocket-server.cjs for data for single vehicle widget in Static Screen -- //
-    let client2 = new WebSocket('ws://localhost:3000/');
-    console.log("Connected to port 3000 server")
+    // let client2 = new WebSocket('ws://localhost:3000/');
+    // console.log("Connected to port 3000 server")
 
-    client2.addEventListener("message", (event) => {
-        const data = JSON.parse(event.data);
-        receivedData2.value = data;
+    // client2.addEventListener("message", (event) => {
+    //     const data = JSON.parse(event.data);
+    //     receivedData2.value = data;
 
-        console.log("Received data from test-websocket-server:", receivedData2);
-        batteryPct2.value = receivedData2.value.battery;
-        testCoordinate2.value.latitude = receivedData2.value.currentPosition.latitude;
-        testCoordinate2.value.longitude = receivedData2.value.currentPosition.longitude;
-        dummyConnection2.value = receivedData2.value.dummy_connection;
-    });
+    //     console.log("Received data from test-websocket-server:", receivedData2);
+    //     batteryPct2.value = receivedData2.value.battery;
+    //     testCoordinate2.value.latitude = receivedData2.value.currentPosition.latitude;
+    //     testCoordinate2.value.longitude = receivedData2.value.currentPosition.longitude;
+    //     dummyConnection2.value = receivedData2.value.dummy_connection;
+    // });
 });
 
 // --- testing with dummy reactive data --- //
@@ -66,9 +66,9 @@ let testCoordinateObject2 = {
     <div class="four-status-rightside">
         <!-- For final product, pass in a Vehicle Object instead that contains all of the information for the VehicleStatusComponent to display-->
         <Status :batteryPct=batteryPct :latency=dummyConnection :coordinates=testCoordinate :vehicleName="'ERU'" :vehicleStatus="'In Use'"/>
-        <Status :batteryPct=batteryPct2 :latency=dummyConnection2 :coordinates=testCoordinate2 :vehicleName="'MEA'" :vehicleStatus="'Standby'"/>
+        <Status :batteryPct=.40 :latency=36 :coordinates=testCoordinate2 :vehicleName="'MEA'" :vehicleStatus="'Standby'"/>
         <Status :batteryPct=0 :latency=100 :coordinates="testCoordinateObject2" :vehicleName="'MRA'" :vehicleStatus="'Offline'"/>
-        <Status :batteryPct=10 :latency=0 :coordinates="testCoordinateObject1" :vehicleName="'FRA'" :vehicleStatus="'Offline'"/>
+        <Status :batteryPct=.10 :latency=0 :coordinates="testCoordinateObject1" :vehicleName="'FRA'" :vehicleStatus="'Offline'"/>
     </div>
   </div>
 
