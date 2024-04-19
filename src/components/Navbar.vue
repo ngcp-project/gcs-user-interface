@@ -80,7 +80,7 @@ export default {
           <!-- Insert your menu items here -->
           <li><a href="#" style="text-decoration: none;">Home</a></li>
           <li><a href="#" style="text-decoration: none;" @click="openNewWindow">Link</a></li>
-          <li><router-link to="/1" style="text-decoration: none;">Disabled</router-link></li>
+          <li><router-link to="/test" style="text-decoration: none;">Disabled</router-link></li>
         </ul>
       </div>
     </nav>
