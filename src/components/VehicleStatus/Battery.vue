@@ -2,7 +2,7 @@
     <div class="outer_div">
         <div class="battery_container">
             <!-- <div :class="percentageCSS" :style="{ width: this.percentage + '%' }"></div> -->
-            <div :class="percentageCSS" :style="[percentage > 15 ? { width: percentage + '%' } : { width: '15%'}]"></div>
+            <div :class="percentageCSS" :style="[percentage > .15 ? { width: (percentage * 100) + '%' } : { width: '15%'}]"></div>
         </div>
         <div class="battery_widget"></div> 
         <img class="lightingSymbol" :class="batteryStatus" src="..\..\assets\lightning-icon-png-5.png" >
@@ -24,11 +24,11 @@
             percentageCSS() {
                 if (this.percentage <= 0) {
                     return 'zeroPercent'
-                } else if ((this.percentage > 0) && (this.percentage <= 15)) {
+                } else if ((this.percentage > 0) && (this.percentage <= .15)) {
                     return 'tenPercent'
-                } else if ((this.percentage > 15) && (this.percentage <= 30)) {
+                } else if ((this.percentage > .15) && (this.percentage <= .30)) {
                     return 'twentyFivePercent'
-                } else if ((this.percentage > 30) && (this.percentage <= 50)) {
+                } else if ((this.percentage > .30) && (this.percentage <= .50)) {
                     return 'fiftyPercent'
                 } else {
                     return 'normalPercent'

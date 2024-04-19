@@ -20,10 +20,10 @@ let testCoordinateObject2 = {
 
     <div class="four-status-rightside">
         <!-- For final product, pass in a Vehicle Object instead that contains all of the information for the VehicleStatusComponent to display-->
-        <Status :batteryPct=100 :latency=50 :coordinates="testCoordinateObject2" :vehicleName="'ERU'" :vehicleStatus="'In Use'"/>
-        <Status :batteryPct=48 :latency=30 :coordinates="testCoordinateObject" :vehicleName="'MEA'" :vehicleStatus="'Standby'"/>
+        <Status :batteryPct=1 :latency=50 :coordinates="testCoordinateObject2" :vehicleName="'ERU'" :vehicleStatus="'In Use'"/>
+        <Status :batteryPct=.48 :latency=30 :coordinates="testCoordinateObject" :vehicleName="'MEA'" :vehicleStatus="'Standby'"/>
         <Status :batteryPct=0 :latency=100 :coordinates="testCoordinateObject2" :vehicleName="'MRA'" :vehicleStatus="'Offline'"/>
-        <Status :batteryPct=10 :latency=0 :coordinates="testCoordinateObject" :vehicleName="'FRA'" :vehicleStatus="'Offline'"/>
+        <Status :batteryPct=.10 :latency=0 :coordinates="testCoordinateObject" :vehicleName="'FRA'" :vehicleStatus="'Offline'"/>
     </div>
   </div>
 
