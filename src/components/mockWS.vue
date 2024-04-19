@@ -2,7 +2,7 @@
 import { ref, onBeforeUnmount } from "vue";
 
 // const webSocketUrl = "ws://192.168.1.65:5135/ws"; // WebSocket server URL
-const webSocketUrl = "ws://localhost:5135/ws"; // WebSocket server URL
+const webSocketUrl = "ws://localhost:5137/ws/fra"; // WebSocket server URL
 const socket = ref<WebSocket | null>(null);
 const receivedData = ref<any>(null);
 

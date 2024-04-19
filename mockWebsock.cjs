@@ -40,7 +40,7 @@ ERU.on('connection', (ws) => {
         yaw: 3.3,
         roll: 4.4,
         altitude: 5.5,
-        batteryLife: 6.6,
+        batteryLife: .1,
         lastUpdated: '00:00:00',
         currentPosition: {
             latitude: 7.7,
@@ -56,7 +56,7 @@ ERU.on('connection', (ws) => {
     setInterval(() => {
         vehicleData.altitude = Math.random() * 10000; 
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
-        vehicleData.batteryLife = Math.round(Math.random() * (100)) / 100;
+        vehicleData.batteryLife = Math.random().toFixed(2);
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
@@ -104,7 +104,7 @@ MEA.on('connection', (ws) => {
         yaw: 3.3,
         roll: 4.4,
         altitude: 5.5,
-        batteryLife: 6.6,
+        batteryLife: .2,
         lastUpdated: '00:00:00',
         currentPosition: {
             latitude: 7.7,
@@ -120,7 +120,7 @@ MEA.on('connection', (ws) => {
     setInterval(() => {
         vehicleData.altitude = Math.random() * 10000; 
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
-        vehicleData.batteryLife = Math.round(Math.random() * (100)) / 100;
+        vehicleData.batteryLife = Math.random().toFixed(2);
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
@@ -168,7 +168,7 @@ FRA.on('connection', (ws) => {
         yaw: 3.3,
         roll: 4.4,
         altitude: 5.5,
-        batteryLife: 6.6,
+        batteryLife: .8,
         lastUpdated: '00:00:00',
         currentPosition: {
             latitude: 7.7,
@@ -184,7 +184,7 @@ FRA.on('connection', (ws) => {
     setInterval(() => {
         vehicleData.altitude = Math.random() * 10000; 
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
-        vehicleData.batteryLife = Math.round(Math.random() * (100)) / 100;
+        vehicleData.batteryLife = Math.random().toFixed(2);
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
@@ -232,7 +232,7 @@ MRA.on('connection', (ws) => {
         yaw: 3.3,
         roll: 4.4,
         altitude: 5.5,
-        batteryLife: 6.6,
+        batteryLife: .6,
         lastUpdated: '00:00:00',
         currentPosition: {
             latitude: 7.7,
@@ -248,7 +248,7 @@ MRA.on('connection', (ws) => {
     setInterval(() => {
         vehicleData.altitude = Math.random() * 10000; 
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
-        vehicleData.batteryLife = Math.round(Math.random() * (100)) / 100;
+        vehicleData.batteryLife = Math.random().toFixed(2);
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
