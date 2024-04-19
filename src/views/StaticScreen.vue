@@ -3,6 +3,7 @@ import Camera from "../components/Camera.vue";
 import Status from '../components/VehicleStatusComponent.vue';
 import NavBar from '../components/Navbar.vue';
 import { onMounted, ref } from 'vue';
+import Map from '../components/Map.vue';
 
 // for ERU widget
 const receivedData = ref<any>(null);
@@ -61,7 +62,9 @@ let testCoordinateObject2 = {
 <template>
   <div class="screen_div">
     <!-- Map component will be placed below -->
-    <div class="map_div"></div>
+    <div class="map_div">
+        <Map></Map>
+    </div>
 
     <div class="four-status-rightside">
         <!-- For final product, pass in a Vehicle Object instead that contains all of the information for the VehicleStatusComponent to display-->
