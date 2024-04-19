@@ -15,7 +15,7 @@ export  default {
 <template>
 	<div class="airspeed-div">
 		<Airspeed :size="200" :airspeed="airspeed"/>
-        <span style="font-size: 1.2em;"> Airspeed: {{ airspeed }} ft/s</span>
+        <span style="font-size: 1.2em;"> Speed: {{ airspeed }} ft/s</span>
 	</div>
 </template>
 
@@ -27,6 +27,7 @@ export  default {
         display: flex;
         flex-direction: column;
         align-items: center;
+        gap: 2%;
     }
 
 </style>

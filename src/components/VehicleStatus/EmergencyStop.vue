@@ -15,7 +15,7 @@
         },
         data() {
             return {
-                showModal: false
+                showModal: false        
             };    
         },
         props: {

@@ -1,26 +1,26 @@
 <script>
-import {Altimeter} from  'vue-flight-indicators'
+import {Heading} from  'vue-flight-indicators'
 
 export  default {
-	name:  'altimeter',
+	name:  'heading',
     props: {
-        altitude: { required: true, type: Number},
+        yaw: { required: true, type: Number},
     },  
 	components: {
-		Altimeter
+		Heading
 	}
 }
 </script>
 
 <template>
-	<div class="altimeter-div">
-		<Altimeter :size="200" :altitude="altitude"/>
-        <span style="font-size: 1.2em;"> Altitude: {{ altitude }} ft/s</span>
+	<div class="heading-div">
+		<Heading :size="200" :heading="yaw" />
+        <span style="font-size: 1.2em;"> Yaw: {{ yaw }} </span>
 	</div>
 </template>
 
 <style scoped>
-    .altimeter-div {
+    .heading-div {
         position: relative;
         height: 100%;
         width: 100%;
@@ -29,5 +29,4 @@ export  default {
         align-items: center;
         gap: 2%;
     }
-
 </style>

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import Airspeed from "../components/FlightComponents/Airspeed.vue";
-import Altimeter from "../components/FlightComponents/Altimeter.vue";
-import Altitude from "../components/FlightComponents/Altitude.vue";
 import Camera from "../components/Camera.vue";
+import IndicatorComponent from "../components/IndicatorComponent.vue";
+import Status from "../components/VehicleStatusComponent.vue";
 import { useRoute } from 'vue-router';
 const route = useRoute();
 const cameraID = Number(route.params.id); // Assuming we're using camera Number 
@@ -20,17 +19,7 @@ const cameraID = Number(route.params.id); // Assuming we're using camera Number
     </div>
 
   <div class="vehicle-info-container">
-    <div class="flight-indicator">
-        <Altitude :pitch=2 :roll=10></Altitude>
-    </div>
-
-    <div class="flight-indicator">
-        <Altimeter :altitude=200></Altimeter>
-    </div>
-
-    <div class="flight-indicator">
-        <Airspeed :airspeed=100></Airspeed>
-    </div>
+    <IndicatorComponent class="adjust-indicator"  :pitch=10 :roll=6 :altitude=4 :airspeed=15 :yaw=60></IndicatorComponent>
   </div>
 </div>
 </template>
@@ -45,7 +34,7 @@ const cameraID = Number(route.params.id); // Assuming we're using camera Number
 .camera-container {
     /* height: 90vh;  */
     height: 100%; 
-    width: 75%;
+    width: 77%;
     display: flex; /* Use flexbox to align items vertically */
     justify-content: center; /* Center the child element horizontally */
     align-items: center; /* Center the child element vertically */
@@ -65,19 +54,17 @@ const cameraID = Number(route.params.id); // Assuming we're using camera Number
     color: black;
     cursor: pointer;
   }
+
   .vehicle-info-container {
     display: flex;
     flex-direction: column;
     gap: 1%;
     height: 100%; 
-    width: 25%;
-    /* background-color: pink; */
+    width: 23%;
 }
-.flight-indicator{
-    position: relative;
-    width: 45%;
-    border: 1px solid black;
-    padding-bottom: 2%;
-}
+  .adjust-indicator {
+    margin-top: auto;
+    margin-bottom: 1%;
+  }
 
 </style>

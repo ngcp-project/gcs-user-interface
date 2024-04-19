@@ -16,8 +16,10 @@ export  default {
 <template>
 	<div class="altitude-div">
 		<Attitude :size="200" :pitch="pitch" :roll="roll" />
-        <span style="font-size: 1.2em;"> Pitch: {{ pitch }} </span>
-        <span style="font-size: 1.2em;"> Roll: {{ roll }} </span>
+        <div>   
+            <span style="font-size: 1.2em; "> Pitch: {{ pitch }} </span>
+            <span style="font-size: 1.2em;"> Roll: {{ roll }} </span>
+        </div>
 	</div>
 </template>
 
@@ -29,5 +31,6 @@ export  default {
         display: flex;
         flex-direction: column;
         align-items: center;
+        gap: 2%;
     }
 </style>

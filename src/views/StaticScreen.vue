@@ -58,5 +58,6 @@ let testCoordinateObject2 = {
 }
 
 .map_div {
+    width: 77%;
 }
 </style>

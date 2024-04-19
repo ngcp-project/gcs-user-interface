@@ -5,6 +5,7 @@ import Coordinate from './components/VehicleStatus/Coordinate.vue';
 import Altitude from './components/FlightComponents/Altitude.vue';
 import Altimeter from './components/FlightComponents/Altimeter.vue';
 import Airspeed from './components/FlightComponents/Airspeed.vue';
+import IndicatorComponent from './components/IndicatorComponent.vue';
 
 let testObject = {
         longitude: -177.9325790,
@@ -13,8 +14,11 @@ let testObject = {
 </script>
 
 <template>
+  <div class="testing">
+    <IndicatorComponent></IndicatorComponent>
+  </div>
 
-  <div class="altitude-outer-div">
+  <!-- <div class="altitude-outer-div">
     <Altitude :pitch=2 :roll=10></Altitude>
   </div>
 
@@ -24,7 +28,7 @@ let testObject = {
 
   <div class="altitude-outer-div">
     <Airspeed :airspeed=100></Airspeed>
-  </div>
+  </div> -->
   
 
 </template>
@@ -48,6 +52,11 @@ let testObject = {
 .altimeter-outer-div {
   height: 50;
   width: 10%;
+}
+
+.testing {
+  width: 50%;
+  height: 50%;
 }
 
 </style>
