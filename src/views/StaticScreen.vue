@@ -2,6 +2,7 @@
 import Camera from "../components/Camera.vue";
 import Status from '../components/VehicleStatusComponent.vue';
 import NavBar from '../components/Navbar.vue';
+import getWebsocketConnection from '../webSocket.cjs';
 import { onMounted, ref } from 'vue';
 
 // for ERU widget
@@ -17,6 +18,12 @@ const dummyConnection2 = ref(65);
 
 // create websocket connection once Static Screen finishes initial rendering
 onMounted(() => {
+    // let receivedData = getWebsocketConnection();
+    //     batteryPct.value = receivedData.value.batteryLife;
+    //     testCoordinate.value.latitude = receivedData.value.currentPosition.latitude;
+    //     testCoordinate.value.longitude = receivedData.value.currentPosition.longitude;
+    //     dummyConnection.value = receivedData.value.dummyConnection;
+
     let client = new WebSocket('ws://localhost:5135/');
     console.log("Connected to 5135 server");
 
@@ -30,21 +37,6 @@ onMounted(() => {
         testCoordinate.value.longitude = receivedData.value.currentPosition.longitude;
         dummyConnection.value = receivedData.value.dummyConnection;
     });
-
-    // -- uncomment below to use test-websocket-server.cjs for data for single vehicle widget in Static Screen -- //
-    // let client2 = new WebSocket('ws://localhost:3000/');
-    // console.log("Connected to port 3000 server")
-
-    // client2.addEventListener("message", (event) => {
-    //     const data = JSON.parse(event.data);
-    //     receivedData2.value = data;
-
-    //     console.log("Received data from test-websocket-server:", receivedData2);
-    //     batteryPct2.value = receivedData2.value.battery;
-    //     testCoordinate2.value.latitude = receivedData2.value.currentPosition.latitude;
-    //     testCoordinate2.value.longitude = receivedData2.value.currentPosition.longitude;
-    //     dummyConnection2.value = receivedData2.value.dummy_connection;
-    // });
 });
 
 // --- testing with dummy reactive data --- //
