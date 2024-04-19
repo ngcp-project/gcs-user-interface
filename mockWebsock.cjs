@@ -29,6 +29,7 @@ wss.on('connection', (ws) => {
             latitude: 7.7,
             longitude: 8.8,
         },
+        dummyConnection: 0,
         vehicleStatus: 0,
     };
 
@@ -41,6 +42,7 @@ wss.on('connection', (ws) => {
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
+        vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
 
         ws.send(JSON.stringify(vehicleData));
     }, 1000);
