@@ -33,7 +33,7 @@
             <VehicleTitle :vehicleName="vehicleName" :vehicleStatus="vehicleStatus"/>
             <div class="battery-status-container">
                 <Battery :percentage = "batteryPct" :charging="false" class="adjust-battery"/>
-                <span style="margin-top: 4%; font-size: 1.4em;">{{ batteryPct }}%</span>
+                <span style="margin-top: 4%; font-size: 1.4em;">{{ (batteryPct * 100) }}%</span>        <!-- Multiply batteryPct by 100 because it is in between 0 and 1 -->
             </div>
             <div class="connection-status-container">
                 <Connection :latency="latency" class="adjust-connection"/> 
@@ -48,7 +48,7 @@
         <div class="right-container">
             <Open class="adjust-open-button"></Open>
             <Coordinate :coordinates="coordinates" class="adjust-coordinates"></Coordinate>
-            <EmergencyStop class="adjust-emergency-button"/>
+            <EmergencyStop :vehicleName="vehicleName" class="adjust-emergency-button"/>
         </div>
     </div>
 </template>

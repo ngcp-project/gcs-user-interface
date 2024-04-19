@@ -18,7 +18,7 @@ const handleClick = (cameraID:number) => {
     <div class="grid">
         <div class="hover" style="position: relative; display: flex;" @click="handleClick(2)">
             <Camera :cameraID="2"/>
-            <Battery :percentage=85 :charging="false" class="battery_test"/>
+            <Battery :percentage=.85 :charging="false" class="battery_test"/>
             <Connection :latency=65 class="connection_test"/>   
             <!-- the Battery and Connection component's size is dependent on its parent element. So changing 'status_div' size will change their size-->
             <!-- <div class="status_div">        
@@ -29,7 +29,7 @@ const handleClick = (cameraID:number) => {
 
         <div class="hover" style="position: relative; display: flex;" @click="handleClick(1)">
             <Camera :cameraID="1"/>
-            <Battery :percentage=12 :charging="false" class="battery_test"/>
+            <Battery :percentage=.12 :charging="false" class="battery_test"/>
             <Connection :latency=3 class="connection_test"/>  
             <!-- <div class="status_div">
                 <Battery :percentage=12 :charging="false" class="adjust_Battery"/>
@@ -39,7 +39,7 @@ const handleClick = (cameraID:number) => {
 
         <div class="hover" style="position: relative; display: flex;" @click="handleClick(1)">
             <Camera :cameraID="1"/>
-            <Battery :percentage=46 :charging="false" class="battery_test"/>
+            <Battery :percentage=.46 :charging="false" class="battery_test"/>
             <Connection :latency=82 class="connection_test"/>   
             <!-- <div class="status_div">
                 <Battery :percentage=46 :charging="false" class="adjust_Battery"/>
