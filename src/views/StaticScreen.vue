@@ -1,26 +1,16 @@
 <script setup lang="ts">
 import Status from '../components/VehicleStatusComponent.vue';
-import { onMounted, ref } from 'vue';
+import { onMounted, onBeforeUnmount, ref, reactive } from 'vue';
 import Map from '../components/Map.vue';
 import { initializeWSConnections, getAllConnections, closeConnections } from "../webSocket";
 
-// Reactive variables for ERU widget
-const batteryPct_ERU = ref<number>(0);
-const testCoordinate_ERU = ref({longitude: 39.323719, latitude: -76.591978})
-const connection_ERU = ref<number>(0);
-// Reactive variables for MEA widget
-const batteryPct_MEA = ref<number>(.78);
-const testCoordinate_MEA = ref({longitude: 57.848923, latitude: -118.377468})
-const connection_MEA = ref<number>(22);
-// Reactive variables for MRA widget
-const batteryPct_MRA = ref<number>(.2);
-const testCoordinate_MRA = ref({longitude: 153.59374, latitude: -67.384919})
-const connection_MRA = ref<number>(65);
-// Reactive variables for FRA widget
-const batteryPct_FRA = ref<number>(.4);
-const testCoordinate_FRA = ref({longitude: 34.060425, latitude: -117.816546})
-const connection_FRA = ref<number>(98);
+// initialize reactive variables for each vehicle's telemetry data
+const ERU_data = reactive({batteryPct: 0, connection: 0, coordinates: {longitude: 39.323719, latitude: -76.591978}, status: 'Standby'});
+const MEA_data = reactive({batteryPct: .78, connection: 22, coordinates: {longitude: 57.848923, latitude: -118.377468}, status: 'Standby'});
+const MRA_data = reactive({batteryPct: .2, connection: 65, coordinates: {longitude: 153.59374, latitude: -67.384919}, status: 'Standby'});
+const FRA_data = reactive({batteryPct: .4, connection: 98, coordinates: {longitude: 34.060425, latitude: -117.816546}, status: 'Standby'});
 
+// add event listeners for each vehicle WS connection that updates the reactive variables whenever new data is received
 function addListeners() {
     for (const [vehicleKey, webSocketConnection] of Object.entries(wsConnections)) {
         webSocketConnection.addEventListener("message", (event) => {
@@ -33,30 +23,37 @@ function addListeners() {
                 latitude: parseFloat(data.currentPosition.latitude),
                 longitude: parseFloat(data.currentPosition.longitude)
             },
-            dummyConnection: data.dummyConnection
+            dummyConnection: data.dummyConnection,
+            status: data.vehicleStatus
         };
 
-        if (vehicleKey == 'eru') {
-            batteryPct_ERU.value = receivedData.batteryLife;
-            testCoordinate_ERU.value.latitude = receivedData.currentPosition.latitude;
-            testCoordinate_ERU.value.longitude = receivedData.currentPosition.longitude;
-            connection_ERU.value = receivedData.dummyConnection;
-        } else if (vehicleKey == 'mea') {
-            batteryPct_MEA.value = receivedData.batteryLife;
-            testCoordinate_MEA.value.latitude = receivedData.currentPosition.latitude;
-            testCoordinate_MEA.value.longitude = receivedData.currentPosition.longitude;
-            connection_MEA.value = receivedData.dummyConnection;
-        } else if (vehicleKey == 'fra') {
-            batteryPct_FRA.value = receivedData.batteryLife;
-            testCoordinate_FRA.value.latitude = receivedData.currentPosition.latitude;
-            testCoordinate_FRA.value.longitude = receivedData.currentPosition.longitude;
-            connection_FRA.value = receivedData.dummyConnection;
-        } else if (vehicleKey == 'mra') {
-            batteryPct_MRA.value = receivedData.batteryLife;
-            testCoordinate_MRA.value.latitude = receivedData.currentPosition.latitude;
-            testCoordinate_MRA.value.longitude = receivedData.currentPosition.longitude;
-            connection_MRA.value = receivedData.dummyConnection;
-        }});
+        switch (vehicleKey) {
+            case 'eru':
+                ERU_data.batteryPct = receivedData.batteryLife;
+                ERU_data.coordinates.latitude = receivedData.currentPosition.latitude;
+                ERU_data.coordinates.longitude = receivedData.currentPosition.longitude;
+                ERU_data.connection = receivedData.dummyConnection;   
+                ERU_data.status = receivedData.status;   
+            case 'mea':
+                MEA_data.batteryPct = receivedData.batteryLife;
+                MEA_data.coordinates.latitude = receivedData.currentPosition.latitude;
+                MEA_data.coordinates.longitude = receivedData.currentPosition.longitude;
+                MEA_data.connection = receivedData.dummyConnection; 
+                MEA_data.status = receivedData.status;     
+            case 'fra':
+                FRA_data.batteryPct = receivedData.batteryLife;
+                FRA_data.coordinates.latitude = receivedData.currentPosition.latitude;
+                FRA_data.coordinates.longitude = receivedData.currentPosition.longitude;
+                FRA_data.connection = receivedData.dummyConnection;
+                FRA_data.status = receivedData.status;   
+            case 'mra':
+                MRA_data.batteryPct = receivedData.batteryLife;
+                MRA_data.coordinates.latitude = receivedData.currentPosition.latitude;
+                MRA_data.coordinates.longitude = receivedData.currentPosition.longitude;
+                MRA_data.connection = receivedData.dummyConnection;
+                MRA_data.status = receivedData.status;   
+            }
+        });
     } // end for
 }
 
@@ -64,29 +61,30 @@ let wsConnections: { [key: string]: WebSocket } = {};
 // create websocket connection once Static Screen finishes initial rendering
 onMounted(() => {
     wsConnections = getAllConnections();
-    // below for loop just for testing
-    for (let key in wsConnections) {
-        console.log("FROM StaticScreen, got ws connection for " + key);
-        console.log(typeof wsConnections[key]);
-    };
-    
+    // below for loop just for testing. check console for outputs
+    // for (let key in wsConnections) {
+    //     console.log("FROM StaticScreen, got ws connection for " + key);
+    // };
     addListeners();
+});
+
+// close connections on component unmount
+onBeforeUnmount(() => {
+    closeConnections();
 });
 </script>
 
 <template>
   <div class="screen_div">
-    <!-- Map component will be placed below -->
     <div class="map_div">
         <Map></Map>
     </div>
 
     <div class="four-status-rightside">
-        <!-- For final product, pass in a Vehicle Object instead that contains all of the information for the VehicleStatusComponent to display-->
-        <Status :batteryPct=batteryPct_ERU :latency=connection_ERU :coordinates=testCoordinate_ERU :vehicleName="'ERU'" :vehicleStatus="'In Use'"/>
-        <Status :batteryPct=batteryPct_MEA :latency=connection_MEA :coordinates=testCoordinate_MEA :vehicleName="'MEA'" :vehicleStatus="'Standby'"/>
-        <Status :batteryPct=batteryPct_MRA :latency=connection_MRA :coordinates=testCoordinate_MRA :vehicleName="'MRA'" :vehicleStatus="'Offline'"/>
-        <Status :batteryPct=batteryPct_FRA :latency=connection_FRA :coordinates=testCoordinate_FRA :vehicleName="'FRA'" :vehicleStatus="'Offline'"/>
+        <Status :batteryPct=ERU_data.batteryPct :latency=ERU_data.connection :coordinates=ERU_data.coordinates :vehicleName="'ERU'" :vehicleStatus="ERU_data.status"/>
+        <Status :batteryPct=MEA_data.batteryPct :latency=MEA_data.connection :coordinates=MEA_data.coordinates :vehicleName="'MEA'" :vehicleStatus="MEA_data.status"/>
+        <Status :batteryPct=MRA_data.batteryPct :latency=MRA_data.connection :coordinates=MRA_data.coordinates :vehicleName="'MRA'" :vehicleStatus="MRA_data.status"/>
+        <Status :batteryPct=FRA_data.batteryPct :latency=FRA_data.connection :coordinates=FRA_data.coordinates :vehicleName="'FRA'" :vehicleStatus="FRA_data.status"/>
     </div>
   </div>
 

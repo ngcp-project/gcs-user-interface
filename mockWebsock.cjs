@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
 
 const ports = [5135, 5136, 5137, 5138];
+const vehicleStatuses = ['In Use', 'Standby', 'Emergency'];
 
 // Define the server's local IP address
 const serverIpAddress = 'localhost';
@@ -61,6 +62,7 @@ ERU.on('connection', (ws) => {
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
+        vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
 
         ws.send(JSON.stringify(vehicleData));
     }, 1000);
@@ -125,6 +127,7 @@ MEA.on('connection', (ws) => {
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
+        vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
 
         ws.send(JSON.stringify(vehicleData));
     }, 1000);
@@ -189,6 +192,7 @@ FRA.on('connection', (ws) => {
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
+        vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
 
         ws.send(JSON.stringify(vehicleData));
     }, 1000);
@@ -253,6 +257,7 @@ MRA.on('connection', (ws) => {
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
+        vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
 
         ws.send(JSON.stringify(vehicleData));
     }, 1000);
