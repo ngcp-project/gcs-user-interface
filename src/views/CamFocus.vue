@@ -77,6 +77,7 @@ const testCoordinate2 = ref({longitude: 57.848923, latitude: -67.384919})
 }
 .vehicle-status-parent {
   height: 15em;
-  padding-top: 4.5em;
+  /* padding-top: 4.5em; */
+  margin-bottom: auto;
 }
 </style>

@@ -222,7 +222,7 @@ FRA.on('connection', (ws) => {
 
 // Event listener for new client connections
 MRA.on('connection', (ws) => {
-    console.log('New client connected');
+    console.log('New MRA client connected');
 
     // Sample vehicle data object
     let vehicleData = {

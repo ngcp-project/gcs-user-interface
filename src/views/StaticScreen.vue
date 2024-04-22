@@ -1,164 +1,77 @@
 <script setup lang="ts">
-import Camera from "../components/Camera.vue";
 import Status from '../components/VehicleStatusComponent.vue';
-import NavBar from '../components/Navbar.vue';
 import { onMounted, ref } from 'vue';
 import Map from '../components/Map.vue';
+import { initializeWSConnections, getAllConnections, closeConnections } from "../webSocket";
 
-// for ERU widget
-const receivedData = ref<any>(null);
-const batteryPct = ref(0);
-const testCoordinate = ref({longitude: 0, latitude: 0})
-const dummyConnection = ref(0);
-// for MEA widget
-const receivedData2 = ref<any>(null);
-const batteryPct2 = ref(.78);
-const testCoordinate2 = ref({longitude: 57.848923, latitude: -67.384919})
-const dummyConnection2 = ref(65);
-// for MRA widget
-const receivedData3 = ref<any>(null);
-const batteryPct3 = ref(.2);
-const testCoordinate3 = ref({longitude: 57.848923, latitude: -67.384919})
-const dummyConnection3 = ref(65);
-// for FRA widget
-const receivedData4 = ref<any>(null);
-const batteryPct4 = ref(.4);
-const testCoordinate4 = ref({longitude: 57.848923, latitude: -67.384919})
-const dummyConnection4 = ref(65);
+// Reactive variables for ERU widget
+const batteryPct_ERU = ref<number>(0);
+const testCoordinate_ERU = ref({longitude: 39.323719, latitude: -76.591978})
+const connection_ERU = ref<number>(0);
+// Reactive variables for MEA widget
+const batteryPct_MEA = ref<number>(.78);
+const testCoordinate_MEA = ref({longitude: 57.848923, latitude: -118.377468})
+const connection_MEA = ref<number>(22);
+// Reactive variables for MRA widget
+const batteryPct_MRA = ref<number>(.2);
+const testCoordinate_MRA = ref({longitude: 153.59374, latitude: -67.384919})
+const connection_MRA = ref<number>(65);
+// Reactive variables for FRA widget
+const batteryPct_FRA = ref<number>(.4);
+const testCoordinate_FRA = ref({longitude: 34.060425, latitude: -117.816546})
+const connection_FRA = ref<number>(98);
 
-const connections = [
-    'ws://localhost:5135/ws/eru',
-    'ws://localhost:5136/ws/mea',
-    'ws://localhost:5137/ws/fra',
-    'ws://localhost:5138/ws/mra',
-
-]
-
-let wsClientsList: { [key: string]: WebSocket } = {};
-let test: { [key: string]: string } = {};
-
-let names = ['eru', 'mea', 'fra', 'mra']
-const telemetryData = [];
-
-function getWebsocketConnection(): string {
-    for (let i = 0; i < connections.length; i++) {
-        let newWebSocket = new WebSocket(connections[i]);
-        let vehicleName = names[i];
-        wsClientsList[names[i]] = newWebSocket;
-        console.log(connections[i]);
-    }
-
-    for (const [vehicleKey, webSocketConnection] of Object.entries(wsClientsList)) {
-        console.log(vehicleKey);
+function addListeners() {
+    for (const [vehicleKey, webSocketConnection] of Object.entries(wsConnections)) {
         webSocketConnection.addEventListener("message", (event) => {
         const data = JSON.parse(event.data);
-        receivedData.value = data; 
+        // const receivedData = ref<any>(null);
+        // receivedData.value = data; 
+        const receivedData = {
+            batteryLife: parseFloat(data.batteryLife),
+            currentPosition: {
+                latitude: parseFloat(data.currentPosition.latitude),
+                longitude: parseFloat(data.currentPosition.longitude)
+            },
+            dummyConnection: data.dummyConnection
+        };
 
-        console.log("Received data from eru server:", receivedData);
         if (vehicleKey == 'eru') {
-            batteryPct.value = receivedData.value.batteryLife;
-            testCoordinate.value.latitude = receivedData.value.currentPosition.latitude;
-            testCoordinate.value.longitude = receivedData.value.currentPosition.longitude;
-            dummyConnection.value = receivedData.value.dummyConnection;
+            batteryPct_ERU.value = receivedData.batteryLife;
+            testCoordinate_ERU.value.latitude = receivedData.currentPosition.latitude;
+            testCoordinate_ERU.value.longitude = receivedData.currentPosition.longitude;
+            connection_ERU.value = receivedData.dummyConnection;
         } else if (vehicleKey == 'mea') {
-            batteryPct2.value = receivedData.value.batteryLife;
-            testCoordinate2.value.latitude = receivedData.value.currentPosition.latitude;
-            testCoordinate2.value.longitude = receivedData.value.currentPosition.longitude;
-            dummyConnection2.value = receivedData.value.dummyConnection;
+            batteryPct_MEA.value = receivedData.batteryLife;
+            testCoordinate_MEA.value.latitude = receivedData.currentPosition.latitude;
+            testCoordinate_MEA.value.longitude = receivedData.currentPosition.longitude;
+            connection_MEA.value = receivedData.dummyConnection;
         } else if (vehicleKey == 'fra') {
-            batteryPct3.value = receivedData.value.batteryLife;
-            testCoordinate3.value.latitude = receivedData.value.currentPosition.latitude;
-            testCoordinate3.value.longitude = receivedData.value.currentPosition.longitude;
-            dummyConnection3.value = receivedData.value.dummyConnection;
+            batteryPct_FRA.value = receivedData.batteryLife;
+            testCoordinate_FRA.value.latitude = receivedData.currentPosition.latitude;
+            testCoordinate_FRA.value.longitude = receivedData.currentPosition.longitude;
+            connection_FRA.value = receivedData.dummyConnection;
         } else if (vehicleKey == 'mra') {
-            batteryPct4.value = receivedData.value.batteryLife;
-            testCoordinate4.value.latitude = receivedData.value.currentPosition.latitude;
-            testCoordinate4.value.longitude = receivedData.value.currentPosition.longitude;
-            dummyConnection4.value = receivedData.value.dummyConnection;
-        }
-        });
-    }
-
-
-    return "hi";
+            batteryPct_MRA.value = receivedData.batteryLife;
+            testCoordinate_MRA.value.latitude = receivedData.currentPosition.latitude;
+            testCoordinate_MRA.value.longitude = receivedData.currentPosition.longitude;
+            connection_MRA.value = receivedData.dummyConnection;
+        }});
+    } // end for
 }
 
+let wsConnections: { [key: string]: WebSocket } = {};
 // create websocket connection once Static Screen finishes initial rendering
 onMounted(() => {
-    getWebsocketConnection();
-    // let receivedData = getWebsocketConnection();
-    //     batteryPct.value = receivedData.value.batteryLife;
-    //     testCoordinate.value.latitude = receivedData.value.currentPosition.latitude;
-    //     testCoordinate.value.longitude = receivedData.value.currentPosition.longitude;
-    //     dummyConnection.value = receivedData.value.dummyConnection;
-
-    let client = new WebSocket('ws://localhost:5135/ws/eru');
-    console.log("Connected to eru server");
-
-    client.addEventListener("message", (event) => {
-        const data = JSON.parse(event.data);
-        receivedData.value = data; 
-
-        console.log("Received data from eru server:", receivedData);
-        batteryPct.value = receivedData.value.batteryLife;
-        testCoordinate.value.latitude = receivedData.value.currentPosition.latitude;
-        testCoordinate.value.longitude = receivedData.value.currentPosition.longitude;
-        dummyConnection.value = receivedData.value.dummyConnection;
-    });
-
-    // let client3 = new WebSocket('ws://localhost:5136/ws/mea');
-    // console.log("Connected to mea server");
-
-    // client3.addEventListener("message", (event) => {
-    //     const data = JSON.parse(event.data);
-    //     receivedData3.value = data; 
-
-    //     console.log("Received data from mea server:", receivedData3);
-    //     batteryPct3.value = receivedData3.value.batteryLife;
-    //     testCoordinate3.value.latitude = receivedData3.value.currentPosition.latitude;
-    //     testCoordinate3.value.longitude = receivedData3.value.currentPosition.longitude;
-    //     dummyConnection3.value = receivedData3.value.dummyConnection;
-    // });
-
-    // let client2 = new WebSocket('ws://localhost:5137/ws/fra');
-    // console.log("Connected to fra server");
-
-    // client2.addEventListener("message", (event) => {
-    //     const data = JSON.parse(event.data);
-    //     receivedData2.value = data; 
-
-    //     console.log("Received data from fra server:", receivedData2);
-    //     batteryPct2.value = receivedData2.value.batteryLife;
-    //     testCoordinate2.value.latitude = receivedData2.value.currentPosition.latitude;
-    //     testCoordinate2.value.longitude = receivedData2.value.currentPosition.longitude;
-    //     dummyConnection2.value = receivedData2.value.dummyConnection;
-    // });
-
-
-    // let client4 = new WebSocket('ws://localhost:5138/ws/mra');
-    // console.log("Connected to mra server");
-
-    // client4.addEventListener("message", (event) => {
-    //     const data = JSON.parse(event.data);
-    //     receivedData4.value = data; 
-
-    //     console.log("Received data from mra server:", receivedData4);
-    //     batteryPct4.value = receivedData4.value.batteryLife;
-    //     testCoordinate4.value.latitude = receivedData4.value.currentPosition.latitude;
-    //     testCoordinate4.value.longitude = receivedData4.value.currentPosition.longitude;
-    //     dummyConnection4.value = receivedData4.value.dummyConnection;
-    // });
+    wsConnections = getAllConnections();
+    // below for loop just for testing
+    for (let key in wsConnections) {
+        console.log("FROM StaticScreen, got ws connection for " + key);
+        console.log(typeof wsConnections[key]);
+    };
+    
+    addListeners();
 });
-
-// --- testing with dummy reactive data --- //
-let testCoordinateObject1 = {
-        longitude: -177.9325790,
-        latitude: 33.9325790
-    }
-let testCoordinateObject2 = {
-    longitude: 40.748440,
-    latitude: -73.984559
-}
 </script>
 
 <template>
@@ -170,10 +83,10 @@ let testCoordinateObject2 = {
 
     <div class="four-status-rightside">
         <!-- For final product, pass in a Vehicle Object instead that contains all of the information for the VehicleStatusComponent to display-->
-        <Status :batteryPct=batteryPct :latency=dummyConnection :coordinates=testCoordinate :vehicleName="'ERU'" :vehicleStatus="'In Use'"/>
-        <Status :batteryPct=batteryPct2 :latency=dummyConnection2 :coordinates=testCoordinate2 :vehicleName="'MEA'" :vehicleStatus="'Standby'"/>
-        <Status :batteryPct=batteryPct3 :latency=dummyConnection3 :coordinates="testCoordinate3" :vehicleName="'MRA'" :vehicleStatus="'Offline'"/>
-        <Status :batteryPct=batteryPct4 :latency=dummyConnection4 :coordinates="testCoordinate4" :vehicleName="'FRA'" :vehicleStatus="'Offline'"/>
+        <Status :batteryPct=batteryPct_ERU :latency=connection_ERU :coordinates=testCoordinate_ERU :vehicleName="'ERU'" :vehicleStatus="'In Use'"/>
+        <Status :batteryPct=batteryPct_MEA :latency=connection_MEA :coordinates=testCoordinate_MEA :vehicleName="'MEA'" :vehicleStatus="'Standby'"/>
+        <Status :batteryPct=batteryPct_MRA :latency=connection_MRA :coordinates=testCoordinate_MRA :vehicleName="'MRA'" :vehicleStatus="'Offline'"/>
+        <Status :batteryPct=batteryPct_FRA :latency=connection_FRA :coordinates=testCoordinate_FRA :vehicleName="'FRA'" :vehicleStatus="'Offline'"/>
     </div>
   </div>
 
