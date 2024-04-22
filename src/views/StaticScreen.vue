@@ -18,7 +18,7 @@ const dummyConnection2 = ref(65);
 
 // create websocket connection once Static Screen finishes initial rendering
 onMounted(() => {
-    let client = new WebSocket('ws://localhost:5135/');
+    let client = new WebSocket('ws://localhost:5135/ws/eru');
     console.log("Connected to 5135 server");
 
     client.addEventListener("message", (event) => {
