@@ -44,7 +44,7 @@
       {
         "label": "StaticScreen",
         "title": "Over View",
-        "url": "http://localhost:4000/#/1"
+        "url": "http://localhost:4000/#/StaticScreen"
       }
     ]
   }
