@@ -50,43 +50,77 @@ export default {
       v-model:zoom="zoom"
       :use-global-leaflet="false"
       :center="mapOrigin"
-      @click="handleMapClick"
+      @click="addPoint"
     >
+      <div class="button-container">
+        <button class="send-button" @click="sendPolygonPoints">Send</button>
+        <button class="clear-button" @click="clearPoints">Clear</button>
+      </div>
       <l-tile-layer
         :url="localTileURL"
         :minZoom="14"
         :maxZoom="16"
         layer-type="base"
         name="CustomTiles"
+        
       ></l-tile-layer>
+      <l-polygon
+        v-if="polygonPoints.length > 0"
+        :lat-lngs="polygonPoints"
+        :options="{ fillColor: 'blue', fillOpacity: 0.4 }"
+        :key="polygonPoints.length"
+      ></l-polygon>
     </l-map>
   </div>
 </template>
 
 <script lang="ts">
 import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer } from "@vue-leaflet/vue-leaflet";
-import { LeafletMouseEvent } from "leaflet";
+import { LMap, LTileLayer, LPolygon  } from "@vue-leaflet/vue-leaflet";
+import { LeafletMouseEvent, LatLngExpression  } from "leaflet";
 
 
 export default {
   components: {
     LMap,
     LTileLayer,
+    LPolygon,
   },
   data() {
     return {
-      mapOrigin: [34.058, -117.819],
+      mapOrigin: [34.058, -117.819], //area of interest origin
       zoom: 16,
-      localTileURL: "http://localhost:8001/{z}/{x}/{y}.png", // Update to your local server URL
+      localTileURL: "http://localhost:8001/{z}/{x}/{y}.png", // Update to local server URL
+      polygonPoints: [] as LatLngExpression[],
     };
   },
   methods: {
-    handleMapClick(event: LeafletMouseEvent) {
+    addPoint(event: LeafletMouseEvent) {
       const lat = event.latlng.lat;
       const lng = event.latlng.lng;
       console.log("Clicked coordinates:", lat, lng);
-      // You can now use the lat and lng values as needed
+      const latLng: LatLngExpression = [event.latlng.lat, event.latlng.lng];
+      this.polygonPoints.push(latLng);
+      console.log("polygonPoints:", this.polygonPoints);
+    },
+    clearPoints(event: LeafletMouseEvent) {
+      event.stopPropagation(); // Stop event propagation
+      this.polygonPoints = []
+      console.log("polygonPoints:", this.polygonPoints);
+    },
+    sendPolygonPoints(event: LeafletMouseEvent) {
+      event.stopPropagation(); // Stop event propagation
+      // Send a POST request to the backend API
+      
+      // axios.post('backend-api-url', data)
+      // .then(response => {
+      //   console.log('Polygon points sent successfully:', response.data);
+      // })
+      // .catch(error => {
+      //   console.error('Error sending polygon points:', error);
+      // });
+      console.log("polygonPoints sent:", this.polygonPoints);
+    
     },
   },
 };
@@ -96,4 +130,31 @@ export default {
 .map {
   height: 100%;
 }
+.clear-button,
+.send-button {
+  padding: 12px 24px;
+  font-size: 16px; 
+  border: none;
+  border-radius: 8px;
+  background-color: #496ecc; 
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  margin: 10px; 
+}
+.clear-button:hover,
+.send-button:hover {
+  background-color: #3d569c;
+}
+.button-container {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  display: flex;
+  z-index: 999;
+}
+
 </style>
