@@ -2,75 +2,62 @@
 import Status from '../components/VehicleStatusComponent.vue';
 import { onMounted, onBeforeUnmount, ref, reactive } from 'vue';
 import Map from '../components/Map.vue';
-import { initializeWSConnections, getAllConnections, closeConnections } from "../webSocket";
+import { getAllConnections, closeConnections } from "../webSocket";
 
-// initialize reactive variables for each vehicle's telemetry data
-const ERU_data = reactive({batteryPct: 0, connection: 0, coordinates: {longitude: 39.323719, latitude: -76.591978}, status: 'Standby'});
-const MEA_data = reactive({batteryPct: .78, connection: 22, coordinates: {longitude: 57.848923, latitude: -118.377468}, status: 'Standby'});
-const MRA_data = reactive({batteryPct: .2, connection: 65, coordinates: {longitude: 153.59374, latitude: -67.384919}, status: 'Standby'});
-const FRA_data = reactive({batteryPct: .4, connection: 98, coordinates: {longitude: 34.060425, latitude: -117.816546}, status: 'Standby'});
+// initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
+const ERU_data = reactive({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const MEA_data = reactive({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const MRA_data = reactive({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const FRA_data = reactive({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
 
-// add event listeners for each vehicle WS connection that updates the reactive variables whenever new data is received
+let wsConnections: { [key: string]: WebSocket } = {};
+// this function runs once (in mounted) and adds event listeners for each vehicle WS connection, so that the reactive variables update whenever new data is received
 function addListeners() {
-    for (const [vehicleKey, webSocketConnection] of Object.entries(wsConnections)) {
+    wsConnections = getAllConnections();        // gets all 4 Websocket connections that were initialized in App.vue (when Vue project first ran)
+
+    for (const [vehicleKey, webSocketConnection] of Object.entries(wsConnections)) {        // loops through each WS connection and adds an event listener to it
         webSocketConnection.addEventListener("message", (event) => {
-        const data = JSON.parse(event.data);
+        const receivedData = JSON.parse(event.data);
+        // const data = JSON.parse(event.data);
         // const receivedData = ref<any>(null);
-        // receivedData.value = data; 
-        const receivedData = {
-            batteryLife: parseFloat(data.batteryLife),
-            currentPosition: {
-                latitude: parseFloat(data.currentPosition.latitude),
-                longitude: parseFloat(data.currentPosition.longitude)
-            },
-            dummyConnection: data.dummyConnection,
-            status: data.vehicleStatus
-        };
 
         switch (vehicleKey) {
             case 'eru':
-                ERU_data.batteryPct = receivedData.batteryLife;
-                ERU_data.coordinates.latitude = receivedData.currentPosition.latitude;
-                ERU_data.coordinates.longitude = receivedData.currentPosition.longitude;
+                ERU_data.status = receivedData.vehicleStatus;   
+                ERU_data.batteryPct = parseFloat(receivedData.batteryLife);
+                ERU_data.coordinates.latitude = parseFloat(receivedData.currentPosition.latitude);
+                ERU_data.coordinates.longitude = parseFloat(receivedData.currentPosition.longitude);
                 ERU_data.connection = receivedData.dummyConnection;   
-                ERU_data.status = receivedData.status;   
+                break;
             case 'mea':
-                MEA_data.batteryPct = receivedData.batteryLife;
-                MEA_data.coordinates.latitude = receivedData.currentPosition.latitude;
-                MEA_data.coordinates.longitude = receivedData.currentPosition.longitude;
+                MEA_data.status = receivedData.vehicleStatus;   
+                MEA_data.batteryPct = parseFloat(receivedData.batteryLife);
+                MEA_data.coordinates.latitude = parseFloat(receivedData.currentPosition.latitude);
+                MEA_data.coordinates.longitude = parseFloat(receivedData.currentPosition.longitude);
                 MEA_data.connection = receivedData.dummyConnection; 
-                MEA_data.status = receivedData.status;     
-            case 'fra':
-                FRA_data.batteryPct = receivedData.batteryLife;
-                FRA_data.coordinates.latitude = receivedData.currentPosition.latitude;
-                FRA_data.coordinates.longitude = receivedData.currentPosition.longitude;
-                FRA_data.connection = receivedData.dummyConnection;
-                FRA_data.status = receivedData.status;   
+                break;
             case 'mra':
-                MRA_data.batteryPct = receivedData.batteryLife;
-                MRA_data.coordinates.latitude = receivedData.currentPosition.latitude;
-                MRA_data.coordinates.longitude = receivedData.currentPosition.longitude;
+                MRA_data.status = receivedData.vehicleStatus;   
+                MRA_data.batteryPct = parseFloat(receivedData.batteryLife);
+                MRA_data.coordinates.latitude = parseFloat(receivedData.currentPosition.latitude);
+                MRA_data.coordinates.longitude = parseFloat(receivedData.currentPosition.longitude);
                 MRA_data.connection = receivedData.dummyConnection;
-                MRA_data.status = receivedData.status;   
+                break;  
+            case 'fra':
+                FRA_data.status = receivedData.vehicleStatus;  
+                FRA_data.batteryPct = parseFloat(receivedData.batteryLife);
+                FRA_data.coordinates.latitude = parseFloat(receivedData.currentPosition.latitude);
+                FRA_data.coordinates.longitude = parseFloat(receivedData.currentPosition.longitude);
+                FRA_data.connection = receivedData.dummyConnection;
+                break;
             }
         });
-    } // end for
-}
+    } // end for loop
+} // end addListeners
 
-let wsConnections: { [key: string]: WebSocket } = {};
-// create websocket connection once Static Screen finishes initial rendering
+// gets all 4 websocket connections and adds event listeners to each of them once Static Screen finishes initial rendering
 onMounted(() => {
-    wsConnections = getAllConnections();
-    // below for loop just for testing. check console for outputs
-    // for (let key in wsConnections) {
-    //     console.log("FROM StaticScreen, got ws connection for " + key);
-    // };
     addListeners();
-});
-
-// close connections on component unmount
-onBeforeUnmount(() => {
-    closeConnections();
 });
 </script>
 

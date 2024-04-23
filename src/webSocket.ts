@@ -1,19 +1,17 @@
-const connections = [
-    'ws://localhost:5135/ws/eru',
-    'ws://localhost:5136/ws/mea',
-    'ws://localhost:5137/ws/fra',
-    'ws://localhost:5138/ws/mra',
-]
-
+// dictionary where vehicle name is key and websocket URLs is value | put websocket URLs here
+const connections = {
+    'eru': 'ws://localhost:5135/ws/eru',
+    'mea': 'ws://localhost:5136/ws/mea',
+    'fra': 'ws://localhost:5137/ws/fra',
+    'mra': 'ws://localhost:5138/ws/mra',
+};
 let wsConnections: { [key: string]: WebSocket } = {};       // dictionary where vehicle name is the key (eru, fra, etc), and its websocket connection is the value
-let vehicleKeys = ['eru', 'mea', 'fra', 'mra']
 
 // initializes 4 websocket connections for each endpoint (each of the 4 vehicles) and store them in the wsConnections dictionary || This is called in main.ts
 export function initializeWSConnections() {
-    for (let i = 0; i < connections.length; i++) {
-        let newWebSocket = new WebSocket(connections[i]);
-        let vehicleName = vehicleKeys[i];
-        wsConnections[vehicleName] = newWebSocket;
+    for (const [vehicleKey, connectionURL] of Object.entries(connections)) { 
+        let newWebSocket = new WebSocket(connectionURL);
+        wsConnections[vehicleKey] = newWebSocket;
     }
 }
 
