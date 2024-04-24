@@ -48,7 +48,7 @@ ERU.on('connection', (ws) => {
             longitude: 8.8,
         },
         dummyConnection: 0,
-        vehicleStatus: 0,
+        vehicleStatus: 'Standby',
     };
 
     // Send the initial sample data to the client
@@ -113,7 +113,7 @@ MEA.on('connection', (ws) => {
             longitude: 8.8,
         },
         dummyConnection: 0,
-        vehicleStatus: 0,
+        vehicleStatus: 'Standby',
     };
 
     // Send the initial sample data to the client
@@ -178,7 +178,7 @@ FRA.on('connection', (ws) => {
             longitude: 8.8,
         },
         dummyConnection: 0,
-        vehicleStatus: 0,
+        vehicleStatus: 'Standby',
     };
 
     // Send the initial sample data to the client
@@ -243,7 +243,7 @@ MRA.on('connection', (ws) => {
             longitude: 8.8,
         },
         dummyConnection: 0,
-        vehicleStatus: 0,
+        vehicleStatus: 'Standby',
     };
 
     // Send the initial sample data to the client
