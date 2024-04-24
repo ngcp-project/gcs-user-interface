@@ -3,7 +3,8 @@ import socketserver
 import os
 
 # Set the directory containing your tile files
-DIRECTORY = 'C:/Users/steve/Desktop/NGCP/Mobile Atlas Creator 2.3.3/atlases/CPP_2024-04-22_005248/CPP'
+DIRECTORY = 'public\Atlases\SLO'
+# C:/Users/steve/Desktop/NGCP/Mobile Atlas Creator 2.3.3/atlases/SLO_Flyers_2024-04-24_015640/SLO
 
 # Define the handler to serve files
 class TileServer(http.server.SimpleHTTPRequestHandler):

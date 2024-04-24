@@ -88,7 +88,7 @@ export default {
   },
   data() {
     return {
-      mapOrigin: [34.058, -117.819], //area of interest origin
+      mapOrigin: [35.33004319829399, -120.75064544958856], //area of interest origin, CPP: 34.058, -117.819
       zoom: 16,
       localTileURL: "http://localhost:8001/{z}/{x}/{y}.png", // Update to local server URL
       polygonPoints: [] as LatLngExpression[],
