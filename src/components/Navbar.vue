@@ -35,7 +35,7 @@ export default {
             <div>
                 <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0);">Mission 1</span>
                 <button style="border: 2px solid rgb(0, 0, 0); margin-left: 1.2rem; color: rgb(0, 0, 0); padding: 3px 6px; font-size: 0.8rem;" type="button" @click="">
-                  <router-link to="/1" class="router-link">
+                  <router-link to="/" class="router-link">
                     <span style="font-weight: bold; font-size: 0.8rem;">OPEN</span>
                   </router-link>
                 </button>
@@ -48,7 +48,7 @@ export default {
             <div>
                 <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0);">Mission 2</span>
                 <button style="border: 2px solid rgb(0, 0, 0); margin-left: 1.2rem; color: rgb(0, 0, 0); padding: 3px 6px; font-size: 0.8rem;" type="button" @click="">
-                  <router-link to="/2" class="router-link">
+                  <router-link to="/" class="router-link">
                     <span style="font-weight: bold; font-size: 0.8rem;">OPEN</span>
                   </router-link>
                 </button>
@@ -77,10 +77,9 @@ export default {
       </div>
       <div v-if="isNavbarOpen" style="margin-top: 10px;">
         <ul style="list-style-type: none; padding-left: 0;">
-          <!-- Insert your menu items here -->
-          <li><a href="#" style="text-decoration: none;">Home</a></li>
-          <li><a href="#" style="text-decoration: none;" @click="openNewWindow">Link</a></li>
-          <li><router-link to="/test" style="text-decoration: none;">Disabled</router-link></li>
+          <li><router-link to="/" style="text-decoration: none;">Home</router-link></li>
+          <li><router-link to="/StaticScreen" style="text-decoration: none;">Map Screen</router-link></li>
+          <li><router-link to="/test" style="text-decoration: none;">Test</router-link></li>
         </ul>
       </div>
     </nav>

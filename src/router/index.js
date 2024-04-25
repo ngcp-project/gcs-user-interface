@@ -8,14 +8,14 @@ import mockWS from "../views/mockWS.vue";
 
 const routes = [
   { path: '/', component: HomeScreen },
-  { path: '/1', component: StaticScreen },
+  { path: '/StaticScreen', component: StaticScreen },
   { path: '/2', component: Cam2Focus },
   { path: '/CamFocus/:id', component: CamFocus },
   { path: '/test', component: mockWS },
 ]
 
 const router = createRouter({
-  // 4. Provide the history implementation to use. We
+  // Provide the history implementation to use. We
   // are using the hash history for simplicity here.
   history: createWebHashHistory(),
   routes, // short for `routes: routes`
