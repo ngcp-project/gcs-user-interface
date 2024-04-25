@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
 
 const ports = [5135, 5136, 5137, 5138];
+const vehicleStatuses = ['In Use', 'Standby', 'Emergency'];
 
 // Define the server's local IP address
 const serverIpAddress = 'localhost';
@@ -40,14 +41,14 @@ ERU.on('connection', (ws) => {
         yaw: 3.3,
         roll: 4.4,
         altitude: 5.5,
-        batteryLife: 6.6,
+        batteryLife: .1,
         lastUpdated: '00:00:00',
         currentPosition: {
             latitude: 7.7,
             longitude: 8.8,
         },
         dummyConnection: 0,
-        vehicleStatus: 0,
+        vehicleStatus: 'Standby',
     };
 
     // Send the initial sample data to the client
@@ -56,11 +57,12 @@ ERU.on('connection', (ws) => {
     setInterval(() => {
         vehicleData.altitude = Math.random() * 10000; 
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
-        vehicleData.batteryLife = Math.round(Math.random() * (100)) / 100;
+        vehicleData.batteryLife = Math.random().toFixed(2);
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
+        vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
 
         ws.send(JSON.stringify(vehicleData));
     }, 1000);
@@ -104,14 +106,14 @@ MEA.on('connection', (ws) => {
         yaw: 3.3,
         roll: 4.4,
         altitude: 5.5,
-        batteryLife: 6.6,
+        batteryLife: .2,
         lastUpdated: '00:00:00',
         currentPosition: {
             latitude: 7.7,
             longitude: 8.8,
         },
         dummyConnection: 0,
-        vehicleStatus: 0,
+        vehicleStatus: 'Standby',
     };
 
     // Send the initial sample data to the client
@@ -120,11 +122,12 @@ MEA.on('connection', (ws) => {
     setInterval(() => {
         vehicleData.altitude = Math.random() * 10000; 
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
-        vehicleData.batteryLife = Math.round(Math.random() * (100)) / 100;
+        vehicleData.batteryLife = Math.random().toFixed(2);
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
+        vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
 
         ws.send(JSON.stringify(vehicleData));
     }, 1000);
@@ -168,14 +171,14 @@ FRA.on('connection', (ws) => {
         yaw: 3.3,
         roll: 4.4,
         altitude: 5.5,
-        batteryLife: 6.6,
+        batteryLife: .8,
         lastUpdated: '00:00:00',
         currentPosition: {
             latitude: 7.7,
             longitude: 8.8,
         },
         dummyConnection: 0,
-        vehicleStatus: 0,
+        vehicleStatus: 'Standby',
     };
 
     // Send the initial sample data to the client
@@ -184,11 +187,12 @@ FRA.on('connection', (ws) => {
     setInterval(() => {
         vehicleData.altitude = Math.random() * 10000; 
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
-        vehicleData.batteryLife = Math.round(Math.random() * (100)) / 100;
+        vehicleData.batteryLife = Math.random().toFixed(2);
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
+        vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
 
         ws.send(JSON.stringify(vehicleData));
     }, 1000);
@@ -222,7 +226,7 @@ FRA.on('connection', (ws) => {
 
 // Event listener for new client connections
 MRA.on('connection', (ws) => {
-    console.log('New client connected');
+    console.log('New MRA client connected');
 
     // Sample vehicle data object
     let vehicleData = {
@@ -232,14 +236,14 @@ MRA.on('connection', (ws) => {
         yaw: 3.3,
         roll: 4.4,
         altitude: 5.5,
-        batteryLife: 6.6,
+        batteryLife: .6,
         lastUpdated: '00:00:00',
         currentPosition: {
             latitude: 7.7,
             longitude: 8.8,
         },
         dummyConnection: 0,
-        vehicleStatus: 0,
+        vehicleStatus: 'Standby',
     };
 
     // Send the initial sample data to the client
@@ -248,11 +252,12 @@ MRA.on('connection', (ws) => {
     setInterval(() => {
         vehicleData.altitude = Math.random() * 10000; 
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
-        vehicleData.batteryLife = Math.round(Math.random() * (100)) / 100;
+        vehicleData.batteryLife = Math.random().toFixed(2);
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)).toFixed(6));
         vehicleData.lastUpdated = new Date().toLocaleTimeString();
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
+        vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
 
         ws.send(JSON.stringify(vehicleData));
     }, 1000);

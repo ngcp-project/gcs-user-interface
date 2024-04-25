@@ -33,7 +33,7 @@
             <VehicleTitle :vehicleName="vehicleName" :vehicleStatus="vehicleStatus"/>
             <div class="battery-status-container">
                 <Battery :percentage = "batteryPct" :charging="false" class="adjust-battery"/>
-                <span style="margin-top: 4%; font-size: 1.4em;">{{ (batteryPct * 100) }}%</span>        <!-- Multiply batteryPct by 100 because it is in between 0 and 1 -->
+                <span style="margin-top: 4%; font-size: 1.4em;">{{ Math.round(batteryPct * 100) }}%</span>        <!-- Multiply batteryPct by 100 because it is in between 0 and 1 -->
             </div>
             <div class="connection-status-container">
                 <Connection :latency="latency" class="adjust-connection"/> 

@@ -1,77 +1,58 @@
 <script setup lang="ts">
-import Camera from "../components/Camera.vue";
 import Status from '../components/VehicleStatusComponent.vue';
-import NavBar from '../components/Navbar.vue';
-import { onMounted, ref } from 'vue';
+import { onMounted, onBeforeUnmount, ref, reactive, Ref } from 'vue';
 import Map from '../components/Map.vue';
+import { getAllConnections, closeConnections } from "../Functions/webSocket";
 
-// for ERU widget
-const receivedData = ref<any>(null);
-const batteryPct = ref(0);
-const testCoordinate = ref({longitude: 0, latitude: 0})
-const dummyConnection = ref(0);
-// for MEA widget
-const receivedData2 = ref<any>(null);
-const batteryPct2 = ref(78);
-const testCoordinate2 = ref({longitude: 57.848923, latitude: -67.384919})
-const dummyConnection2 = ref(65);
+// initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
+const ERU_data = ref({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const MEA_data = ref({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const MRA_data = ref({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const FRA_data = ref({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
 
-// create websocket connection once Static Screen finishes initial rendering
+// maps vehicle name to corresponding reactive variable so that addListeners can more easily set EventListeners to update variables
+const vehicleMap: { [key: string]: Ref<any> } = {
+    'eru': ERU_data,
+    'mea': MEA_data,
+    'mra': MRA_data,
+    'fra': FRA_data
+};
+
+let wsConnections: { [key: string]: WebSocket } = {};
+// this function runs once (in mounted) and adds event listeners for each vehicle WS connection, so that the reactive variables update whenever new data is received
+function addListeners() {
+    wsConnections = getAllConnections();        // gets all 4 Websocket connections that were initialized in App.vue (when Vue project first ran)
+
+    for (const [vehicleKey, webSocketConnection] of Object.entries(wsConnections)) {        // loops through each WS connection and adds an event listener to it
+        webSocketConnection.addEventListener("message", (event) => {
+        const receivedData = JSON.parse(event.data);
+ 
+        vehicleMap[vehicleKey].value.status = receivedData.vehicleStatus;   
+        vehicleMap[vehicleKey].value.batteryPct = parseFloat(receivedData.batteryLife);
+        vehicleMap[vehicleKey].value.coordinates.latitude = parseFloat(receivedData.currentPosition.latitude);
+        vehicleMap[vehicleKey].value.coordinates.longitude = parseFloat(receivedData.currentPosition.longitude);
+        vehicleMap[vehicleKey].value.connection = parseInt(receivedData.dummyConnection);   
+        });
+    } // end for loop
+} // end addListeners
+
+// gets all 4 websocket connections and adds event listeners to each of them once Static Screen finishes initial rendering
 onMounted(() => {
-    let client = new WebSocket('ws://localhost:5135/ws/eru');
-    console.log("Connected to 5135 server");
-
-    client.addEventListener("message", (event) => {
-        const data = JSON.parse(event.data);
-        receivedData.value = data; 
-
-        console.log("Received data from mockWebsock:", receivedData);
-        batteryPct.value = receivedData.value.batteryLife;
-        testCoordinate.value.latitude = receivedData.value.currentPosition.latitude;
-        testCoordinate.value.longitude = receivedData.value.currentPosition.longitude;
-        dummyConnection.value = receivedData.value.dummyConnection;
-    });
-
-    // -- uncomment below to use test-websocket-server.cjs for data for single vehicle widget in Static Screen -- //
-    // let client2 = new WebSocket('ws://localhost:3000/');
-    // console.log("Connected to port 3000 server")
-
-    // client2.addEventListener("message", (event) => {
-    //     const data = JSON.parse(event.data);
-    //     receivedData2.value = data;
-
-    //     console.log("Received data from test-websocket-server:", receivedData2);
-    //     batteryPct2.value = receivedData2.value.battery;
-    //     testCoordinate2.value.latitude = receivedData2.value.currentPosition.latitude;
-    //     testCoordinate2.value.longitude = receivedData2.value.currentPosition.longitude;
-    //     dummyConnection2.value = receivedData2.value.dummy_connection;
-    // });
+    addListeners();
 });
-
-// --- testing with dummy reactive data --- //
-let testCoordinateObject1 = {
-        longitude: -177.9325790,
-        latitude: 33.9325790
-    }
-let testCoordinateObject2 = {
-    longitude: 40.748440,
-    latitude: -73.984559
-}
 </script>
 
 <template>
   <div class="screen_div">
-    <!-- Map component will be placed below -->
     <div class="map_div">
         <Map></Map>
     </div>
 
-    <div class="four-status-rightside">
-        <!-- For final product, pass in a Vehicle Object instead that contains all of the information for the VehicleStatusComponent to display-->
-        <Status :batteryPct=batteryPct :latency=dummyConnection :coordinates=testCoordinate :vehicleName="'ERU'" :vehicleStatus="'In Use'"/>
-        <Status :batteryPct=.40 :latency=36 :coordinates=testCoordinate2 :vehicleName="'MEA'" :vehicleStatus="'Standby'"/>
-        <Status :batteryPct=0 :latency=100 :coordinates="testCoordinateObject2" :vehicleName="'MRA'" :vehicleStatus="'Offline'"/>
-        <Status :batteryPct=.10 :latency=0 :coordinates="testCoordinateObject1" :vehicleName="'FRA'" :vehicleStatus="'Offline'"/>
+    <div class="four-status-rightside">     
+        <Status :batteryPct=ERU_data.batteryPct :latency=ERU_data.connection :coordinates=ERU_data.coordinates :vehicleName="'ERU'" :vehicleStatus="ERU_data.status"/>
+        <Status :batteryPct=MEA_data.batteryPct :latency=MEA_data.connection :coordinates=MEA_data.coordinates :vehicleName="'MEA'" :vehicleStatus="MEA_data.status"/>
+        <Status :batteryPct=MRA_data.batteryPct :latency=MRA_data.connection :coordinates=MRA_data.coordinates :vehicleName="'MRA'" :vehicleStatus="MRA_data.status"/>
+        <Status :batteryPct=FRA_data.batteryPct :latency=FRA_data.connection :coordinates=FRA_data.coordinates :vehicleName="'FRA'" :vehicleStatus="FRA_data.status"/>
     </div>
   </div>
 
