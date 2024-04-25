@@ -1,7 +1,7 @@
 <template>
     <div class="coordinate-container">
-        <div class="coordinate-div">Longitude: {{ coordinates.longitude }}</div>
-        <div class="coordinate-div">Latitude: {{ coordinates.latitude }}</div>
+        <div class="coordinate-div">Longitude: {{ coordinates.longitude.toFixed(6) }}</div>
+        <div class="coordinate-div">Latitude: {{ coordinates.latitude.toFixed(6) }}</div>
     </div>
 </template>
     

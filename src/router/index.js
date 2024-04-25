@@ -10,7 +10,8 @@ const routes = [
   { path: '/', component: HomeScreen },
   { path: '/StaticScreen', component: StaticScreen },
   { path: '/2', component: Cam2Focus },
-  { path: '/CamFocus/:id', component: CamFocus },
+  // { path: '/CamFocus/:id', component: CamFocus },
+  { path: '/CamFocus/:id/:vehicleID', component: CamFocus },    // passing vehicle id (name) 
   { path: '/test', component: mockWS },
 ]
 
