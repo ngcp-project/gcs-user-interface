@@ -4,7 +4,7 @@ import IndicatorComponent from "../components/IndicatorComponent.vue";
 import Status from "../components/VehicleStatusComponent.vue";
 import { useRoute } from 'vue-router';
 import { onMounted, ref } from 'vue';
-import { getConnection } from "../webSocket";
+import { getConnection } from "../Functions/webSocket";
 
 
 const route = useRoute();

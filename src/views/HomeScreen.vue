@@ -4,7 +4,7 @@ import Battery from '../components/VehicleStatus/Battery.vue';
 import Connection from '../components/VehicleStatus/Connection.vue';
 import Camera from "../components/Camera.vue";
 import { useRouter } from 'vue-router';
-import { getAllConnections } from "../webSocket";
+import { getAllConnections } from "../Functions/webSocket";
 
 const router = useRouter();
 
