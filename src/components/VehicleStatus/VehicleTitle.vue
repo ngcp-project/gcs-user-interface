@@ -2,7 +2,7 @@
     <div class="vehicle-title-container">
         <div class="vehicle-name-div"> 
                 {{ vehicleName }} 
-               <img :src="getIconPath" class="vehicle-icon"></img> 
+               <img :src="getIconPath" class="vehicle-icon"/>
         </div>
         <div class="vehicle-status-div">Status: {{ vehicleStatus }}</div>
     </div>
