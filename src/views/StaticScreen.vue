@@ -2,7 +2,7 @@
 import Status from '../components/VehicleStatusComponent.vue';
 import { onMounted, onBeforeUnmount, ref, reactive, Ref } from 'vue';
 import Map from '../components/Map.vue';
-import { getAllConnections, closeConnections } from "../webSocket";
+import { getAllConnections, closeConnections } from "../Functions/webSocket";
 
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
 const ERU_data = ref({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
