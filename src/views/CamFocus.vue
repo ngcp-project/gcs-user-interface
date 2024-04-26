@@ -14,7 +14,8 @@ const vehicleID = String(route.params.vehicleID);
 // const ERU_data = ref({batteryPct: 0, connection: 0});
 const vehicleData = ref<any>(null);
 
-const wsConnection = getConnection(vehicleID);   
+// const wsConnection = getConnection(vehicleID);   
+const wsConnection = getConnection();   
 console.log("Got connection for " + vehicleID + " | " + typeof wsConnection);    
 wsConnection.addEventListener("message", (event) => {
   vehicleData.value = JSON.parse(event.data);

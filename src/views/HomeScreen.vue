@@ -4,7 +4,8 @@ import Battery from '../components/VehicleStatus/Battery.vue';
 import Connection from '../components/VehicleStatus/Connection.vue';
 import Camera from "../components/Camera.vue";
 import { useRouter } from 'vue-router';
-import { getAllConnections } from "../Functions/webSocket";
+// import { getAllConnections } from "../Functions/webSocket";
+import { getConnection } from "../Functions/webSocket";
 
 const router = useRouter();
 
@@ -28,18 +29,27 @@ const vehicleMap: { [key: string]: Ref<any> } = {
 };
 
 let wsConnections: { [key: string]: WebSocket } = {};
+let wsConnection: WebSocket;
 // this function runs once (in mounted) and adds event listeners for each vehicle WS connection, so that the reactive variables update whenever new data is received
 function addListeners() {
-    wsConnections = getAllConnections();        // gets all 4 Websocket connections that were initialized in App.vue (when Vue project first ran)
+      wsConnection = getConnection();
+      wsConnection.addEventListener("message", (event) => {
+      const receivedData = JSON.parse(event.data);
 
-    for (const [vehicleKey, webSocketConnection] of Object.entries(wsConnections)) {        // loops through each WS connection and adds an event listener to it
-        webSocketConnection.addEventListener("message", (event) => {
-        const receivedData = JSON.parse(event.data);
+      ERU_data.value.batteryPct = parseFloat(receivedData.batteryLife);
+      ERU_data.value.connection = parseInt(receivedData.dummyConnection);   
+      });
+
+    // wsConnections = getAllConnections();        // gets all 4 Websocket connections that were initialized in App.vue (when Vue project first ran)
+
+    // for (const [vehicleKey, webSocketConnection] of Object.entries(wsConnections)) {        // loops through each WS connection and adds an event listener to it
+    //     webSocketConnection.addEventListener("message", (event) => {
+    //     const receivedData = JSON.parse(event.data);
  
-        vehicleMap[vehicleKey].value.batteryPct = parseFloat(receivedData.batteryLife);
-        vehicleMap[vehicleKey].value.connection = parseInt(receivedData.dummyConnection);   
-        });
-    } // end for loop
+    //     vehicleMap[vehicleKey].value.batteryPct = parseFloat(receivedData.batteryLife);
+    //     vehicleMap[vehicleKey].value.connection = parseInt(receivedData.dummyConnection);   
+    //     });
+    // } // end for loop
 } // end addListeners
 
 // gets all 4 websocket connections and adds event listeners to each of them once Static Screen finishes initial rendering
@@ -57,19 +67,22 @@ onMounted(() => {
             <Connection :latency=ERU_data.connection class="connection_test"/>   
         </div>
 
-        <div class="hover" style="position: relative; display: flex;" @click="handleClick(1, 'mea')">
+        <!-- <div class="hover" style="position: relative; display: flex;" @click="handleClick(1, 'mea')"> -->
+        <div class="hover" style="position: relative; display: flex;" @click="handleClick(1, 'eru')">
             <Camera :cameraID="1"/>
             <Battery :percentage=MEA_data.batteryPct :charging="false" class="battery_test"/>
             <Connection :latency=MEA_data.connection class="connection_test"/>  
         </div>
 
-        <div class="hover" style="position: relative; display: flex;" @click="handleClick(1, 'mra')">
-            <Camera :cameraID="1"/>
+        <!-- <div class="hover" style="position: relative; display: flex;" @click="handleClick(1, 'mra')"> -->
+        <div class="hover" style="position: relative; display: flex;" @click="handleClick(1, 'eru')">
+          <Camera :cameraID="1"/>
             <Battery :percentage=MRA_data.batteryPct :charging="false" class="battery_test"/>
             <Connection :latency=MRA_data.connection class="connection_test"/>   
         </div>
 
-        <div class="hover" style="position: relative; display: flex;" @click="handleClick(1, 'fra')">
+        <!-- <div class="hover" style="position: relative; display: flex;" @click="handleClick(1, 'fra')"> -->
+        <div class="hover" style="position: relative; display: flex;" @click="handleClick(1, 'eru')">
             <Camera :cameraID="1"/>
             <Battery :percentage=FRA_data.batteryPct :charging="false" class="battery_test"/>
             <Connection :latency=FRA_data.connection class="connection_test"/>   

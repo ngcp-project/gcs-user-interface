@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import Navbar from "./components/Navbar.vue";
 import { RouterView } from "vue-router";
-import { initializeWSConnections } from "./Functions/webSocket";
+// import { initializeWSConnections } from "./Functions/webSocket";
+import { initializeWSConnection } from "./Functions/webSocket";
 
-initializeWSConnections();      // initialize 4 websocket connections for all 4 vehicles at entry point of project
+// initializeWSConnections();      // initialize 4 websocket connections for all 4 vehicles at entry point of project
+initializeWSConnection();      // initialize 4 websocket connections for all 4 vehicles at entry point of project
 console.log("Initialize 4 websocket connections from App.vue");
 </script>
 
