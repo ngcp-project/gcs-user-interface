@@ -55,7 +55,7 @@ ERU.on('connection', (ws) => {
     ws.send(JSON.stringify(vehicleData));
      // continuously send random battery values to client
     setInterval(() => {
-        vehicleData.speed = 69;
+        vehicleData.speed = Math.random() * 150;
         vehicleData.yaw = Math.random() * 30;
         vehicleData.altitude = 3423;
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
@@ -123,7 +123,7 @@ MEA.on('connection', (ws) => {
      // continuously send random battery values to client
     setInterval(() => {
         vehicleData.speed = Math.random() * 150; 
-        vehicleData.yaw = Math.random() * 30;
+        vehicleData.yaw = 22;
         vehicleData.altitude = Math.random() * 10000; 
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
         // vehicleData.batteryLife = Math.random().toFixed(2);

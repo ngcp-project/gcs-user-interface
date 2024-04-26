@@ -37,7 +37,7 @@ wsConnection.addEventListener("message", (event) => {
       <Status :batteryPct=parseFloat(vehicleData.batteryLife) :latency=parseFloat(vehicleData.dummyConnection) :coordinates=vehicleData.currentPosition :vehicleName="vehicleID.toUpperCase()" :vehicleStatus="vehicleData.vehicleStatus"/>
     </div>
 
-    <IndicatorComponent class="adjust-indicator"  :pitch=10 :roll=6 :altitude=parseInt(vehicleData.altitude) :airspeed=parseInt(vehicleData.speed) :yaw=parseInt(vehicleData.yaw)></IndicatorComponent>
+    <IndicatorComponent class="adjust-indicator" :vehicleName="vehicleID.toUpperCase()" :pitch=10 :roll=6 :altitude=parseInt(vehicleData.altitude) :airspeed=parseInt(vehicleData.speed) :yaw=parseInt(vehicleData.yaw)></IndicatorComponent>
   </div>
 </div>
 </template>
