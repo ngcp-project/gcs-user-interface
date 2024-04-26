@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 
-const ports = [5135, 5136, 5137, 5138];
+const ports = [6135, 6136, 6137, 6138];
 const vehicleStatuses = ['In Use', 'Standby', 'Emergency'];
 
 // Define the server's local IP address

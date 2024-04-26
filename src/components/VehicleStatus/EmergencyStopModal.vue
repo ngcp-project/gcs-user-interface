@@ -46,23 +46,22 @@ import axios, {AxiosResponse} from "axios";
               //         console.error('Error sending stop command:', error);
               //     });
               // this.close(); // Close the dialog or modal after sending the command
-               console.error(JSON.stringify({ key: this.vehicleName }));
-              fetch('http://localhost:5135/EmergencyStop', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({ key: this.vehicleName })
-              })
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error('Network response was not ok');
-                }
-                return response.json();
-              })
-              .catch(error => {
-                console.error('Error sending stop command:', error);
-              });
+               console.error(JSON.stringify({ Key: this.vehicleName }));
+               fetch('http://localhost:5135/EmergencyStop', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ Key: this.vehicleName })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => console.log(data))
+                .catch(error => console.error('Error sending stop command:', error));
           },
             close() {
                 this.$emit('close');
