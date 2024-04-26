@@ -26,6 +26,7 @@
 </template>
     
 <script lang="ts">
+import axios, {AxiosResponse} from "axios";
     export default {
         data() {
             return {};    
@@ -34,10 +35,35 @@
             vehicleName: { required: true, type: String},
         },
         methods: {
-            sendStopCommand() {
+          sendStopCommand() {
               console.log("Pressed yes to send stop command for " + this.vehicleName);
-              this.close();
-            },
+              //console.error({ key: this.vehicleName });
+              axios.post('http://localhost:5135/EmergencyStop', { key: this.vehicleName })
+                  .then((response: AxiosResponse<any>) => {
+                      console.log('Stop command sent successfully:', response.data);
+                  })
+                  .catch( (error: any) => {
+                      console.error('Error sending stop command:', error);
+                  });
+              this.close(); // Close the dialog or modal after sending the command
+              //  console.error(JSON.stringify({ key: this.vehicleName }));
+          //     fetch('http://localhost:5135/EmergencyStop', {
+          //         method: 'POST',
+          //         headers: {
+          //             'Content-Type': 'application/json'
+          //         },
+          //         body: JSON.stringify({ key: this.vehicleName })
+          //     })
+          //     .then(response => {
+          //       if (!response.ok) {
+          //         throw new Error('Network response was not ok');
+          //       }
+          //       return response.json();
+          //     })
+          //     .catch(error => {
+          //       console.error('Error sending stop command:', error);
+          //     });
+          },
             close() {
                 this.$emit('close');
             },

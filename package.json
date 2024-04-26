@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1.4.0",
+    "axios": "^1.6.8",
     "express": "^4.19.2",
     "vue": "^3.2.45",
     "vue-flight-indicators": "^0.1.1",
