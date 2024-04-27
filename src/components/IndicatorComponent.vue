@@ -6,6 +6,7 @@
 
     export default {
         props: {
+            vehicleName: { required: true, type: String },
             pitch: { required: true, type: Number},
             roll: { required: true, type: Number},
             altitude: {required: true, type: Number},
@@ -18,24 +19,33 @@
             Altitude,
             Heading
         },
+        computed: {
+            changeSpeedSize() {
+                if (this.vehicleName == 'ERU') {        // if this is ERU: make the airspeed component larger
+                    return 300
+                } else {
+                    return 200                          // else: make the airspeed component the same size as other components
+                }
+            },        
+        }
     };
 </script>
 
 <template>
   <div class="flight-indicators-container">
-    <div class="flight-indicator">
+    <div v-if="vehicleName != 'ERU'" class="flight-indicator">
         <Altitude class="pitch-roll-indicator" :pitch=pitch :roll=roll></Altitude>
     </div>
 
-    <div class="flight-indicator">
-        <Airspeed class="airspeed-indicator" :airspeed=airspeed></Airspeed>
+    <div class="flight-indicator" :style="[vehicleName == 'ERU' ? { width: '70%' } : { width: '45%'}]"> 
+        <Airspeed class="airspeed-indicator" :airspeed=airspeed :size="changeSpeedSize"></Airspeed>
     </div>
 
-    <div class="flight-indicator">
+    <div v-if="vehicleName != 'ERU'" class="flight-indicator">
         <Altimeter class="altitude-indicator" :altitude=altitude></Altimeter>
     </div>
 
-    <div class="flight-indicator">
+    <div v-if="vehicleName != 'ERU'" class="flight-indicator">
         <Heading class="altitude-indicator" :yaw=yaw></Heading>
     </div>
   </div>

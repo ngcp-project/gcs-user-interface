@@ -5,6 +5,7 @@ export  default {
 	name:  'airspeed',
     props: {
         airspeed: { required: true, type: Number},
+        size: { required: true, type: Number }
     },  
 	components: {
 		Airspeed
@@ -14,7 +15,7 @@ export  default {
 
 <template>
 	<div class="airspeed-div">
-		<Airspeed :size="200" :airspeed="airspeed"/>
+		<Airspeed :size="size" :airspeed="airspeed"/>
         <span style="font-size: 1.2em;"> Speed: {{ airspeed }} ft/s</span>
 	</div>
 </template>

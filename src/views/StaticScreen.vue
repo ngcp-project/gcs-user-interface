@@ -29,8 +29,8 @@ function addListeners() {
  
         vehicleMap[vehicleKey].value.status = receivedData.vehicleStatus;   
         vehicleMap[vehicleKey].value.batteryPct = parseFloat(receivedData.batteryLife);
-        vehicleMap[vehicleKey].value.coordinates.latitude = parseFloat(receivedData.currentPosition.latitude);
-        vehicleMap[vehicleKey].value.coordinates.longitude = parseFloat(receivedData.currentPosition.longitude);
+        vehicleMap[vehicleKey].value.coordinates.latitude = parseFloat(receivedData.currentCoordinate.latitude);
+        vehicleMap[vehicleKey].value.coordinates.longitude = parseFloat(receivedData.currentCoordinate.longitude);
         vehicleMap[vehicleKey].value.connection = parseInt(receivedData.dummyConnection);   
         });
     } // end for loop
