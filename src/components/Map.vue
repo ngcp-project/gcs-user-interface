@@ -80,12 +80,12 @@ export default {
         :options="{ fillColor: 'green', fillOpacity: 0.4 }"
         :key="zoneInPolygons.length"
       ></l-polygon>
-      <!-- <l-polygon
-        v-for="(polygon, index) in zoneInPolygons"
-        :key="index"
-        :lat-lngs="polygon.latLngs"
-        :options="polygon.options"
-      ></l-polygon> -->
+      <l-polygon
+        v-if="zoneOutPolygons.length > 0"
+        :lat-lngs="zoneOutPolygons"
+        :options="{ fillColor: 'red', fillOpacity: 0.4 }"
+        :key="zoneOutPolygons.length"
+      ></l-polygon>
     </l-map>
   </div>
 </template>
@@ -144,8 +144,25 @@ export default {
         console.error('Error sending zoneInPolygonPoints points:', error);
 
       }
-      console.log("zoneInPolygonPoints:", this.polygonPoints);
-      console.log("Cleared Selected zoneInPolygons:", this.zoneInPolygons);
+      try {
+        const response = await fetch('http://localhost:5135/zones/out', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        });
+        if (!response) {
+          throw new Error('Network response was not ok');
+        }
+        
+        const res = await response.json();
+        console.error('Cleared zoneOutPolygonPoints points:', res);
+      } catch (error) {
+        console.error('Error sending zoneOutPolygonPoints points:', error);
+
+      }
+      console.log("zoneOutnPolygonPoints:", this.polygonPoints);
+      console.log("Cleared Selected zoneOutPolygons:", this.zoneInPolygons);
     },
     async clearSelection(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
@@ -183,22 +200,22 @@ export default {
 
         const res = await response.json();
         console.log('zone In PolygonPoints sent successfully:', res);
-        const multiPolygon = [
-          [ // First polygon
-            [ // Outer ring of the first polygon
-              [35.33165465225685, -120.75643812675729], [35.32603702617105, -120.75843434541602], [35.324846949352334, -120.74817421080436], [35.335119535355524, -120.74864643457312]
-            ],
-            [ // Hole of the first polygon
-              [35.334402071757125, -120.74561990950984], [35.32983465415885, -120.74881815230721], [35.32796211334611, -120.74018933616938],
-            ]
-          ],
-          [ // Second polygon
-            [ // Outer ring of the second polygon
-              [35.33167215203964, -120.75609469128912], [35.32671956232397, -120.75285351905823], [35.333002124445976, -120.7487108287234],
-            ]
-          ],
-        ];
-        this.zoneInPolygons = multiPolygon;
+        // const multiPolygon = [
+        //   [ // First polygon
+        //     [ // Outer ring of the first polygon
+        //       [35.33165465225685, -120.75643812675729], [35.32603702617105, -120.75843434541602], [35.324846949352334, -120.74817421080436], [35.335119535355524, -120.74864643457312]
+        //     ],
+        //     [ // Hole of the first polygon
+        //       [35.334402071757125, -120.74561990950984], [35.32983465415885, -120.74881815230721], [35.32796211334611, -120.74018933616938],
+        //     ]
+        //   ],
+        //   [ // Second polygon
+        //     [ // Outer ring of the second polygon
+        //       [35.33167215203964, -120.75609469128912], [35.32671956232397, -120.75285351905823], [35.333002124445976, -120.7487108287234],
+        //     ]
+        //   ],
+        // ];
+        // this.zoneInPolygons = multiPolygon;
         // console.log(this.zoneInPolygons);
         
       } 
@@ -248,23 +265,20 @@ export default {
         const response = await fetch('http://localhost:5135/zones/in', {
           method: 'GET',
         });
-
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
         const res = await response.json();
-        //console.log(res);
-        res.forEach(item => {
-          const obj = JSON.parse(item);
-          //console.log(obj);
-          console.log(obj.coordinates);
-          this.zoneInPolygons.push(obj.coordinates);
+        this.zoneInPolygons = [];
+        let zones = res.data.split("|").map(zone => JSON.parse(zone))
+        console.log("zoneIn prev", this.zoneInPolygons);
+        zones.forEach((zone) => {
+          //console.log(zone.coordinates.map(coordinate => [coordinate.latitude, coordinate.longitude]));
+          const coordinates = zone.coordinates.map(coordinate => [coordinate.latitude, coordinate.longitude]);
+          this.zoneInPolygons.push([coordinates]);
+          console.log(this.zoneInPolygons);
+
         });
-        console.log(this.zoneInPolygons);
-        this.zoneInPolygons.forEach(element => {
-          console.log(element);
-        });
-        //console.log(this.zoneInPolygons[0][0].latitude);
       }
       catch (error) {
         console.error('Error sending sendZoneOutPolygonPoints points:', error);
@@ -280,23 +294,20 @@ export default {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        const data = await response.text(); // Read response as text
-        const res = data.split('|');
-        //const res = await response.json();
-        console.log(res);
-        // res.data.array.forEach(polygon => {
-        //   console.log(polygon);
-        // });
-        // data.forEach(item => {
-          //console.log(obj);
-          // console.log(obj.coordinates);
-          // this.zoneOutPolygons.push(obj.coordinates);
-        // });
-        console.log(this.zoneOutPolygons);
-        this.zoneOutPolygons.forEach(element => {
-          console.log(element);
+        const res = await response.json();
+        this.zoneOutPolygons = [];
+        let zones = res.data.split("|").map(zone => JSON.parse(zone))
+        console.log(zones);
+        console.log("Zoneout prev", this.zoneOutPolygons);
+        zones.forEach((zone) => {
+          //console.log(zone.coordinates);
+          const coordinates = zone.coordinates.map(coordinate => [coordinate.latitude, coordinate.longitude]);
+          this.zoneOutPolygons.push([coordinates]);
+          console.log(this.zoneOutPolygons);
+
         });
-        //console.log(this.zoneInPolygons[0][0].latitude);
+       
+        //console.log(response.data.split("|").map(zone => JSON.parse(zone)))
       }
       catch (error) {
         console.error('Error sending sendZoneOutPolygonPoints points:', error);
