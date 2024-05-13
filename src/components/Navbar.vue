@@ -79,6 +79,7 @@ export default {
         <ul style="list-style-type: none; padding-left: 0;">
           <li><router-link to="/" style="text-decoration: none;">Home</router-link></li>
           <li><router-link to="/StaticScreen" style="text-decoration: none;">Map Screen</router-link></li>
+          <li><router-link to="/MissionInitialization" style="text-decoration: none;">Mission Initialization</router-link></li>
           <li><router-link to="/test" style="text-decoration: none;">Test</router-link></li>
         </ul>
       </div>
