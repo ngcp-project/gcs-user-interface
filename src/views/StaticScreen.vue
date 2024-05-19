@@ -2,7 +2,7 @@
 import Status from '../components/VehicleStatusComponent.vue';
 import { onMounted, onBeforeUnmount, ref, reactive, Ref } from 'vue';
 import Map from '../components/Map.vue';
-import { getAllConnections, closeConnections } from "../Functions/webSocket";
+import { getAllConnections, closeConnections, getVehicleStatus } from "../Functions/webSocket";
 
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
 const ERU_data = ref({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
@@ -26,11 +26,13 @@ function addListeners() {
     for (const [vehicleKey, webSocketConnection] of Object.entries(wsConnections)) {        // loops through each WS connection and adds an event listener to it
         webSocketConnection.addEventListener("message", (event) => {
         const receivedData = JSON.parse(event.data);
+        console.log(receivedData);
+        console.log("PENEINEINEINIENINSNS");
  
-        vehicleMap[vehicleKey].value.status = receivedData.vehicleStatus;   
+        vehicleMap[vehicleKey].value.status = getVehicleStatus(receivedData.vehicleStatus);   
         vehicleMap[vehicleKey].value.batteryPct = parseFloat(receivedData.batteryLife);
-        vehicleMap[vehicleKey].value.coordinates.latitude = parseFloat(receivedData.currentCoordinate.latitude);
-        vehicleMap[vehicleKey].value.coordinates.longitude = parseFloat(receivedData.currentCoordinate.longitude);
+        vehicleMap[vehicleKey].value.coordinates.latitude = parseFloat(receivedData.currentPosition.latitude);
+        vehicleMap[vehicleKey].value.coordinates.longitude = parseFloat(receivedData.currentPosition.longitude);
         vehicleMap[vehicleKey].value.connection = parseInt(receivedData.dummyConnection);   
         });
     } // end for loop
@@ -77,7 +79,7 @@ onMounted(() => {
 .four-status-rightside {
     display: flex;
     flex-direction: column;
-    border: 0.003em solid black;
+    border-left: 0.003em solid black;
     height: 100%;
     width: 23%;
     margin-left: auto
