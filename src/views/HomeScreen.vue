@@ -52,7 +52,7 @@ onMounted(() => {
 <template>
     <div class="grid">
         <div class="hover" style="position: relative; display: flex;" @click="handleClick(2, 'eru')">
-            <Camera :cameraID="1"/>
+            <Camera :cameraID="2"/>
             <Battery :percentage=ERU_data.batteryPct :charging="false" class="battery_test"/>
             <Connection :latency=ERU_data.connection class="connection_test"/>   
         </div>
@@ -69,8 +69,8 @@ onMounted(() => {
             <Connection :latency=MRA_data.connection class="connection_test"/>   
         </div>
 
-        <div class="hover" style="position: relative; display: flex;" @click="handleClick(1, 'fra')">
-            <Camera :cameraID="1"/>
+        <div class="hover" style="position: relative; display: flex;" @click="handleClick(2, 'fra')">
+            <Camera :cameraID="2"/>
             <Battery :percentage=FRA_data.batteryPct :charging="false" class="battery_test"/>
             <Connection :latency=FRA_data.connection class="connection_test"/>   
         </div>

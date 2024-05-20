@@ -1,47 +1,3 @@
-<!-- <template>
-  <div class="map">
-    <l-map
-      ref="map"
-      v-model:zoom="zoom"
-      :use-global-leaflet="false"
-      :center="mapOrigin"
-    >
-      <l-tile-layer
-        :url="tileServer"
-        layer-type="base"
-        name="OpenStreetMap"
-      ></l-tile-layer>
-    </l-map>
-  </div>
-</template>
-
-<script lang="ts">
-import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer } from "@vue-leaflet/vue-leaflet";
-
-export default {
-  components: {
-    LMap,
-    LTileLayer,
-  },
-  data() {
-    return {
-      tileServer:
-        import.meta.env.VITE_OSM_SERVER ||
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      mapOrigin: [34.058, -117.819],
-      zoom: 17,
-    };
-  },
-};
-</script>
-
-<style scoped>
-.map {
-  height: 100%;
-}
-</style> -->
-
 <!-- offline -->
 <template>
   <div class="map">
@@ -55,9 +11,8 @@ export default {
       <div class="button-container">
         <button class="send-button" @click="sendZoneInPolygonPoints">Zone In</button>
         <button class="send-button" @click="sendZoneOutPolygonPoints">Zone Out</button>
-        <button class="send-button" @click="getZoneIn">Get In</button>
-        <button class="send-button" @click="getZoneOut">Get Out</button>
-        <button class="clear-button" @click="clearPolygons">Clear</button>
+        <!-- <button class="send-button" @click="FetchZones" >Get In/Out</button> -->
+        <button class="clear-button" @click="clearPolygons">Clear All</button>
         <button class="clear-button" @click="clearSelection">Clear Selected</button>
       </div>
       <l-tile-layer
@@ -77,13 +32,13 @@ export default {
       <l-polygon
         v-if="zoneInPolygons.length > 0"
         :lat-lngs="zoneInPolygons"
-        :options="{ fillColor: 'green', fillOpacity: 0.4 }"
+        :options="{ color: 'green', fillColor: 'green', fillOpacity: 0 }"
         :key="zoneInPolygons.length"
       ></l-polygon>
       <l-polygon
         v-if="zoneOutPolygons.length > 0"
         :lat-lngs="zoneOutPolygons"
-        :options="{ fillColor: 'red', fillOpacity: 0.4 }"
+        :options="{ fillColor: 'red', fillOpacity: 0.3 }"
         :key="zoneOutPolygons.length"
       ></l-polygon>
     </l-map>
@@ -108,12 +63,13 @@ export default {
       mapOrigin: [35.33004319829399, -120.75064544958856], //area of interest origin, CPP: 34.058, -117.819
       zoom: 16,
       localTileURL: "http://localhost:8001/{z}/{x}/{y}.png", // Update to local server URL
-      polygonPoints: [] as LatLngExpression[],
-      zoneInPolygons: [] as LatLngExpression[],
-      zoneOutPolygons: [] as LatLngExpression[],
+      polygonPoints: [] as LatLngExpression[], //current selected polygons
+      zoneInPolygons: [] as LatLngExpression[], //all zone in polygons from backend
+      zoneOutPolygons: [] as LatLngExpression[], //all zone out polygons from backend
     };
   },
   methods: {
+    //creating the current selected polygon
     addPoint(event: LeafletMouseEvent) {
       const lat = event.latlng.lat;
       const lng = event.latlng.lng;
@@ -122,11 +78,12 @@ export default {
       this.polygonPoints.push(latLng);
       console.log("polygonPoints:", this.polygonPoints);
     },
+    //clear every polygons (selected and backend)
     async clearPolygons(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
-      this.polygonPoints = [];
-      this.zoneInPolygons = [];
-      this.zoneOutPolygons = [];
+      this.polygonPoints = []; 
+      this.zoneInPolygons = []; 
+      this.zoneOutPolygons = []; 
       try {
         const response = await fetch('http://localhost:5135/zones/in', {
           method: 'DELETE',
@@ -164,12 +121,14 @@ export default {
       console.log("zoneOutnPolygonPoints:", this.polygonPoints);
       console.log("Cleared Selected zoneOutPolygons:", this.zoneInPolygons);
     },
+    //clear current selected polygons 
     async clearSelection(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
       this.polygonPoints = [];
       console.log("Cleared Selected zoneInPolygonPoints:", this.polygonPoints);
       
     },
+    //send current selected polygons as zone in polygons
     async sendZoneInPolygonPoints(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
       try {
@@ -181,8 +140,7 @@ export default {
         });
         
         const payload = {
-          name: "TEST",
-          shapeType: "polygon",
+          "keepIn": true,
           coordinates: coordinates,
         };
         
@@ -200,6 +158,8 @@ export default {
 
         const res = await response.json();
         console.log('zone In PolygonPoints sent successfully:', res);
+        await this.getZoneIn(event);
+        await this.clearSelection(event);
         // const multiPolygon = [
         //   [ // First polygon
         //     [ // Outer ring of the first polygon
@@ -224,6 +184,7 @@ export default {
       }
       
     },
+    //send current selected polygons as zone out polygons
     async sendZoneOutPolygonPoints(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
       try {
@@ -235,8 +196,7 @@ export default {
         });
         
         const payload = {
-          name: "TEST",
-          shapeType: "polygon",
+          "keepIn": true,
           coordinates: coordinates,
         };
         
@@ -254,11 +214,14 @@ export default {
 
         const res = await response.json();
         console.log('zone out PolygonPoints sent successfully:', res);
+        await this.getZoneOut(event);
+        await this.clearSelection(event);
       } 
       catch (error) {
         console.error('Error sending sendZoneOutPolygonPoints points:', error);
       }
     },
+    //get all zone in polygons 
     async getZoneIn(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
       try {
@@ -269,45 +232,42 @@ export default {
           throw new Error('Network response was not ok');
         }
         const res = await response.json();
-        this.zoneInPolygons = [];
-        let zones = res.data.split("|").map(zone => JSON.parse(zone))
-        console.log("zoneIn prev", this.zoneInPolygons);
-        zones.forEach((zone) => {
+        this.zoneInPolygons = []; //need to reset displayed zone in polygons
+        let zones = res.data.split("|").map((zone : any) => JSON.parse(zone))
+        //console.log("zoneIn prev", this.zoneInPolygons);
+        zones.forEach((zone : any) => {
           //console.log(zone.coordinates.map(coordinate => [coordinate.latitude, coordinate.longitude]));
-          const coordinates = zone.coordinates.map(coordinate => [coordinate.latitude, coordinate.longitude]);
+          const coordinates = zone.coordinates.map((coordinate : any) => [coordinate.latitude, coordinate.longitude]);
           this.zoneInPolygons.push([coordinates]);
-          console.log(this.zoneInPolygons);
-
+          
         });
+        console.log("Updated Zone In Polygons", this.zoneInPolygons);
       }
       catch (error) {
         console.error('Error sending sendZoneOutPolygonPoints points:', error);
       }
     },
+    //get all zone out polygons 
     async getZoneOut(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
       try {
         const response = await fetch('http://localhost:5135/zones/out', {
           method: 'GET',
         });
-
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
         const res = await response.json();
-        this.zoneOutPolygons = [];
-        let zones = res.data.split("|").map(zone => JSON.parse(zone))
-        console.log(zones);
-        console.log("Zoneout prev", this.zoneOutPolygons);
-        zones.forEach((zone) => {
+        this.zoneOutPolygons = []; //need to reset displayed zone out polygons
+        let zones = res.data.split("|").map((zone : any) => JSON.parse(zone))
+        //console.log(zones);
+        //console.log("Zoneout prev", this.zoneOutPolygons);
+        zones.forEach((zone : any) => {
           //console.log(zone.coordinates);
-          const coordinates = zone.coordinates.map(coordinate => [coordinate.latitude, coordinate.longitude]);
+          const coordinates = zone.coordinates.map((coordinate : any) => [coordinate.latitude, coordinate.longitude]);
           this.zoneOutPolygons.push([coordinates]);
-          console.log(this.zoneOutPolygons);
-
         });
-       
-        //console.log(response.data.split("|").map(zone => JSON.parse(zone)))
+        console.log("Updated Zone Out Polygons" , this.zoneOutPolygons);
       }
       catch (error) {
         console.error('Error sending sendZoneOutPolygonPoints points:', error);
