@@ -32,7 +32,7 @@ wsConnection.addEventListener("message", (event) => {
 
   <div class="vehicle-info-container">
     <div class="vehicle-status-parent">
-      <Status :batteryPct=parseFloat(vehicleData.batteryLife) :latency=parseFloat(vehicleData.dummyConnection) :coordinates=vehicleData.currentPosition :vehicleName="vehicleID.toUpperCase()" :vehicleStatus="getVehicleStatus(vehicleData.vehicleStatus)"/>
+      <Status :batteryPct=parseFloat(vehicleData.batteryLife) :latency=parseFloat(vehicleData.lastUpdated) :coordinates=vehicleData.currentPosition :vehicleName="vehicleID.toUpperCase()" :vehicleStatus="getVehicleStatus(vehicleData.vehicleStatus)"/>
     </div>
 
     <IndicatorComponent class="adjust-indicator" :vehicleName="vehicleID.toUpperCase()" :pitch=10 :roll=6 :altitude=parseInt(vehicleData.altitude) :airspeed=parseInt(vehicleData.speed) :yaw=parseInt(vehicleData.yaw)></IndicatorComponent>

@@ -5,6 +5,8 @@
 //     'fra': 'ws://localhost:5135/ws/fra',
 //     'mra': 'ws://localhost:5135/ws/mra',
 // };
+
+// uncomment to test with mock websocket servers from mockWebsock.cjs
 const connections = {
     'eru': 'ws://localhost:6135/ws/eru',
     'mea': 'ws://localhost:6136/ws/mea',

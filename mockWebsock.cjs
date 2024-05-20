@@ -59,10 +59,15 @@ ERU.on('connection', (ws) => {
         vehicleData.yaw = Math.random() * 30;
         vehicleData.altitude = 3423;
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
+
+        // send random timestamp/lastUpdated values
+        const currentTime = Date.now();
+        const random_change = Math.floor(Math.random() * 1000); 
+        vehicleData.lastUpdated = currentTime - random_change;
+
         vehicleData.batteryLife = Math.random().toFixed(2);
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
-        vehicleData.lastUpdated = new Date().toLocaleTimeString();
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
         // vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
         vehicleData.vehicleStatus = Math.floor(Math.random() * 3);
@@ -131,7 +136,12 @@ MEA.on('connection', (ws) => {
         vehicleData.batteryLife = 0;
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
-        vehicleData.lastUpdated = new Date().toLocaleTimeString();
+
+        // send random timestamp/lastUpdated values
+        const currentTime = Date.now();
+        const random_change = Math.floor(Math.random() * 1000); 
+        vehicleData.lastUpdated = currentTime - random_change;
+
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
         // vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
         vehicleData.vehicleStatus = Math.floor(Math.random() * 3);
@@ -199,7 +209,12 @@ FRA.on('connection', (ws) => {
         vehicleData.batteryLife = Math.random().toFixed(2);
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
-        vehicleData.lastUpdated = new Date().toLocaleTimeString();
+
+        // send random timestamp/lastUpdated values
+        const currentTime = Date.now();
+        const random_change = Math.floor(Math.random() * 1000); 
+        vehicleData.lastUpdated = currentTime - random_change;
+
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
         // vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
         vehicleData.vehicleStatus = Math.floor(Math.random() * 3);
@@ -267,7 +282,12 @@ MRA.on('connection', (ws) => {
         vehicleData.batteryLife = Math.random().toFixed(2);
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
-        vehicleData.lastUpdated = new Date().toLocaleTimeString();
+
+        // send random timestamp/lastUpdated values
+        const currentTime = Date.now();
+        const random_change = Math.floor(Math.random() * 1000); 
+        vehicleData.lastUpdated = currentTime - random_change;
+
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
         // vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
         vehicleData.vehicleStatus = Math.floor(Math.random() * 3);
