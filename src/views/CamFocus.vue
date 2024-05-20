@@ -4,17 +4,16 @@ import IndicatorComponent from "../components/IndicatorComponent.vue";
 import Status from "../components/VehicleStatusComponent.vue";
 import { useRoute } from 'vue-router';
 import { onMounted, ref } from 'vue';
-import { getConnection } from "../Functions/webSocket";
+import { getConnection, getVehicleStatus } from "../Functions/webSocket";
 
 
 const route = useRoute();
 const cameraID = Number(route.params.id); // Assuming we're using camera Number 
 const vehicleID = String(route.params.vehicleID);
 
-// const ERU_data = ref({batteryPct: 0, connection: 0});
 const vehicleData = ref<any>(null);
 
-const wsConnection = getConnection(vehicleID);   
+const wsConnection = getConnection(vehicleID);   // get websocket connection for this specific vehicle
 console.log("Got connection for " + vehicleID + " | " + typeof wsConnection);    
 wsConnection.addEventListener("message", (event) => {
   vehicleData.value = JSON.parse(event.data);
@@ -33,8 +32,7 @@ wsConnection.addEventListener("message", (event) => {
 
   <div class="vehicle-info-container">
     <div class="vehicle-status-parent">
-      <!-- <Status :batteryPct=.6 :latency=4 :coordinates=testCoordinate2 :vehicleName="'MEA'" :vehicleStatus="'Standby'"/> -->
-      <Status :batteryPct=parseFloat(vehicleData.batteryLife) :latency=parseFloat(vehicleData.dummyConnection) :coordinates=vehicleData.currentCoordinate :vehicleName="vehicleID.toUpperCase()" :vehicleStatus="vehicleData.vehicleStatus"/>
+      <Status :batteryPct=parseFloat(vehicleData.batteryLife) :latency=parseFloat(vehicleData.lastUpdated) :coordinates=vehicleData.currentPosition :vehicleName="vehicleID.toUpperCase()" :vehicleStatus="getVehicleStatus(vehicleData.vehicleStatus)"/>
     </div>
 
     <IndicatorComponent class="adjust-indicator" :vehicleName="vehicleID.toUpperCase()" :pitch=10 :roll=6 :altitude=parseInt(vehicleData.altitude) :airspeed=parseInt(vehicleData.speed) :yaw=parseInt(vehicleData.yaw)></IndicatorComponent>

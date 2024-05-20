@@ -37,7 +37,7 @@
         <Altitude class="pitch-roll-indicator" :pitch=pitch :roll=roll></Altitude>
     </div>
 
-    <div class="flight-indicator" :style="[vehicleName == 'ERU' ? { width: '70%' } : { width: '45%'}]"> 
+    <div class="flight-indicator" :style="[vehicleName == 'ERU' ? { width: '70%', height: '75%', fontSize: '1.4em' } : { width: '45%'}]">  <!-- if viewing ERU, only show speed -->
         <Airspeed class="airspeed-indicator" :airspeed=airspeed :size="changeSpeedSize"></Airspeed>
     </div>
 

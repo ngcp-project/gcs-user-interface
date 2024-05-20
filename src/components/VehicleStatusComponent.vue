@@ -36,11 +36,11 @@
                 <span style="margin-top: 4%; font-size: 1.4em;">{{ Math.round(batteryPct * 100) }}%</span>        <!-- Multiply batteryPct by 100 because it is in between 0 and 1 -->
             </div>
             <div class="connection-status-container">
-                <Connection :latency="latency" class="adjust-connection"/> 
-                <div class="connection-status-specifics">
-                    <span style="font-size: 0.9em;">Connection:</span>
+                <Connection :latency="latency" :displayLatency="true" class="adjust-connection"/> 
+                <!-- <div class="connection-status-specifics">                  <-- moved the text showing latency into actual Connection component 
+                    <span style="font-size: 0.9em;">Connection:</span>              bcuz we calculate latency in Connection.vue
                     <span style="font-size: 0.9em;">Last Packet: {{ latency }} </span>
-                </div>
+                </div> -->
             </div>
         </div>
 

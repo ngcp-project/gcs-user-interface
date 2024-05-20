@@ -2,13 +2,13 @@
 import Status from '../components/VehicleStatusComponent.vue';
 import { onMounted, onBeforeUnmount, ref, reactive, Ref } from 'vue';
 import Map from '../components/Map.vue';
-import { getAllConnections, closeConnections } from "../Functions/webSocket";
+import { getAllConnections, closeConnections, getVehicleStatus } from "../Functions/webSocket";
 
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
-const ERU_data = ref({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
-const MEA_data = ref({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
-const MRA_data = ref({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
-const FRA_data = ref({batteryPct: 0, connection: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const ERU_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const MEA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const MRA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const FRA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
 
 // maps vehicle name to corresponding reactive variable so that addListeners can more easily set EventListeners to update variables
 const vehicleMap: { [key: string]: Ref<any> } = {
@@ -27,11 +27,12 @@ function addListeners() {
         webSocketConnection.addEventListener("message", (event) => {
         const receivedData = JSON.parse(event.data);
  
-        vehicleMap[vehicleKey].value.status = receivedData.vehicleStatus;   
+        vehicleMap[vehicleKey].value.status = getVehicleStatus(receivedData.vehicleStatus);   
         vehicleMap[vehicleKey].value.batteryPct = parseFloat(receivedData.batteryLife);
-        vehicleMap[vehicleKey].value.coordinates.latitude = parseFloat(receivedData.currentCoordinate.latitude);
-        vehicleMap[vehicleKey].value.coordinates.longitude = parseFloat(receivedData.currentCoordinate.longitude);
-        vehicleMap[vehicleKey].value.connection = parseInt(receivedData.dummyConnection);   
+        vehicleMap[vehicleKey].value.coordinates.latitude = parseFloat(receivedData.currentPosition.latitude);
+        vehicleMap[vehicleKey].value.coordinates.longitude = parseFloat(receivedData.currentPosition.longitude);
+        // vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.dummyConnection);   // <-- uncomment to use dummyConnection value from mockWebsock.cjs 
+        vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.lastUpdated);   
         });
     } // end for loop
 } // end addListeners
@@ -49,10 +50,10 @@ onMounted(() => {
     </div>
 
     <div class="four-status-rightside">     
-        <Status :batteryPct=ERU_data.batteryPct :latency=ERU_data.connection :coordinates=ERU_data.coordinates :vehicleName="'ERU'" :vehicleStatus="ERU_data.status"/>
-        <Status :batteryPct=MEA_data.batteryPct :latency=MEA_data.connection :coordinates=MEA_data.coordinates :vehicleName="'MEA'" :vehicleStatus="MEA_data.status"/>
-        <Status :batteryPct=MRA_data.batteryPct :latency=MRA_data.connection :coordinates=MRA_data.coordinates :vehicleName="'MRA'" :vehicleStatus="MRA_data.status"/>
-        <Status :batteryPct=FRA_data.batteryPct :latency=FRA_data.connection :coordinates=FRA_data.coordinates :vehicleName="'FRA'" :vehicleStatus="FRA_data.status"/>
+        <Status :batteryPct=ERU_data.batteryPct :latency=ERU_data.lastUpdated :coordinates=ERU_data.coordinates :vehicleName="'ERU'" :vehicleStatus="ERU_data.status"/>
+        <Status :batteryPct=MEA_data.batteryPct :latency=MEA_data.lastUpdated :coordinates=MEA_data.coordinates :vehicleName="'MEA'" :vehicleStatus="MEA_data.status"/>
+        <Status :batteryPct=MRA_data.batteryPct :latency=MRA_data.lastUpdated :coordinates=MRA_data.coordinates :vehicleName="'MRA'" :vehicleStatus="MRA_data.status"/>
+        <Status :batteryPct=FRA_data.batteryPct :latency=FRA_data.lastUpdated :coordinates=FRA_data.coordinates :vehicleName="'FRA'" :vehicleStatus="FRA_data.status"/>
     </div>
   </div>
 
@@ -77,7 +78,7 @@ onMounted(() => {
 .four-status-rightside {
     display: flex;
     flex-direction: column;
-    border: 0.003em solid black;
+    border-left: 0.003em solid black;
     height: 100%;
     width: 23%;
     margin-left: auto
