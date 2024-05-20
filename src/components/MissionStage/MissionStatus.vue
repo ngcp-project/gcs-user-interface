@@ -17,22 +17,35 @@
       <button
         style="border: 2px solid rgb(0, 0, 0); margin-left: 1.2rem; color: rgb(0, 0, 0); padding: 3px 6px; font-size: 0.8rem"
         type="button"
-        @click=""
+        @click="showPopup = true"
       >
-        <router-link to="/" class="router-link">
-          <span style="font-weight: bold; font-size: 0.8rem" :style="{ color: status === 'initiated' ? 'black' : 'blue' }">OPEN</span>
-        </router-link>
+        <span style="font-weight: bold; font-size: 0.8rem" :style="{ color: status === 'initiated' ? 'black' : 'blue' }">OPEN</span>
       </button>
     </div>
     <div>
       <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0)">Status: {{ status }}</span>
     </div>
   </div>
+  <div>
+    <div v-if="showPopup" class="popup">
+      <button style="float: right" @click="showPopup = false">X</button>
+      <MissionDropdown :missionNumber="missionNumber" />
+    </div>
+  </div>
 </template>
 
 <script>
+import MissionDropdown from "./MissionDropdown.vue";
 export default {
   name: "MissionStatus",
+  data() {
+    return {
+      showPopup: false,
+    };
+  },
+  components: {
+    MissionDropdown,
+  },
   props: {
     missionNumber: {
       type: Number,
@@ -45,3 +58,14 @@ export default {
   },
 };
 </script>
+<style scoped>
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  z-index: 1000;
+}
+</style>
