@@ -14,6 +14,10 @@
         <!-- <button class="send-button" @click="FetchZones" >Get In/Out</button> -->
         <button class="clear-button" @click="clearPolygons">Clear All</button>
         <button class="clear-button" @click="clearSelection">Clear Selected</button>
+        <!-- <div class="fire-info" v-if="fire">
+          <h3>Fire Information</h3>
+          <p>coords:{{ fire.longitude.toFixed(6) }} {{ fire.latitude.toFixed(6) }}</p>
+        </div> -->
       </div>
       <l-tile-layer
         :url="localTileURL"
@@ -23,10 +27,15 @@
         name="CustomTiles"
         
       ></l-tile-layer>
+      <l-marker
+        v-for="(point, index) in fireCoordsList"
+        :key="index"
+        :lat-lng="[point.latitude, point.longitude]"
+      ></l-marker>
       <l-polygon
         v-if="polygonPoints.length > 0"
         :lat-lngs="polygonPoints"
-        :options="{ fillColor: 'blue', fillOpacity: 0.4 }"
+        :options="{ fillColor: 'blue', fillOpacity: 0.2 }"
         :key="polygonPoints.length"
       ></l-polygon>
       <l-polygon
@@ -47,16 +56,23 @@
 
 <script lang="ts">
 import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer, LPolygon  } from "@vue-leaflet/vue-leaflet";
-import { LeafletMouseEvent, LatLngExpression  } from "leaflet";
-import Coordinate from "./VehicleStatus/Coordinate.vue";
-
+import { LMap, LTileLayer, LPolygon, LMarker  } from "@vue-leaflet/vue-leaflet";
+import { LeafletMouseEvent, LatLngExpression } from "leaflet";
+interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
 
 export default {
   components: {
     LMap,
     LTileLayer,
     LPolygon,
+    LMarker,
+  },
+  props: {
+    //import fire prop from telemetry
+    firePoint: { required: false, type: Object},
   },
   data() {
     return {
@@ -66,6 +82,10 @@ export default {
       polygonPoints: [] as LatLngExpression[], //current selected polygons
       zoneInPolygons: [] as LatLngExpression[], //all zone in polygons from backend
       zoneOutPolygons: [] as LatLngExpression[], //all zone out polygons from backend
+      fireCoordsList: [],
+      maxFireCoordsCount: 10,
+      lastUpdate: 0,
+      updateInterval: 500, // Adjust as needed
     };
   },
   methods: {
@@ -77,6 +97,12 @@ export default {
       const latLng: LatLngExpression = [event.latlng.lat, event.latlng.lng];
       this.polygonPoints.push(latLng);
       console.log("polygonPoints:", this.polygonPoints);
+      //testing fire pts list
+      // const coords: Coordinates = {
+      //   latitude: lat,
+      //   longitude: lng
+      // };
+      // this.updateFireCoords(coords)
     },
     //clear every polygons (selected and backend)
     async clearPolygons(event: LeafletMouseEvent) {
@@ -273,8 +299,26 @@ export default {
         console.error('Error sending sendZoneOutPolygonPoints points:', error);
       }
     },
-    
+    updateFireCoords(coords : Coordinates) {
+      if (this.fireCoordsList.length > this.maxFireCoordsCount) {
+        this.fireCoordsList.shift();
+      }
+      //pass the fire coords here
+      this.fireCoordsList.push(coords);
+      this.fireCoordsList.push(firePoint);
+      console.log("firstptslist:", this.fireCoordsList)
+    },
   },
+  watch: {
+    firePoints(newFireCoords) {
+      const currentTime = Date.now();
+      if (currentTime - this.lastUpdate >= this.updateInterval) {
+        this.updateFireCoords(newFireCoords);
+        this.lastUpdate = currentTime;
+      }
+    },
+  },
+  
 };
 </script>
 
