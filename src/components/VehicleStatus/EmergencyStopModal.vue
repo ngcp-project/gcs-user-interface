@@ -12,7 +12,8 @@
         
         <section class="modal-body">
           <slot name="body">
-            Send Stop Command to {{ vehicleName }}?
+            <div v-if="vehicleName == 'all'" style="font-size: 1.6em;">Send Stop Command to All Vehicles?</div>
+            <div v-else class="bar" style='font-size: 1.8em;'>Send Stop Command to {{ vehicleName }}?</div>
           </slot>
          </section>
   
@@ -29,13 +30,16 @@
 import axios, {AxiosResponse} from "axios";
     export default {
         data() {
-            return {};    
+            return {
+              vehicle_names: ['ERU', 'MEA', 'MRA', 'FRA']
+            };    
         },
         props: {
             vehicleName: { required: true, type: String},
         },
         methods: {
           sendStopCommand() {
+<<<<<<< HEAD
               // console.log("Pressed yes to send stop command for " + this.vehicleName);
               // //console.error({ key: this.vehicleName });
               // axios.post('http://localhost:5135/EmergencyStop', { key: this.vehicleName })
@@ -48,11 +52,21 @@ import axios, {AxiosResponse} from "axios";
               // this.close(); // Close the dialog or modal after sending the command
                console.error(JSON.stringify({ Key: this.vehicleName }));
                fetch('http://localhost:5135/EmergencyStop', {
+=======
+            const promises: any[] = [];
+            if (this.vehicleName == 'all') {            // send Emergency Stop command for all vehicles
+              this.vehicle_names.forEach(name => {
+                const promise = fetch('http://localhost:5135/EmergencyStop', {
+>>>>>>> fa0453a81214c39cee712bb99e5615ef66685058
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
+<<<<<<< HEAD
                     body: JSON.stringify({ Key: this.vehicleName })
+=======
+                    body: JSON.stringify({ Key: name })
+>>>>>>> fa0453a81214c39cee712bb99e5615ef66685058
                 })
                 .then(response => {
                     if (!response.ok) {
@@ -62,6 +76,7 @@ import axios, {AxiosResponse} from "axios";
                 })
                 .then(data => console.log(data))
                 .catch(error => console.error('Error sending stop command:', error));
+<<<<<<< HEAD
           },
             close() {
                 this.$emit('close');
@@ -71,6 +86,48 @@ import axios, {AxiosResponse} from "axios";
                     this.close();
                 }
             }
+=======
+                promises.push(promise);
+              });
+              
+              Promise.all(promises)
+              .then(data => {
+                console.log("Sent stop commands to all four vehicles!");
+              })
+              .catch(error => {
+                console.error('Error sending stop command:', error);
+              })
+
+            } else {                                   // send Emergency Stop command for specific vehicle
+              fetch('http://localhost:5135/EmergencyStop', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ Key: this.vehicleName })
+              })
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                  }
+                  return response.json();
+              })
+              .then(data => console.log(data))
+              .catch(error => console.error('Error sending stop command:', error));
+            } //end else
+            this.close();     // close modal
+          },
+
+          close() {
+              this.$emit('close');    // emit event called 'close' to parent component (EmergencyStop.vue) to tell it to close the modal
+          },
+
+          closeFromOutside(event: MouseEvent) {
+              if (!this.$el.querySelector('.modal').contains(event.target)) {
+                  this.close();
+              }
+          }
+>>>>>>> fa0453a81214c39cee712bb99e5615ef66685058
         }
     };
 </script>
@@ -99,6 +156,7 @@ import axios, {AxiosResponse} from "axios";
     width: 25%;
     height: 22%;
     border-radius: 2%;
+    color: black;
   }
 
   .modal-header {
@@ -117,7 +175,6 @@ import axios, {AxiosResponse} from "axios";
   .modal-body {
     position: relative;
     padding: 20px 10px;
-    font-size: 1.8em;
     font-weight: bold;
   }
 

@@ -32,3 +32,22 @@ export function closeConnections() {
         wsConnections[vehicleKey].close();
     }
 }
+
+// enum for vehicle status
+enum VehicleStatus {
+    InUse = 0,
+    Standby = 1,
+    EmergencyStopped = 2
+}
+
+export function getVehicleStatus(status_num: number) {
+    if (status_num == VehicleStatus.InUse) {
+        return "In Use";
+    } else if (status_num == VehicleStatus.Standby) {
+        return "Standby";
+    } else if (status_num == VehicleStatus.EmergencyStopped) {
+        return "Stopped";
+    } else {
+        return "Error";
+    }
+}
