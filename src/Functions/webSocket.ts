@@ -1,4 +1,15 @@
 // dictionary where vehicle name is key and websocket URLs is value | put websocket URLs here
+<<<<<<< HEAD
+=======
+const connections = {
+    'eru': 'ws://localhost:5135/ws/eru',
+    'mea': 'ws://localhost:5135/ws/mea',
+    'fra': 'ws://localhost:5135/ws/fra',
+    'mra': 'ws://localhost:5135/ws/mra',
+};
+
+// uncomment to test with mock websocket servers from mockWebsock.cjs
+>>>>>>> main
 // const connections = {
 //     'eru': 'ws://localhost:5135/ws/eru',
 //     'mea': 'ws://localhost:5135/ws/mea',
@@ -36,5 +47,24 @@ export function closeConnections() {
     for (let vehicleKey in wsConnections) {
         console.log("Closing websocket connection for " + vehicleKey);
         wsConnections[vehicleKey].close();
+    }
+}
+
+// enum for vehicle status
+enum VehicleStatus {
+    InUse = 0,
+    Standby = 1,
+    EmergencyStopped = 2
+}
+
+export function getVehicleStatus(status_num: number) {
+    if (status_num == VehicleStatus.InUse) {
+        return "In Use";
+    } else if (status_num == VehicleStatus.Standby) {
+        return "Standby";
+    } else if (status_num == VehicleStatus.EmergencyStopped) {
+        return "Stopped";
+    } else {
+        return "Error";
     }
 }

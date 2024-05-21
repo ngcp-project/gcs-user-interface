@@ -50,6 +50,8 @@
         background-color: rgb(255, 57, 57);
         font-size: 0.96em;
         transition: background-color 0.20s;
+        white-space: nowrap; 
+        overflow: hidden; 
     } 
 
     .emergency-button:hover {
