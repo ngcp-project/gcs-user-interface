@@ -66,8 +66,8 @@ ERU.on('connection', (ws) => {
         vehicleData.lastUpdated = currentTime - random_change;
 
         vehicleData.batteryLife = Math.random().toFixed(2);
-        vehicleData.currentPosition.longitude = Number(((Math.random() * (0.01)) + (-0.005))) + -120.75365555392507;
-        vehicleData.currentPosition.latitude = Number(((Math.random() * (0.01)) + (-0.005))) + 35.33358365056906;
+        vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
+        vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
         // vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
         vehicleData.vehicleStatus = Math.floor(Math.random() * 3);
@@ -196,6 +196,10 @@ FRA.on('connection', (ws) => {
         },
         dummyConnection: 0,
         vehicleStatus: 1,
+        fireCoordinates: {
+            latitude: 1.0,
+            longitude: 2.0,    
+        },
     };
 
     // Send the initial sample data to the client
@@ -209,6 +213,9 @@ FRA.on('connection', (ws) => {
         vehicleData.batteryLife = Math.random().toFixed(2);
         vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
         vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
+        //send random fire coordinate values
+        vehicleData.fireCoordinates.longitude = Number(((Math.random() * (0.01)) + (-0.005))) + -120.75365555392507;
+        vehicleData.fireCoordinates.latitude = Number(((Math.random() * (0.01)) + (-0.005))) + 35.33358365056906;
 
         // send random timestamp/lastUpdated values
         const currentTime = Date.now();
