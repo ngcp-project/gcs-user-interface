@@ -66,14 +66,8 @@ ERU.on('connection', (ws) => {
         vehicleData.lastUpdated = currentTime - random_change;
 
         vehicleData.batteryLife = Math.random().toFixed(2);
-<<<<<<< HEAD
         vehicleData.currentPosition.longitude = Number(((Math.random() * (0.01)) + (-0.005))) + -120.75365555392507;
         vehicleData.currentPosition.latitude = Number(((Math.random() * (0.01)) + (-0.005))) + 35.33358365056906;
-        vehicleData.lastUpdated = new Date().toLocaleTimeString();
-=======
-        vehicleData.currentPosition.longitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
-        vehicleData.currentPosition.latitude = Number(((Math.random() * (180 - (-180) + 1)) + (-180)));
->>>>>>> main
         vehicleData.dummyConnection = Math.floor((Math.random() * (100 - 0 + 1)) + 0);
         // vehicleData.vehicleStatus = vehicleStatuses[Math.floor(Math.random() * vehicleStatuses.length)];
         vehicleData.vehicleStatus = Math.floor(Math.random() * 3);

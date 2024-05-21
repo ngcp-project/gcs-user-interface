@@ -1,21 +1,11 @@
 // dictionary where vehicle name is key and websocket URLs is value | put websocket URLs here
-<<<<<<< HEAD
-=======
-const connections = {
-    'eru': 'ws://localhost:5135/ws/eru',
-    'mea': 'ws://localhost:5135/ws/mea',
-    'fra': 'ws://localhost:5135/ws/fra',
-    'mra': 'ws://localhost:5135/ws/mra',
-};
-
-// uncomment to test with mock websocket servers from mockWebsock.cjs
->>>>>>> main
 // const connections = {
 //     'eru': 'ws://localhost:5135/ws/eru',
 //     'mea': 'ws://localhost:5135/ws/mea',
 //     'fra': 'ws://localhost:5135/ws/fra',
 //     'mra': 'ws://localhost:5135/ws/mra',
 // };
+// uncomment below to test with mock websocket servers from mockWebsock.cjs
 const connections = {
     'eru': 'ws://localhost:6135/ws/eru',
     'mea': 'ws://localhost:6136/ws/mea',
