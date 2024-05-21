@@ -28,6 +28,7 @@
         
       ></l-tile-layer>
       <l-marker
+        :icon="fire_icon"
         v-for="(point, index) in fireCoordsList"
         :key="index"
         :lat-lng="[point.latitude, point.longitude]"
@@ -57,7 +58,7 @@
 <script lang="ts">
 import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LPolygon, LMarker  } from "@vue-leaflet/vue-leaflet";
-import { LeafletMouseEvent, LatLngExpression } from "leaflet";
+import { LeafletMouseEvent, LatLngExpression, icon } from "leaflet";
 interface Coordinates {
   latitude: number;
   longitude: number;
@@ -86,6 +87,11 @@ export default {
       maxFireCoordsCount: 10,
       lastUpdate: 0,
       updateInterval: 500, // Adjust as needed
+
+      fire_icon: icon({
+          iconUrl: "../src/assets/fire-icon.png",
+          iconSize: [24, 34],
+        }),
     };
   },
   methods: {
@@ -305,18 +311,31 @@ export default {
       }
       //pass the fire coords here
       this.fireCoordsList.push(coords);
-      this.fireCoordsList.push(firePoint);
+      // this.fireCoordsList.push(firePoint);
       console.log("firstptslist:", this.fireCoordsList)
     },
   },
   watch: {
-    firePoints(newFireCoords) {
-      const currentTime = Date.now();
-      if (currentTime - this.lastUpdate >= this.updateInterval) {
-        this.updateFireCoords(newFireCoords);
-        this.lastUpdate = currentTime;
-      }
-    },
+    // uses deep watch to watch for changes in longitude and latitude properties in firePoint
+    firePoint: {
+      handler(newFireCoords) {
+        console.log("From watcher function in Map.vue: " + newFireCoords.latitude + " | " + newFireCoords.longitude);
+        const currentTime = Date.now();
+        if (currentTime - this.lastUpdate >= this.updateInterval) {
+          this.updateFireCoords(newFireCoords);
+          this.lastUpdate = currentTime;
+        }
+      },
+      deep: true
+    }
+    
+    // firePoints(newFireCoords) {
+    //   const currentTime = Date.now();
+    //   if (currentTime - this.lastUpdate >= this.updateInterval) {
+    //     this.updateFireCoords(newFireCoords);
+    //     this.lastUpdate = currentTime;
+    //   }
+    // },
   },
   
 };
