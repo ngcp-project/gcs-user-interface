@@ -39,44 +39,32 @@ import axios, {AxiosResponse} from "axios";
         },
         methods: {
           sendStopCommand() {
-<<<<<<< HEAD
-              // console.log("Pressed yes to send stop command for " + this.vehicleName);
-              // //console.error({ key: this.vehicleName });
-              // axios.post('http://localhost:5135/EmergencyStop', { key: this.vehicleName })
-              //     .then((response: AxiosResponse<any>) => {
-              //         console.log('Stop command sent successfully:', response.data);
-              //     })
-              //     .catch( (error: any) => {
-              //         console.error('Error sending stop command:', error);
-              //     });
-              // this.close(); // Close the dialog or modal after sending the command
-               console.error(JSON.stringify({ Key: this.vehicleName }));
-               fetch('http://localhost:5135/EmergencyStop', {
-=======
-            const promises: any[] = [];
-            if (this.vehicleName == 'all') {            // send Emergency Stop command for all vehicles
-              this.vehicle_names.forEach(name => {
-                const promise = fetch('http://localhost:5135/EmergencyStop', {
->>>>>>> fa0453a81214c39cee712bb99e5615ef66685058
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-<<<<<<< HEAD
-                    body: JSON.stringify({ Key: this.vehicleName })
-=======
-                    body: JSON.stringify({ Key: name })
->>>>>>> fa0453a81214c39cee712bb99e5615ef66685058
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => console.log(data))
-                .catch(error => console.error('Error sending stop command:', error));
-<<<<<<< HEAD
+            // console.log("Pressed yes to send stop command for " + this.vehicleName);
+            // //console.error({ key: this.vehicleName });
+            // axios.post('http://localhost:5135/EmergencyStop', { key: this.vehicleName })
+            //     .then((response: AxiosResponse<any>) => {
+            //         console.log('Stop command sent successfully:', response.data);
+            //     })
+            //     .catch( (error: any) => {
+            //         console.error('Error sending stop command:', error);
+            //     });
+            // this.close(); // Close the dialog or modal after sending the command
+            console.error(JSON.stringify({ Key: this.vehicleName }));
+            fetch('http://localhost:5135/EmergencyStop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ Key: this.vehicleName })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => console.log(data))
+            .catch(error => console.error('Error sending stop command:', error));
           },
             close() {
                 this.$emit('close');
