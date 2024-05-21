@@ -53,7 +53,8 @@ onMounted(() => {
   <div class="screen_div">
     <div class="map_div">
         <!-- should be fire coords -->
-        <Map :firePoint=FRA_data.fire_coordinates></Map>
+        <Map :ERU_coords=ERU_data.coordinates :MEA_coords=MEA_data.coordinates :MRA_coords=MRA_data.coordinates
+             :FRA_coords=FRA_data.coordinates :firePoint=FRA_data.fire_coordinates></Map>
     </div>
 
     <div class="four-status-rightside">     

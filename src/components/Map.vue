@@ -27,12 +27,19 @@
         name="CustomTiles"
         
       ></l-tile-layer>
+
+    <!-- vehicle + fire markers -->
+      <l-marker :lat-lng="ERU_position" :icon="ERU_icon"></l-marker>
+      <l-marker :lat-lng="MEA_position" :icon="MEA_icon"></l-marker>
+      <l-marker :lat-lng="MRA_position" :icon="MRA_icon"></l-marker>
+      <l-marker :lat-lng="FRA_position" :icon="FRA_icon"></l-marker>
       <l-marker
         :icon="fire_icon"
         v-for="(point, index) in fireCoordsList"
         :key="index"
         :lat-lng="[point.latitude, point.longitude]"
       ></l-marker>
+
       <l-polygon
         v-if="polygonPoints.length > 0"
         :lat-lngs="polygonPoints"
@@ -74,6 +81,12 @@ export default {
   props: {
     //import fire prop from telemetry
     firePoint: { required: false, type: Object},
+
+    // vehicle coordinate props to pass into vehicle markers
+    ERU_coords: { required: true, type: Object },
+    MEA_coords: { required: true, type: Object },
+    MRA_coords: { required: true, type: Object },
+    FRA_coords: { required: true, type: Object }
   },
   data() {
     return {
@@ -83,7 +96,7 @@ export default {
       polygonPoints: [] as LatLngExpression[], //current selected polygons
       zoneInPolygons: [] as LatLngExpression[], //all zone in polygons from backend
       zoneOutPolygons: [] as LatLngExpression[], //all zone out polygons from backend
-      fireCoordsList: [],
+      fireCoordsList: [] as Coordinates[],
       maxFireCoordsCount: 10,
       lastUpdate: 0,
       updateInterval: 500, // Adjust as needed
@@ -91,6 +104,26 @@ export default {
       fire_icon: icon({
           iconUrl: "../src/assets/fire-icon.png",
           iconSize: [24, 34],
+        }),
+      ERU_position: [35.3308691455096, -120.74555890428901],   // initial position
+      ERU_icon: icon({
+        iconUrl: "../src/assets/ERU.png",
+        iconSize: [38, 38],
+        }),
+      MEA_position: [35.327993383681886 , -120.74457174594193],   // initial position
+      MEA_icon: icon({
+        iconUrl: "../src/assets/MEA.png",
+        iconSize: [38, 38],
+        }),
+      MRA_position: [35.32682044954669, -120.74540868454052],   // initial position
+      MRA_icon: icon({
+        iconUrl: "../src/assets/MRA.png",
+        iconSize: [38, 38],
+        }),
+      FRA_position: [35.3256474983931, -120.74015099334417],    // initial position
+      FRA_icon: icon({
+        iconUrl: "../src/assets/FRA.png",
+        iconSize: [38, 38],
         }),
     };
   },
@@ -312,14 +345,14 @@ export default {
       //pass the fire coords here
       this.fireCoordsList.push(coords);
       // this.fireCoordsList.push(firePoint);
-      console.log("firstptslist:", this.fireCoordsList)
+      // console.log("firstptslist:", this.fireCoordsList)
     },
   },
   watch: {
     // uses deep watch to watch for changes in longitude and latitude properties in firePoint
     firePoint: {
       handler(newFireCoords) {
-        console.log("From watcher function in Map.vue: " + newFireCoords.latitude + " | " + newFireCoords.longitude);
+        // console.log("From watcher function in Map.vue: " + newFireCoords.latitude + " | " + newFireCoords.longitude);
         const currentTime = Date.now();
         if (currentTime - this.lastUpdate >= this.updateInterval) {
           this.updateFireCoords(newFireCoords);
@@ -327,7 +360,7 @@ export default {
         }
       },
       deep: true
-    }
+    },
     
     // firePoints(newFireCoords) {
     //   const currentTime = Date.now();
@@ -336,6 +369,31 @@ export default {
     //     this.lastUpdate = currentTime;
     //   }
     // },
+
+    ERU_coords: {
+      handler(newERUcoords) {
+        this.ERU_position = [newERUcoords.latitude, newERUcoords.longitude];
+      },
+      deep: true
+    },
+    MEA_coords: {
+      handler(newMEAcoords) {
+        this.MEA_position = [newMEAcoords.latitude, newMEAcoords.longitude];
+      },
+      deep: true
+    },
+    MRA_coords: {
+      handler(newMRAcoords) {
+        this.MRA_position = [newMRAcoords.latitude, newMRAcoords.longitude];
+      },
+      deep: true
+    },
+    FRA_coords: {
+      handler(newFRAcoords) {
+        this.FRA_position = [newFRAcoords.latitude, newFRAcoords.longitude];
+      },
+      deep: true
+    }
   },
   
 };
