@@ -8,7 +8,7 @@ import { getAllConnections, closeConnections, getVehicleStatus } from "../Functi
 const ERU_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
 const MEA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
 const MRA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
-const FRA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const FRA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, fire_coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
 
 // maps vehicle name to corresponding reactive variable so that addListeners can more easily set EventListeners to update variables
 const vehicleMap: { [key: string]: Ref<any> } = {
@@ -33,6 +33,12 @@ function addListeners() {
         vehicleMap[vehicleKey].value.coordinates.longitude = parseFloat(receivedData.currentPosition.longitude);
         // vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.dummyConnection);   // <-- uncomment to use dummyConnection value from mockWebsock.cjs 
         vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.lastUpdated);   
+
+        // FRA is sending additional fire coordinates
+        if (vehicleKey == 'fra') {
+            vehicleMap[vehicleKey].value.fire_coordinates.latitude = parseFloat(receivedData.fireCoordinates.latitude);
+            vehicleMap[vehicleKey].value.fire_coordinates.longitude = parseFloat(receivedData.fireCoordinates.longitude);   
+        }
         });
     } // end for loop
 } // end addListeners
@@ -46,7 +52,8 @@ onMounted(() => {
 <template>
   <div class="screen_div">
     <div class="map_div">
-        <Map></Map>
+        <!-- should be fire coords -->
+        <Map :firePoint=FRA_data.fire_coordinates></Map>
     </div>
 
     <div class="four-status-rightside">     
