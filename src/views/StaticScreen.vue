@@ -6,7 +6,7 @@ import { getAllConnections, closeConnections, getVehicleStatus } from "../Functi
 
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
 const ERU_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
-const MEA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const MEA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby', yaw: 0});
 const MRA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
 const FRA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, fire_coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
 
@@ -39,6 +39,10 @@ function addListeners() {
             vehicleMap[vehicleKey].value.fire_coordinates.latitude = parseFloat(receivedData.fireCoordinates.latitude);
             vehicleMap[vehicleKey].value.fire_coordinates.longitude = parseFloat(receivedData.fireCoordinates.longitude);   
         }
+
+        if (vehicleKey == 'mea') {
+            vehicleMap[vehicleKey].value.yaw = parseInt(receivedData.yaw);
+        }
         });
     } // end for loop
 } // end addListeners
@@ -53,7 +57,9 @@ onMounted(() => {
   <div class="screen_div">
     <div class="map_div">
         <!-- should be fire coords -->
-        <Map :ERU_coords=ERU_data.coordinates :MEA_coords=MEA_data.coordinates :MRA_coords=MRA_data.coordinates
+        <Map :ERU_coords=ERU_data.coordinates 
+             :MEA_coords=MEA_data.coordinates :MEA_yaw="MEA_data.yaw"
+             :MRA_coords=MRA_data.coordinates
              :FRA_coords=FRA_data.coordinates :firePoint=FRA_data.fire_coordinates></Map>
     </div>
 
