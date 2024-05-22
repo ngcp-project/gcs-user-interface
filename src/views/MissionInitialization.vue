@@ -32,13 +32,27 @@
         </div>
       </div>
 
-      <button type="submit">Submit</button>
+      <button type="submit" @click="toStaticScreen">Submit</button>
     </form>
   </div>
 </template>
 
 <script lang="ts">
+import { useRouter } from 'vue-router';
+
 export default {
+  setup() {
+    const router = useRouter();
+    // function to use Vue router to navigate to StaticScreen after pressing submit
+    const toStaticScreen = () => {
+      router.push(`/StaticScreen`);
+    }
+    
+    return {
+      toStaticScreen
+    }
+  },
+  
   data() {
     return {
       missionName: "",
