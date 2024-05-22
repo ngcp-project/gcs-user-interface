@@ -15,8 +15,8 @@
         <div style="display: grid; gap: 10px">
           <div style="display: grid; gap: 10px">
             <label :for="'targetLatitude' + index">Target Latitude:</label>
-            <input :id="'targetLatitude' + index" v-model="vehicle.target.latitude" placeholder="Target Latitude" required />
-            <input :id="'targetLongitude' + index" v-model="vehicle.target.longitude" placeholder="Target Longitude" required />
+            <input :id="'targetLatitude' + index" v-model="vehicle.target.latitude" placeholder="Target Latitude" />
+            <input :id="'targetLongitude' + index" v-model="vehicle.target.longitude" placeholder="Target Longitude" />
           </div>
           <div style="display: flex">
             <div
@@ -61,23 +61,7 @@ export default {
             },
           ],
         },
-        {
-          vehicleName: "",
-          target: {
-            latitude: "",
-            longitude: "",
-          },
-          searchArea: [
-            {
-              latitude: "",
-              longitude: "",
-            },
-            {
-              latitude: "",
-              longitude: "",
-            },
-          ],
-        },
+        
       ],
     };
   },
@@ -85,7 +69,27 @@ export default {
     submitForm() {
       // Here you can handle the form submission, for example send a POST request to your server
       console.log(this.missionName, this.stageName, this.vehicleKeys);
-    },
+            fetch('http://localhost:5135/MissionInfo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                  missionName: this.missionName,
+                  stageName: this.stageName,
+                  vehicleKeys: this.vehicleKeys
+
+                 })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => console.log(data))
+            .catch(error => console.error('Error initializing Mission Info:', error));
+          }
   },
 };
 </script>
