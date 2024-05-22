@@ -64,7 +64,6 @@ const { coords, updateCoords } = inject('Coords')
         :key="polygonPoints.length"
       ></l-polygon>
     </l-map>
-    <div>{{ this.coords }}</div>
   </div>
 </template>
 
@@ -78,9 +77,10 @@ import { LeafletMouseEvent, LatLngExpression  } from "leaflet";
 
 export default {
   setup() {
-    const {coords, updateCoords} = inject('Coords')
+    const {searchCoords, updateSearchCoords} = inject('SearchCoords');
+    const { targetCoord, selectingTarget } = inject('TargetCoord');
 
-    return { coords, updateCoords}
+    return { searchCoords, updateSearchCoords, targetCoord, selectingTarget}
   },
   components: {
     LMap,
@@ -103,16 +103,22 @@ export default {
       const latLng: LatLngExpression = [event.latlng.lat, event.latlng.lng];
       this.polygonPoints.push(latLng);
       console.log("polygonPoints:", this.polygonPoints);
+
+      // if selectingTarget from App.vue is true, set targetCoord (also from App.vue) to the latest point you clicked on Map
+      if (this.selectingTarget) {
+        this.targetCoord = latLng;
+        console.log("last clicked/currently selecting coordinate for target: " + this.targetCoord);
+      }      
     },
     clearPoints(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
-      console.log(this.coords.value)
+      console.log(this.searchCoords.value)
       this.polygonPoints = []
       console.log("polygonPoints:", this.polygonPoints);
     },
     sendPolygonPoints(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
-      this.updateCoords(this.polygonPoints);
+      this.updateSearchCoords(this.polygonPoints);
       // console.log("asd",this.coords)
       // Send a POST request to the backend API
 

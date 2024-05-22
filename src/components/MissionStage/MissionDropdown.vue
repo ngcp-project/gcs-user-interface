@@ -11,7 +11,7 @@
       <div style="display: grid; gap: 10px">
         <label for="targetCoordinate">Target Coordinate: {{}}</label>
         <input id="targetCoordinate" v-model="targetCoordinate" type="text" required />
-        <button @click.prevent="selectTargetCoordinate">Select</button>
+        <button @click.prevent="selectTargetCoordinate">{{ target_button_text }}</button>
 
         <label for="searchArea">Search Area:</label>
         <input id="searchArea" v-model="searchArea" type="text" required />
@@ -26,8 +26,10 @@
 import { inject } from "vue";
 export default {
   setup() {
-    const { coords } = inject("Coords");
-    return { coords };
+    const { searchCoords } = inject("SearchCoords");
+    const { targetCoord, selectingTarget } = inject('TargetCoord');
+
+    return { searchCoords, selectingTarget, targetCoord };
   },
   data() {
     return {
@@ -37,14 +39,30 @@ export default {
       searchArea: null,
       latitude: null,
       longitude: null,
+      target_button_text: "Select"
     };
   },
   methods: {
-    // add in logic to select coordinates from map
+    // clicking Select will set selectingTarget (from inject) to true, indicating to Map.vue to update targetCoord (from inject) to last clicked coordinate
     selectTargetCoordinate() {
-      this.targetCoordinate = this.coords;
+      
+      this.selectingTarget = !this.selectingTarget;   // toggles selectingTarget aka if we are currently selecting target coordinate or not
+
+      // this sets text of button to indicate that user is selecting target coord based on result state
+      // also updates targetCoord based on start state
+      if (this.selectingTarget) { // selectingTarget went from false -> true, so don't update targetCoordate
+        console.log("Selecting target coordinate...");
+        this.target_button_text = "Done"
+      } else { // selectingTarget went from true -> false, so set targetCoordate to targetCoord (from injected) 
+        this.targetCoordinate = this.targetCoord;
+        console.log("Selected Target Coordinate: " + this.targetCoord);
+        this.target_button_text = "Select"
+      }
     },
-    selectSearchArea() {},
+    selectSearchArea() {
+      this.searchArea = this.searchCoords;
+      console.log("Selected Search Area Coords: " + this.searchCoords);
+    },
   },
   props: {
     missionNumber: {
