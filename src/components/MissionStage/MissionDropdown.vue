@@ -9,7 +9,7 @@
         </option>
       </select>
       <div style="display: grid; gap: 10px">
-        <label for="targetCoordinate">Target Coordinate:</label>
+        <label for="targetCoordinate">Target Coordinate: {{}}</label>
         <input id="targetCoordinate" v-model="targetCoordinate" type="text" required />
         <button @click.prevent="selectTargetCoordinate">Select</button>
 
@@ -23,7 +23,12 @@
 </template>
 
 <script>
+import { inject } from "vue";
 export default {
+  setup() {
+    const { coords } = inject("Coords");
+    return { coords };
+  },
   data() {
     return {
       selectedVehicle: null,
@@ -36,7 +41,9 @@ export default {
   },
   methods: {
     // add in logic to select coordinates from map
-    selectTargetCoordinate() {},
+    selectTargetCoordinate() {
+      this.targetCoordinate = this.coords;
+    },
     selectSearchArea() {},
   },
   props: {

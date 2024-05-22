@@ -1,21 +1,34 @@
 <script setup lang="ts">
 import Navbar from "./components/Navbar.vue";
+import { provide, ref } from "vue";
 import { RouterView } from "vue-router";
 import { initializeWSConnections } from "./Functions/webSocket";
 
-initializeWSConnections();      // initialize 4 websocket connections for all 4 vehicles at entry point of project
+initializeWSConnections(); // initialize 4 websocket connections for all 4 vehicles at entry point of project
 console.log("Initialize 4 websocket connections from App.vue");
+
+// Use provide/inject to pass data between components
+const coords = ref("");
+
+function updateCoords(coordinate: string) {
+  coords.value = coordinate.toString();
+  console.log("changed Coordinates", coords.value);
+}
+
+provide("Coords", {
+  coords,
+  updateCoords,
+});
 </script>
 
 <template>
   <div>
-    <Navbar/>
+    <Navbar />
   </div>
-  <RouterView/>
+  <RouterView />
 </template>
 
 <style scoped>
-
 .logo.vite:hover {
   filter: drop-shadow(0 0 2em #747bff);
 }

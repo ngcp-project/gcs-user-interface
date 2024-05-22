@@ -41,29 +41,22 @@ export default {
   height: 100%;
 }
 </style> -->
+<!-- <script setup lang="ts">
+import { inject } from 'vue'
+
+const { coords, updateCoords } = inject('Coords')
+
+</script> -->
 
 <!-- offline -->
 <template>
   <div class="map">
-    <l-map
-      ref="map"
-      v-model:zoom="zoom"
-      :use-global-leaflet="false"
-      :center="mapOrigin"
-      @click="addPoint"
-    >
+    <l-map ref="map" v-model:zoom="zoom" :use-global-leaflet="false" :center="mapOrigin" @click="addPoint">
       <div class="button-container">
         <button class="send-button" @click="sendPolygonPoints">Send</button>
         <button class="clear-button" @click="clearPoints">Clear</button>
       </div>
-      <l-tile-layer
-        :url="localTileURL"
-        :minZoom="14"
-        :maxZoom="16"
-        layer-type="base"
-        name="CustomTiles"
-        
-      ></l-tile-layer>
+      <l-tile-layer :url="localTileURL" :minZoom="14" :maxZoom="16" layer-type="base" name="CustomTiles"></l-tile-layer>
       <l-polygon
         v-if="polygonPoints.length > 0"
         :lat-lngs="polygonPoints"
@@ -71,16 +64,24 @@ export default {
         :key="polygonPoints.length"
       ></l-polygon>
     </l-map>
+    <div>{{ this.coords }}</div>
   </div>
 </template>
 
 <script lang="ts">
 import "leaflet/dist/leaflet.css";
+import { inject, ref } from "vue";
 import { LMap, LTileLayer, LPolygon  } from "@vue-leaflet/vue-leaflet";
 import { LeafletMouseEvent, LatLngExpression  } from "leaflet";
 
 
+
 export default {
+  setup() {
+    const {coords, updateCoords} = inject('Coords')
+
+    return { coords, updateCoords}
+  },
   components: {
     LMap,
     LTileLayer,
@@ -105,13 +106,16 @@ export default {
     },
     clearPoints(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
+      console.log(this.coords.value)
       this.polygonPoints = []
       console.log("polygonPoints:", this.polygonPoints);
     },
     sendPolygonPoints(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
+      this.updateCoords(this.polygonPoints);
+      // console.log("asd",this.coords)
       // Send a POST request to the backend API
-      
+
       // axios.post('backend-api-url', data)
       // .then(response => {
       //   console.log('Polygon points sent successfully:', response.data);
@@ -119,8 +123,9 @@ export default {
       // .catch(error => {
       //   console.error('Error sending polygon points:', error);
       // });
+
       console.log("polygonPoints sent:", this.polygonPoints);
-    
+
     },
   },
 };
@@ -133,17 +138,17 @@ export default {
 .clear-button,
 .send-button {
   padding: 12px 24px;
-  font-size: 16px; 
+  font-size: 16px;
   border: none;
   border-radius: 8px;
-  background-color: #496ecc; 
+  background-color: #496ecc;
   color: white;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   transition-duration: 0.4s;
   cursor: pointer;
-  margin: 10px; 
+  margin: 10px;
 }
 .clear-button:hover,
 .send-button:hover {
@@ -156,5 +161,4 @@ export default {
   display: flex;
   z-index: 999;
 }
-
 </style>
