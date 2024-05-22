@@ -29,10 +29,14 @@
       ></l-tile-layer>
 
     <!-- vehicle + fire markers -->
-      <l-marker :lat-lng="ERU_position" :icon="ERU_icon"></l-marker>
+      <l-marker-rotate :lat-lng="ERU_position" :icon="ERU_icon" rotationAngle="50"></l-marker-rotate>
+      <l-marker-rotate :lat-lng="MEA_position" :icon="MEA_icon"></l-marker-rotate>
+      <l-marker-rotate :lat-lng="MRA_position" :icon="MRA_icon"></l-marker-rotate>
+      <l-marker-rotate :lat-lng="FRA_position" :icon="FRA_icon"></l-marker-rotate>
+      <!-- <l-marker :lat-lng="ERU_position" :icon="ERU_icon"></l-marker>
       <l-marker :lat-lng="MEA_position" :icon="MEA_icon"></l-marker>
       <l-marker :lat-lng="MRA_position" :icon="MRA_icon"></l-marker>
-      <l-marker :lat-lng="FRA_position" :icon="FRA_icon"></l-marker>
+      <l-marker :lat-lng="FRA_position" :icon="FRA_icon"></l-marker> -->
       <l-marker
         :icon="fire_icon"
         v-for="(point, index) in fireCoordsList"
@@ -66,6 +70,7 @@
 import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LPolygon, LMarker  } from "@vue-leaflet/vue-leaflet";
 import { LeafletMouseEvent, LatLngExpression, icon } from "leaflet";
+import { LMarkerRotate } from 'vue-leaflet-rotate-marker';
 interface Coordinates {
   latitude: number;
   longitude: number;
@@ -77,6 +82,7 @@ export default {
     LTileLayer,
     LPolygon,
     LMarker,
+    LMarkerRotate
   },
   props: {
     //import fire prop from telemetry
