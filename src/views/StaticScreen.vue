@@ -5,10 +5,10 @@ import Map from '../components/Map.vue';
 import { getAllConnections, closeConnections, getVehicleStatus } from "../Functions/webSocket";
 
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
-const ERU_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const ERU_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby', yaw: 0});
 const MEA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby', yaw: 0});
-const MRA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
-const FRA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, fire_coordinates: {longitude: 0, latitude: 0}, status: 'Standby'});
+const MRA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, status: 'Standby', yaw: 0});
+const FRA_data = ref({batteryPct: 0, lastUpdated: 0, coordinates: {longitude: 0, latitude: 0}, fire_coordinates: {longitude: 0, latitude: 0}, status: 'Standby', yaw: 0});
 
 // maps vehicle name to corresponding reactive variable so that addListeners can more easily set EventListeners to update variables
 const vehicleMap: { [key: string]: Ref<any> } = {
@@ -32,7 +32,8 @@ function addListeners() {
         vehicleMap[vehicleKey].value.coordinates.latitude = parseFloat(receivedData.currentPosition.latitude);
         vehicleMap[vehicleKey].value.coordinates.longitude = parseFloat(receivedData.currentPosition.longitude);
         // vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.dummyConnection);   // <-- uncomment to use dummyConnection value from mockWebsock.cjs 
-        vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.lastUpdated);   
+        vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.lastUpdated);  
+        vehicleMap[vehicleKey].value.yaw = parseInt(receivedData.yaw); 
 
         // FRA is sending additional fire coordinates
         if (vehicleKey == 'fra') {
@@ -40,9 +41,6 @@ function addListeners() {
             vehicleMap[vehicleKey].value.fire_coordinates.longitude = parseFloat(receivedData.fireCoordinates.longitude);   
         }
 
-        if (vehicleKey == 'mea') {
-            vehicleMap[vehicleKey].value.yaw = parseInt(receivedData.yaw);
-        }
         });
     } // end for loop
 } // end addListeners
@@ -57,10 +55,10 @@ onMounted(() => {
   <div class="screen_div">
     <div class="map_div">
         <!-- should be fire coords -->
-        <Map :ERU_coords=ERU_data.coordinates 
+        <Map :ERU_coords=ERU_data.coordinates :ERU_yaw="ERU_data.yaw"
              :MEA_coords=MEA_data.coordinates :MEA_yaw="MEA_data.yaw"
-             :MRA_coords=MRA_data.coordinates
-             :FRA_coords=FRA_data.coordinates :firePoint=FRA_data.fire_coordinates></Map>
+             :MRA_coords=MRA_data.coordinates :MRA_yaw="MRA_data.yaw"
+             :FRA_coords=FRA_data.coordinates :firePoint=FRA_data.fire_coordinates :FRA_yaw="FRA_data.yaw"></Map>
     </div>
 
     <div class="four-status-rightside">     

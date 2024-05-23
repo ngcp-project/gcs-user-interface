@@ -29,10 +29,10 @@
       ></l-tile-layer>
 
     <!-- vehicle + fire markers -->
-      <l-marker-rotate :lat-lng="ERU_position" :icon="ERU_icon"></l-marker-rotate>
+      <l-marker-rotate :lat-lng="ERU_position" :icon="ERU_icon" :rotationAngle=ERU_yaw></l-marker-rotate>
       <l-marker-rotate :lat-lng="MEA_position" :icon="MEA_icon" :rotationAngle=MEA_yaw></l-marker-rotate>
-      <l-marker-rotate :lat-lng="MRA_position" :icon="MRA_icon"></l-marker-rotate>
-      <l-marker-rotate :lat-lng="FRA_position" :icon="FRA_icon"></l-marker-rotate>
+      <l-marker-rotate :lat-lng="MRA_position" :icon="MRA_icon" :rotationAngle=MRA_yaw></l-marker-rotate>
+      <l-marker-rotate :lat-lng="FRA_position" :icon="FRA_icon" :rotationAngle=FRA_yaw></l-marker-rotate>
       <!-- <l-marker :lat-lng="ERU_position" :icon="ERU_icon"></l-marker>
       <l-marker :lat-lng="MEA_position" :icon="MEA_icon"></l-marker>
       <l-marker :lat-lng="MRA_position" :icon="MRA_icon"></l-marker>
@@ -90,10 +90,13 @@ export default {
 
     // vehicle coordinate props to pass into vehicle markers
     ERU_coords: { required: true, type: Object },
-    MEA_yaw: { required: true, type: Number },
+    ERU_yaw: { required: true, type: Number },
     MEA_coords: { required: true, type: Object },
+    MEA_yaw: { required: true, type: Number },
     MRA_coords: { required: true, type: Object },
-    FRA_coords: { required: true, type: Object }
+    MRA_yaw: { required: true, type: Number },
+    FRA_coords: { required: true, type: Object },
+    FRA_yaw: { required: true, type: Number }
   },
   data() {
     return {

@@ -63,7 +63,7 @@ ERU.on('connection', (ws) => {
      // continuously send random battery values to client
     setInterval(() => {
         vehicleData.speed = Math.random() * 150;
-        vehicleData.yaw = Math.random() * 30;
+        vehicleData.yaw = Math.random() * 360;
         vehicleData.altitude = 3423;
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
 
@@ -149,7 +149,7 @@ MEA.on('connection', (ws) => {
      // continuously send random battery values to client
     setInterval(() => {
         vehicleData.speed = Math.random() * 150; 
-        vehicleData.yaw = Math.random() * 60;
+        vehicleData.yaw = Math.random() * 360;
         vehicleData.altitude = Math.random() * 10000; 
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
         // vehicleData.batteryLife = Math.random().toFixed(2);
@@ -237,7 +237,7 @@ FRA.on('connection', (ws) => {
      // continuously send random battery values to client
     setInterval(() => {
         vehicleData.speed = Math.random() * 150; 
-        vehicleData.yaw = Math.random() * 30;
+        vehicleData.yaw = Math.random() * 360;
         vehicleData.altitude = Math.random() * 10000; 
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
         vehicleData.batteryLife = Math.random().toFixed(2);
@@ -324,7 +324,7 @@ MRA.on('connection', (ws) => {
      // continuously send random battery values to client
     setInterval(() => {
         vehicleData.speed = Math.random() * 150; 
-        vehicleData.yaw = Math.random() * 30;
+        vehicleData.yaw = Math.random() * 360;
         vehicleData.altitude = 4200; 
         // vehicleData.batteryLife = Math.floor((Math.random() * (1 - 0 + 1)) + 0);
         vehicleData.batteryLife = Math.random().toFixed(2);
