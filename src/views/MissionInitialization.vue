@@ -39,18 +39,20 @@
 
 <script lang="ts">
 import { useRouter } from 'vue-router';
+import { inject } from "vue";
+import {  Stage } from "../Functions/types";
 
 export default {
   setup() {
+    const { MISSION_INFO, addStage, updateSearchArea, updateTarget } = inject("Mission Info");
+
     const router = useRouter();
     // function to use Vue router to navigate to StaticScreen after pressing submit
     const toStaticScreen = () => {
       router.push(`/StaticScreen`);
     }
     
-    return {
-      toStaticScreen
-    }
+    return { toStaticScreen, MISSION_INFO, addStage, updateSearchArea, updateTarget };
   },
   
   data() {
@@ -58,29 +60,35 @@ export default {
       missionName: "",
       stageName: "",
       vehicleKeys: [
-        {
-          vehicleName: "",
-          target: {
-            latitude: "",
-            longitude: "",
-          },
-          searchArea: [
             {
-              latitude: "",
-              longitude: "",
+                "vehicleName": "ERU",
+                "target": {"latitude": "", "longitude": ""},
+                "searchArea": []
             },
             {
-              latitude: "",
-              longitude: "",
-            },
-          ],
-        },
-        
-      ],
+                "vehicleName": "FRA",
+                "target": {"latitude": "", "longitude": ""},
+                "searchArea": []
+            },{
+                "vehicleName": "MEA",
+                "target": {"latitude": "", "longitude": ""},
+                "searchArea": []
+            },{
+                "vehicleName": "MRA",
+                "target": {"latitude": "", "longitude": ""},
+                "searchArea": []
+            }
+          ]
     };
   },
   methods: {
     submitForm() {
+      // initalizes MISSION_INFO with name and stage
+      this.MISSION_INFO["missionName"] = this.missionName;
+      const firstStage: Stage = {stageName: this.stageName,
+                                 vehicleKeys: this.vehicleKeys};
+      this.addStage(firstStage);
+
       // Here you can handle the form submission, for example send a POST request to your server
       console.log(this.missionName, this.stageName, this.vehicleKeys);
             fetch('http://localhost:5135/MissionInfo', {

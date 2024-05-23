@@ -1,9 +1,19 @@
 <template>
   <div class="coordinate-form">
-    <h2>Mission {{ missionNumber }}</h2>
-    <form @submit.prevent="submitCoordinates">
+    <h2>{{ this.MISSION_INFO["missionName"] }}</h2>
+    <form @submit.prevent="submitCoordinates()">
+
+      <!-- Dropdown to show all stages -->
+      <label for="stage">Stage:</label>
+      <select id="stage" v-model="selectedStage" required>
+        <option v-for="stage in this.getStageNames()" :key="stage" :value= "stage" >
+          {{ stage }}
+        </option>
+      </select>     
+
+      <!-- Dropdown to show all vehicles -->
       <label for="vehicle">Vehicle:</label>
-      <select id="vehicle" v-model="selectedVehicle" required @change="reset()">
+      <select id="vehicle" v-model="selectedVehicle" required @change="this.reset()">
         <option v-for="vehicle in vehicles" :key="vehicle" :value= "vehicle" >
           {{ vehicle }}
         </option>
@@ -17,7 +27,7 @@
         <input id="searchArea" v-model="this.vehicle_data[this.selectedVehicle].search" type="text" required /> <!-- current selected vehicle's search area coords in v-model -->
         <button @click.prevent="selectSearchArea">{{ search_button_text }}</button>
       </div>
-      <button type="submit">Submit</button>
+      <button type="submit" @click="submitCoordinates(); printMISSION_INFO()">Submit</button>
     </form>
   </div>
 </template>
@@ -28,11 +38,14 @@ export default {
   setup() {
     const { searchCoords, selectingSearch } = inject("SearchCoords");
     const { targetCoord, selectingTarget } = inject('TargetCoord');
+    const { MISSION_INFO, addStage, updateSearchArea, updateTarget, getStageNames, getStageInfo } = inject("Mission Info");
 
-    return { searchCoords, selectingSearch, selectingTarget, targetCoord };
+    return { searchCoords, selectingSearch, selectingTarget, targetCoord, MISSION_INFO, addStage, updateSearchArea, updateTarget, getStageNames, getStageInfo };
   },
   data() {
     return {
+      selectedStage: null,
+
       selectedVehicle: "ERU",
       vehicles: ["ERU", "MEA", "MRA", "FRA"], // replace with vehicle names from backend fetch
       latitude: null,
@@ -60,6 +73,10 @@ export default {
         this.target_button_text = "Select";
         this.vehicle_data[this.selectedVehicle].target = this.targetCoord;
         console.log("Selected Target Coordinate for " + this.selectedVehicle + ": " + this.vehicle_data[this.selectedVehicle].target);
+
+        // THIS UPDATES TARGET COORDINATE FOR SPECIFIC VEHICLE OF SPECIFIED STAGE IN MISSION_INFO (massive JSON object from App.vue)
+        this.updateTarget(this.selectedStage, this.selectedVehicle, this.targetCoord);    // this updates target coord for specific vehicle of selected stage
+        this.getStageInfo(this.selectedStage);
       }
     },
     selectSearchArea() {
@@ -72,6 +89,17 @@ export default {
         this.search_button_text = "Select"
         this.vehicle_data[this.selectedVehicle].search = this.searchCoords;    // update current vehicle's search area with selected search area
         console.log("Selected Search Area Coords for " + this.selectedVehicle + ": " + this.vehicle_data[this.selectedVehicle].search);
+
+
+        // THIS UPDATES SEARCH AREA COORDS FOR SPECIFIC VEHICLE OF SPECIFIED STAGE IN MISSION_INFO (massive JSON object from App.vue)
+        let preprocess = [];
+        for (let i = 0; i < this.searchCoords.length; i++) {
+          let lat = this.searchCoords[i][0];
+          let long = this.searchCoords[i][1];
+          preprocess.push({"latitude": lat, "longitude": long});
+        }
+        this.updateSearchArea(this.selectedStage, this.selectedVehicle, preprocess);    // this updates target coord for specific vehicle of selected stage
+        this.getStageInfo(this.selectedStage);
       }
     },
     reset() {
@@ -83,6 +111,27 @@ export default {
       this.searchCoords = "";
       this.target_button_text = "Select";
       this.search_button_text = "Select";
+    },
+    submitCoordinates() {
+      fetch('http://localhost:5135/MissionStage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.MISSION_INFO)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => console.log(data))
+            .catch(error => console.error('Error initializing Mission Info:', error));
+    },
+    printMISSION_INFO() {
+      console.log("Printing MISSION_INFO");
+      console.log(JSON.stringify(this.MISSION_INFO));
     }
   },
   props: {
