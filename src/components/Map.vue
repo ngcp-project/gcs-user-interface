@@ -205,8 +205,7 @@ export default {
       
     },
     //send current selected polygons as zone in polygons
-    async sendZoneInPolygonPoints(event: LeafletMouseEvent) {
-      event.stopPropagation(); // Stop event propagation
+    async sendZoneInPolygonPoints() {
       try {
         const coordinates = this.polygonPoints.map(proxyArray => {
           // Extract latitude and longitude from each Proxy object
@@ -261,8 +260,7 @@ export default {
       
     },
     //send current selected polygons as zone out polygons
-    async sendZoneOutPolygonPoints(event: LeafletMouseEvent) {
-      event.stopPropagation(); // Stop event propagation
+    async sendZoneOutPolygonPoints() {
       try {
         const coordinates = this.polygonPoints.map(proxyArray => {
           // Extract latitude and longitude from each Proxy object
@@ -298,8 +296,7 @@ export default {
       }
     },
     //get all zone in polygons 
-    async getZoneIn(event: LeafletMouseEvent) {
-      event.stopPropagation(); // Stop event propagation
+    async getZoneIn() {
       try {
         const response = await fetch('http://localhost:5135/zones/in', {
           method: 'GET',
@@ -324,8 +321,7 @@ export default {
       }
     },
     //get all zone out polygons 
-    async getZoneOut(event: LeafletMouseEvent) {
-      event.stopPropagation(); // Stop event propagation
+    async getZoneOut() {
       try {
         const response = await fetch('http://localhost:5135/zones/out', {
           method: 'GET',
@@ -354,10 +350,14 @@ export default {
         this.fireCoordsList.shift();
       }
       //pass the fire coords here
-      this.fireCoordsList.push(coords);
+      this.fireCoordsList.push({...coords});
       // this.fireCoordsList.push(firePoint);
       // console.log("firstptslist:", this.fireCoordsList)
     },
+  },
+  mounted() {
+      this.getZoneIn();
+      this.getZoneOut();
   },
   watch: {
     // uses deep watch to watch for changes in longitude and latitude properties in firePoint
@@ -372,6 +372,7 @@ export default {
       },
       deep: true
     },
+    
     
     // firePoints(newFireCoords) {
     //   const currentTime = Date.now();
