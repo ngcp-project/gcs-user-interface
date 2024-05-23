@@ -128,11 +128,15 @@ export default {
             })
             .then(data => console.log(data))
             .catch(error => console.error('Error initializing Mission Info:', error));
+      this.close();
     },
     printMISSION_INFO() {
       console.log("Printing MISSION_INFO");
       console.log(JSON.stringify(this.MISSION_INFO));
-    }
+    },
+    close() {
+      this.$emit('close');
+    },
   },
   props: {
     missionNumber: {

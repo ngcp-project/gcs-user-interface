@@ -29,7 +29,7 @@
   <div>
     <div v-if="showPopup" class="popup">
       <button style="float: right" @click="closePopup()">X</button>
-      <MissionDropdown :missionNumber="missionNumber" />
+      <MissionDropdown :missionNumber="missionNumber" @close="closePopup()"/>
     </div>
   </div>
 </template>
@@ -40,8 +40,9 @@ import { inject } from "vue";
 export default {
   setup() {
     const { selectingTarget } = inject('TargetCoord');
+    const { selectingSearch } = inject('SearchCoords');
 
-    return { selectingTarget };
+    return { selectingTarget, selectingSearch };
   },
 
   name: "MissionStatus",
@@ -67,6 +68,7 @@ export default {
     // make sure to set selectingTarget back to false
     closePopup() {
       this.selectingTarget = false;
+      this.selectingSearch = false;
       this.showPopup = false;
     }
   }

@@ -1,11 +1,12 @@
 <template>
   <div style="width: fit-content; margin: auto; min-width: 35%">
     <h1>Mission Initialization</h1>
+    <h2 v-if="missionExists" style="text-align: center;"> Already in this Mission </h2>
     <form @submit.prevent="submitForm();" style="display: grid; gap: 10px">
       <label for="missionName">Mission Name:</label>
-      <input id="missionName" v-model="missionName" placeholder="Mission Name" required />
+      <input id="missionName" v-model="missionName" placeholder="Mission Name" required @change="missionExists = false;"/>
 
-      <label for="stageName">Stage Name:</label>
+      <label for="stageName">Initial Stage Name:</label>
       <input id="stageName" v-model="stageName" placeholder="Stage Name" required />
 
       <!-- <div v-for="(vehicle, index) in vehicleKeys" :key="index" style="display: grid; gap: 10px">
@@ -37,11 +38,11 @@
 
   <div v-if="MISSION_INFO['missionName'] != ''">
     <h1 style="margin-top: 20%;">Current Mission: {{ MISSION_INFO['missionName'] }} </h1>
-    <h2 v-if="stageExists" style="text-align: center;"> {{ newStageName }} Already Exists! </h2>
-    <h2 v-else style="text-align: center;"> Create New Stage </h2>
+    <h2 style="text-align: center;"> Create New Stage </h2>
+    <h2 v-if="stageExists" style="text-align: center;"> Stage with that name already Exists! </h2>
     <form @submit.prevent="" style="display: grid; gap: 10px;">
       <label for="stageName">Stage Name:</label>
-      <input id="stageName" v-model="newStageName" placeholder="Stage Name" required />
+      <input id="stageName" v-model="newStageName" placeholder="Stage Name" required @change="stageExists = false;"/>
       <button type="submit" @click="createNewStage();">Submit</button>
     </form>
   </div>
@@ -52,7 +53,7 @@
 <script lang="ts">
 import { useRouter } from 'vue-router';
 import { inject } from "vue";
-import {  Stage } from "../Functions/types";
+import { Stage } from "../Functions/types";
 
 export default {
   setup() {
@@ -73,6 +74,7 @@ export default {
       stageName: "",
       newStageName: "",
       stageExists: false,
+      missionExists: false,
       vehicleKeys: [
             {
                 "vehicleName": "ERU",
@@ -97,6 +99,17 @@ export default {
   },
   methods: {
     submitForm() {
+      if ( this.MISSION_INFO["missionName"] == this.missionName) {
+        console.log("Already in this Mission");
+        this.missionExists = true;
+        return;
+      } 
+
+      // if there is a current mission, reset MISSION_INFO
+      this.missionExists = false;
+      this.MISSION_INFO["missionName"] = "";
+      this.MISSION_INFO["stages"] = [] as Stage[];
+
       // initalizes MISSION_INFO with name and stage
       this.MISSION_INFO["missionName"] = this.missionName;
       const firstStage: Stage = {stageName: this.stageName,
