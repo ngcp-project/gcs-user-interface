@@ -2,14 +2,14 @@
 // for each obj
 
 export interface Coordinate {
-    latitude: string;
-    longitude: string;
+    latitude: string | null;
+    longitude: string | null;
   }
   
 export interface Vehicle {
 vehicleName: string;
-target: Coordinate;
-searchArea: Coordinate[];
+target: Coordinate | null;
+searchArea: Coordinate[] | null;
 }
 
 export interface Stage {

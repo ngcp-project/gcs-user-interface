@@ -20,14 +20,14 @@
       </select>
       <div style="display: grid; gap: 10px">
         <label for="targetCoordinate">Target Coordinate: {{}}</label>
-        <input id="targetCoordinate" v-model="this.vehicle_data[this.selectedVehicle].target" type="text" required /> <!-- current selected vehicle's target coord in v-model -->
+        <input id="targetCoordinate" v-model="this.vehicle_data[this.selectedVehicle].target" type="text" /> <!-- current selected vehicle's target coord in v-model -->
         <button @click.prevent="selectTargetCoordinate">{{ target_button_text }}</button>
 
         <label for="searchArea">Search Area:</label>
-        <input id="searchArea" v-model="this.vehicle_data[this.selectedVehicle].search" type="text" required /> <!-- current selected vehicle's search area coords in v-model -->
+        <input id="searchArea" v-model="this.vehicle_data[this.selectedVehicle].search" type="text" /> <!-- current selected vehicle's search area coords in v-model -->
         <button @click.prevent="selectSearchArea">{{ search_button_text }}</button>
       </div>
-      <button type="submit" @click="submitCoordinates(); printMISSION_INFO()">Submit</button>
+      <button type="submit" @click="printMISSION_INFO()">Submit</button>
     </form>
   </div>
 </template>

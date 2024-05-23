@@ -62,21 +62,21 @@ export default {
       vehicleKeys: [
             {
                 "vehicleName": "ERU",
-                "target": {"latitude": "", "longitude": ""},
-                "searchArea": []
+                "target": null,
+                "searchArea": null
             },
             {
                 "vehicleName": "FRA",
-                "target": {"latitude": "", "longitude": ""},
-                "searchArea": []
+                "target": null,
+                "searchArea": null
             },{
                 "vehicleName": "MEA",
-                "target": {"latitude": "", "longitude": ""},
-                "searchArea": []
+                "target": null,
+                "searchArea": null
             },{
                 "vehicleName": "MRA",
-                "target": {"latitude": "", "longitude": ""},
-                "searchArea": []
+                "target": null,
+                "searchArea": null
             }
           ]
     };
@@ -99,27 +99,7 @@ export default {
                 body: JSON.stringify({ 
                   missionName: this.missionName,
                   stageName: this.stageName,
-                  vehicleKeys: [
-                    {
-                        "vehicleName": "ERU",
-                        "target": null,
-                        "searchArea": null
-                    },
-                    {
-                        "vehicleName": "FRA",
-                        "target": null,
-                        "searchArea": null
-                    },{
-                        "vehicleName": "MEA",
-                        "target": null,
-                        "searchArea": null
-                    },{
-                        "vehicleName": "MRA",
-                        "target": null,
-                        "searchArea": null
-                    }
-                  ]
-
+                  vehicleKeys: this.vehicleKeys
                  })
             })
             .then(response => {
