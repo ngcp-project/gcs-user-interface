@@ -59,6 +59,9 @@
 import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LPolygon, LMarker  } from "@vue-leaflet/vue-leaflet";
 import { LeafletMouseEvent, LatLngExpression, icon } from "leaflet";
+
+import {pushZoneInPolygons, pushZoneOutPolygons, clearZoneInPolygons, clearZoneOutPolygons, clearPolygons} from "../Functions/geofence";
+
 interface Coordinates {
   latitude: number;
   longitude: number;
@@ -83,7 +86,7 @@ export default {
       polygonPoints: [] as LatLngExpression[], //current selected polygons
       zoneInPolygons: [] as LatLngExpression[], //all zone in polygons from backend
       zoneOutPolygons: [] as LatLngExpression[], //all zone out polygons from backend
-      fireCoordsList: [],
+      fireCoordsList: [] as Coordinates[],
       maxFireCoordsCount: 10,
       lastUpdate: 0,
       updateInterval: 500, // Adjust as needed
@@ -116,6 +119,7 @@ export default {
       this.polygonPoints = []; 
       this.zoneInPolygons = []; 
       this.zoneOutPolygons = []; 
+      clearPolygons();
       try {
         const response = await fetch('http://localhost:5135/zones/in', {
           method: 'DELETE',
@@ -265,12 +269,14 @@ export default {
         }
         const res = await response.json();
         this.zoneInPolygons = []; //need to reset displayed zone in polygons
+        clearZoneInPolygons();
         let zones = res.data.split("|").map((zone : any) => JSON.parse(zone))
         //console.log("zoneIn prev", this.zoneInPolygons);
         zones.forEach((zone : any) => {
           //console.log(zone.coordinates.map(coordinate => [coordinate.latitude, coordinate.longitude]));
           const coordinates = zone.coordinates.map((coordinate : any) => [coordinate.latitude, coordinate.longitude]);
           this.zoneInPolygons.push([coordinates]);
+          pushZoneInPolygons(coordinates);
           
         });
         console.log("Updated Zone In Polygons", this.zoneInPolygons);
@@ -291,6 +297,7 @@ export default {
         }
         const res = await response.json();
         this.zoneOutPolygons = []; //need to reset displayed zone out polygons
+        clearZoneOutPolygons();
         let zones = res.data.split("|").map((zone : any) => JSON.parse(zone))
         //console.log(zones);
         //console.log("Zoneout prev", this.zoneOutPolygons);
@@ -298,6 +305,7 @@ export default {
           //console.log(zone.coordinates);
           const coordinates = zone.coordinates.map((coordinate : any) => [coordinate.latitude, coordinate.longitude]);
           this.zoneOutPolygons.push([coordinates]);
+          pushZoneOutPolygons(coordinates);
         });
         console.log("Updated Zone Out Polygons" , this.zoneOutPolygons);
       }
