@@ -8,11 +8,11 @@
       <label for="stageName">Stage Name:</label>
       <input id="stageName" v-model="stageName" placeholder="Stage Name" required />
 
-      <div v-for="(vehicle, index) in vehicleKeys" :key="index" style="display: grid; gap: 10px">
+      <!-- <div v-for="(vehicle, index) in vehicleKeys" :key="index" style="display: grid; gap: 10px">
         <label :for="'vehicleName' + index">Vehicle Name:</label>
-        <input :id="'vehicleName' + index" v-model="vehicle.vehicleName" placeholder="Vehicle Name" required />
+        <input :id="'vehicleName' + index" v-model="vehicle.vehicleName" placeholder="Vehicle Name" required /> -->
 
-        <div style="display: grid; gap: 10px">
+        <!-- <div style="display: grid; gap: 10px">
           <div style="display: grid; gap: 10px">
             <label :for="'targetLatitude' + index">Target Latitude:</label>
             <input :id="'targetLatitude' + index" v-model="vehicle.target.latitude" placeholder="Target Latitude" />
@@ -29,10 +29,10 @@
               <input :id="'searchAreaLongitude' + index" v-model="area.longitude" placeholder="Search Area Longitude" />
             </div>
           </div>
-        </div>
-      </div>
+        </div> -->
+      <!-- </div> -->
 
-      <button type="submit" @click="toStaticScreen">Submit</button>
+      <button type="submit" @click="submitForm(); toStaticScreen()">Submit</button>
     </form>
   </div>
 </template>
@@ -91,7 +91,26 @@ export default {
                 body: JSON.stringify({ 
                   missionName: this.missionName,
                   stageName: this.stageName,
-                  vehicleKeys: this.vehicleKeys
+                  vehicleKeys: [
+                    {
+                        "vehicleName": "ERU",
+                        "target": null,
+                        "searchArea": null
+                    },
+                    {
+                        "vehicleName": "FRA",
+                        "target": null,
+                        "searchArea": null
+                    },{
+                        "vehicleName": "MEA",
+                        "target": null,
+                        "searchArea": null
+                    },{
+                        "vehicleName": "MRA",
+                        "target": null,
+                        "searchArea": null
+                    }
+                  ]
 
                  })
             })
