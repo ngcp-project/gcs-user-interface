@@ -51,7 +51,11 @@ function updateSearchArea(stageName: string, vehicleName: string, newSearchAreaC
           let vehicle = currentStage["vehicleKeys"][j];
 
           if (vehicle["vehicleName"] == vehicleName) {
-            vehicle['searchArea'] = newSearchAreaCoords;
+            if (newSearchAreaCoords.length == 0) {
+              vehicle['searchArea'] = null;
+            } else {
+              vehicle['searchArea'] = newSearchAreaCoords;
+            }
           }
       } //end for
     } // end if
@@ -60,7 +64,7 @@ function updateSearchArea(stageName: string, vehicleName: string, newSearchAreaC
 
 // --- THIS UPDATES TARGET COORDS FOR SPECIFIC VEHICLE IN SPECIFIED STAGE --- //
 function updateTarget(stageName: string, vehicleName: string, newTargetCoord: [string, string]) {
-  const newTarget: Coordinate = {latitude: newTargetCoord[0],
+  let newTarget: Coordinate = {latitude: newTargetCoord[0],
                                  longitude: newTargetCoord[1]}
   // loop through 'stages' array to find specified stage
   for (let i = 0; i < MISSION_INFO.value['stages'].length; i++) {
@@ -73,7 +77,11 @@ function updateTarget(stageName: string, vehicleName: string, newTargetCoord: [s
           let vehicle = currentStage["vehicleKeys"][j];
 
           if (vehicle["vehicleName"] == vehicleName) {
-            vehicle['target'] = newTarget;
+            if (newTargetCoord[0] == undefined) {
+              vehicle['target'] = null;
+            } else {
+              vehicle['target'] = newTarget;
+            }
           }
       } //end for
     } // end if
