@@ -94,6 +94,10 @@ export default {
         }),
     };
   },
+  mounted() {
+    this.getZoneIn();
+    this.getZoneOut();
+  },
   methods: {
     //creating the current selected polygon
     addPoint(event: LeafletMouseEvent) {
@@ -254,8 +258,8 @@ export default {
       }
     },
     //get all zone in polygons 
-    async getZoneIn(event: LeafletMouseEvent) {
-      event.stopPropagation(); // Stop event propagation
+    async getZoneIn() {
+      //event.stopPropagation(); // Stop event propagation
       try {
         const response = await fetch('http://localhost:5135/zones/in', {
           method: 'GET',
@@ -280,8 +284,8 @@ export default {
       }
     },
     //get all zone out polygons 
-    async getZoneOut(event: LeafletMouseEvent) {
-      event.stopPropagation(); // Stop event propagation
+    async getZoneOut() {
+      //event.stopPropagation(); // Stop event propagation
       try {
         const response = await fetch('http://localhost:5135/zones/out', {
           method: 'GET',
