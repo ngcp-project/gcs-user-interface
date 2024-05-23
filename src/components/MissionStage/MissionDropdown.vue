@@ -15,7 +15,7 @@
 
         <label for="searchArea">Search Area:</label>
         <input id="searchArea" v-model="searchArea" type="text" required />
-        <button @click.prevent="selectSearchArea">Select</button>
+        <button @click.prevent="selectSearchArea">{{ search_button_text }}</button>
       </div>
       <button type="submit">Submit</button>
     </form>
@@ -26,10 +26,10 @@
 import { inject } from "vue";
 export default {
   setup() {
-    const { searchCoords } = inject("SearchCoords");
+    const { searchCoords, selectingSearch } = inject("SearchCoords");
     const { targetCoord, selectingTarget } = inject('TargetCoord');
 
-    return { searchCoords, selectingTarget, targetCoord };
+    return { searchCoords, selectingSearch, selectingTarget, targetCoord };
   },
   data() {
     return {
@@ -39,7 +39,8 @@ export default {
       searchArea: null,
       latitude: null,
       longitude: null,
-      target_button_text: "Select"
+      target_button_text: "Select",
+      search_button_text: "Select"
     };
   },
   methods: {
@@ -60,8 +61,17 @@ export default {
       }
     },
     selectSearchArea() {
-      this.searchArea = this.searchCoords;
-      console.log("Selected Search Area Coords: " + this.searchCoords);
+      this.selectingSearch = !this.selectingSearch; // toggles selectingSearch
+
+      if (this.selectingSearch) { // went from false -> true, so don't update searchArea
+        console.log("Selecting search area coords...");
+        this.search_button_text = "Done"
+      } else { // went from true -> false, so set searchArea to searchCoords (from injected)
+        this.searchArea = this.searchCoords;
+        console.log("Selected Search Area Coords: " + this.searchCoords);
+        this.search_button_text = "Select"
+      }
+      
     },
   },
   props: {

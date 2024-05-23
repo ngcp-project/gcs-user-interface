@@ -77,10 +77,10 @@ import { LeafletMouseEvent, LatLngExpression  } from "leaflet";
 
 export default {
   setup() {
-    const {searchCoords, updateSearchCoords} = inject('SearchCoords');
+    const {searchCoords, selectingSearch, updateSearchCoords} = inject('SearchCoords');
     const { targetCoord, selectingTarget } = inject('TargetCoord');
 
-    return { searchCoords, updateSearchCoords, targetCoord, selectingTarget}
+    return { searchCoords, selectingSearch, updateSearchCoords, targetCoord, selectingTarget}
   },
   components: {
     LMap,
@@ -93,6 +93,7 @@ export default {
       zoom: 16,
       localTileURL: "http://localhost:8001/{z}/{x}/{y}.png", // Update to local server URL
       polygonPoints: [] as LatLngExpression[],
+      searchPoints: [] as LatLngExpression[],
     };
   },
   methods: {
@@ -102,6 +103,11 @@ export default {
       console.log("Clicked coordinates:", lat, lng);
       const latLng: LatLngExpression = [event.latlng.lat, event.latlng.lng];
       this.polygonPoints.push(latLng);
+      if (this.selectingSearch) {
+        console.log("searchPoints: ",this.searchPoints);
+        this.searchPoints.push(latLng);
+        this.updateSearchCoords(this.searchPoints);
+      }
       console.log("polygonPoints:", this.polygonPoints);
 
       // if selectingTarget from App.vue is true, set targetCoord (also from App.vue) to the latest point you clicked on Map
@@ -114,7 +120,10 @@ export default {
       event.stopPropagation(); // Stop event propagation
       console.log(this.searchCoords.value)
       this.polygonPoints = []
+      this.searchPoints = []
       console.log("polygonPoints:", this.polygonPoints);
+      this.updateSearchCoords(this.polygonPoints);
+      this.targetCoord = []
     },
     sendPolygonPoints(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation

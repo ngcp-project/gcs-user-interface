@@ -9,18 +9,21 @@ console.log("Initialize 4 websocket connections from App.vue");
 
 // Use provide/inject to pass data between components
 const searchCoords = ref("");
+const selectingSearch = ref(false);
 function updateSearchCoords(coordinate: string) {
   searchCoords.value = coordinate.toString();
   // console.log("changed Coordinates", searchCoords.value);
 }
 provide("SearchCoords", {
   searchCoords,
+  selectingSearch,
   updateSearchCoords,
 });
 
 // FOR TARGET COORDINATE
 const targetCoord = ref("");
 const selectingTarget = ref(false);    // this indicates to MissionDropdown and Map6 that we are currently selecting a target coordinate 
+
 provide("TargetCoord", {
   targetCoord,
   selectingTarget
