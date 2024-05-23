@@ -29,10 +29,11 @@ provide("TargetCoord", {
   selectingTarget
 });
 
-// --------------------- MISSION INFORMATON --------------------- //
+// ---------------------------- MISSION INFORMATON ---------------------------- //
 const MISSION_INFO = ref({"missionName": "",
                           "stages": [] as Stage[]});
 
+// --- THIS ADDS A NEW STAGE TO MISSION_INFO'S "stages" LIST --- //
 function addStage(stage: Stage) {
   MISSION_INFO.value['stages'].push(stage);
 }
@@ -107,6 +108,18 @@ function getStageInfo(stage_name: string) {
   } // end for
 } // end getStageInfo
 
+// --- THIS CHECKS IF A STAGE WITH THE SPECIFIED NAME ALREADY EXISTS IN THE CURRENT MISSION --- //
+function checkStageExists(stage_name: string) {
+  // loop through all stages of current mission
+  for (let i = 0; i < MISSION_INFO.value['stages'].length; i++) {
+    let currentStage = MISSION_INFO.value['stages'][i];
+    if (currentStage["stageName"] == stage_name) {
+      return true;
+    } 
+  } 
+  return false;
+}
+
 
 provide("Mission Info", {
   MISSION_INFO,
@@ -114,7 +127,8 @@ provide("Mission Info", {
   updateSearchArea,
   updateTarget,
   getStageNames,
-  getStageInfo
+  getStageInfo,
+  checkStageExists
 });
 
 export type {

@@ -76,7 +76,7 @@ export default {
 .popup {
   position: fixed;
   top: 50%;
-  left: 50%;
+  left: 68%;
   transform: translate(-50%, -50%);
   background: rgba(0, 0, 0, 0.5);
   padding: 20px;

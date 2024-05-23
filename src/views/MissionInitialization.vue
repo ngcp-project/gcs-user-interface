@@ -1,7 +1,7 @@
 <template>
   <div style="width: fit-content; margin: auto; min-width: 35%">
     <h1>Mission Initialization</h1>
-    <form @submit.prevent="submitForm" style="display: grid; gap: 10px">
+    <form @submit.prevent="submitForm();" style="display: grid; gap: 10px">
       <label for="missionName">Mission Name:</label>
       <input id="missionName" v-model="missionName" placeholder="Mission Name" required />
 
@@ -32,8 +32,20 @@
         </div> -->
       <!-- </div> -->
 
-      <button type="submit" @click="submitForm(); toStaticScreen()">Submit</button>
+      <button type="submit" @click="submitForm();">Submit</button>
     </form>
+
+  <div v-if="MISSION_INFO['missionName'] != ''">
+    <h1 style="margin-top: 20%;">Current Mission: {{ MISSION_INFO['missionName'] }} </h1>
+    <h2 v-if="stageExists" style="text-align: center;"> {{ newStageName }} Already Exists! </h2>
+    <h2 v-else style="text-align: center;"> Create New Stage </h2>
+    <form @submit.prevent="" style="display: grid; gap: 10px;">
+      <label for="stageName">Stage Name:</label>
+      <input id="stageName" v-model="newStageName" placeholder="Stage Name" required />
+      <button type="submit" @click="createNewStage();">Submit</button>
+    </form>
+  </div>
+
   </div>
 </template>
 
@@ -44,7 +56,7 @@ import {  Stage } from "../Functions/types";
 
 export default {
   setup() {
-    const { MISSION_INFO, addStage, updateSearchArea, updateTarget } = inject("Mission Info");
+    const { MISSION_INFO, addStage, updateSearchArea, updateTarget, checkStageExists } = inject("Mission Info");
 
     const router = useRouter();
     // function to use Vue router to navigate to StaticScreen after pressing submit
@@ -52,13 +64,15 @@ export default {
       router.push(`/StaticScreen`);
     }
     
-    return { toStaticScreen, MISSION_INFO, addStage, updateSearchArea, updateTarget };
+    return { toStaticScreen, MISSION_INFO, addStage, updateSearchArea, updateTarget, checkStageExists };
   },
   
   data() {
     return {
       missionName: "",
       stageName: "",
+      newStageName: "",
+      stageExists: false,
       vehicleKeys: [
             {
                 "vehicleName": "ERU",
@@ -130,7 +144,23 @@ export default {
             })
             .then(data => console.log(data))
             .catch(error => console.error('Error initializing Mission Info:', error));
-          }
+
+            this.toStaticScreen();
+          },
+
+    createNewStage() {
+      // check if a stage with the current newStageName already exists in this mission
+      if (this.checkStageExists(this.newStageName)) {
+        console.log("Stage with name " + this.newStageName + " already exists! Not creating new one");
+        this.stageExists = true;
+      } else {
+        const newStage: Stage = {stageName: this.newStageName,
+                               vehicleKeys: this.vehicleKeys};
+        this.addStage(newStage);
+        this.toStaticScreen();
+        this.stageExists = false;
+      }
+    }
   },
 };
 </script>
