@@ -25,14 +25,15 @@
         :maxZoom="16"
         layer-type="base"
         name="CustomTiles"
-        
       ></l-tile-layer>
 
-    <!-- vehicle + fire markers -->
+    <!------- VEHICLE + FIRE MARKERS -------->
       <l-marker-rotate :lat-lng="ERU_position" :icon="ERU_icon" :rotationAngle=ERU_yaw></l-marker-rotate>
       <l-marker-rotate :lat-lng="MEA_position" :icon="MEA_icon" :rotationAngle=MEA_yaw></l-marker-rotate>
       <l-marker-rotate :lat-lng="MRA_position" :icon="MRA_icon" :rotationAngle=MRA_yaw></l-marker-rotate>
       <l-marker-rotate :lat-lng="FRA_position" :icon="FRA_icon" :rotationAngle=FRA_yaw></l-marker-rotate>
+
+      <!---- UNCOMENT BELOW TO USE REGULAR MARKERS IF ROTATED MARKERS BUG OUT ---->
       <!-- <l-marker :lat-lng="ERU_position" :icon="ERU_icon"></l-marker>
       <l-marker :lat-lng="MEA_position" :icon="MEA_icon"></l-marker>
       <l-marker :lat-lng="MRA_position" :icon="MRA_icon"></l-marker>
@@ -88,7 +89,7 @@ export default {
     //import fire prop from telemetry
     firePoint: { required: false, type: Object},
 
-    // vehicle coordinate props to pass into vehicle markers
+    // vehicle coordinate and yaw props to pass into vehicle markers
     ERU_coords: { required: true, type: Object },
     ERU_yaw: { required: true, type: Number },
     MEA_coords: { required: true, type: Object },
@@ -120,7 +121,7 @@ export default {
         iconUrl: "../src/assets/ERU.png",
         iconSize: [38, 38],
         }),
-      MEA_position: [35.327993383681886 , -120.74457174594193],   // initial position
+      MEA_position: [35.32724060701405, -120.74394940698397],   // initial position
       MEA_icon: icon({
         iconUrl: "../src/assets/MEA.png",
         iconSize: [38, 38],
@@ -403,10 +404,7 @@ export default {
         this.FRA_position = [newFRAcoords.latitude, newFRAcoords.longitude];
       },
       deep: true
-    },
-    MEA_yaw: function() {
-        console.log("from watcher in map for MEW_yaw: " + this.MEA_yaw);
-    },
+    }
   },
   
 };
