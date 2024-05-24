@@ -12,7 +12,9 @@
             vehicleStatus: { required: true, type: String},
             batteryPct: {required: true, type: Number},
             latency: { required: true, type: Number },
-            coordinates: { required: true, type: Object }
+            coordinates: { required: true, type: Object },
+            isInKeepInZone: { required: true, type: Boolean },
+            isInKeepOutZone: { required: true, type: Boolean }
         },
         components: {
             VehicleTitle,
@@ -30,7 +32,7 @@
 
         <!-- Left side of container (Name, Status, Battery, Connection)-->
         <div class="left-container">
-            <VehicleTitle :vehicleName="vehicleName" :vehicleStatus="vehicleStatus"/>
+            <VehicleTitle :vehicleName="vehicleName" :vehicleStatus="vehicleStatus" :isInKeepInZone="isInKeepInZone" :isInKeepOutZone="isInKeepOutZone"/>
             <div class="battery-status-container">
                 <Battery :percentage = "batteryPct" :charging="false" class="adjust-battery"/>
                 <span style="margin-top: 4%; font-size: 1.4em;">{{ Math.round(batteryPct * 100) }}%</span>        <!-- Multiply batteryPct by 100 because it is in between 0 and 1 -->
