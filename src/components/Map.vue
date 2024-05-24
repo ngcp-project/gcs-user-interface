@@ -39,24 +39,38 @@
         :lat-lng="[point.latitude, point.longitude]"
       ></l-marker>
 
+      <!-- POLYGON TO SHOW CURRENTLY SELECTED AREA FOR KEEP IN/OUT -->
       <l-polygon
         v-if="polygonPoints.length > 0"
         :lat-lngs="polygonPoints"
         :options="{ fillColor: 'blue', fillOpacity: 0.2 }"
         :key="polygonPoints.length"
       ></l-polygon>
+      <!-- POLYGON TO SHOW KEEP IN ZONES -->
       <l-polygon
         v-if="zoneInPolygons.length > 0"
         :lat-lngs="zoneInPolygons"
         :options="{ color: 'green', fillColor: 'green', fillOpacity: 0 }"
         :key="zoneInPolygons.length"
       ></l-polygon>
+      <!-- POLYGON TO SHOW KEEP OUT ZONES -->
       <l-polygon
         v-if="zoneOutPolygons.length > 0"
         :lat-lngs="zoneOutPolygons"
         :options="{ fillColor: 'red', fillOpacity: 0.3 }"
         :key="zoneOutPolygons.length"
       ></l-polygon>
+
+      <!-- POLYGON TO SHOW SEARCH AREA -->
+      <l-polygon
+        v-if="searchPoints.length > 0"
+        :lat-lngs="searchPoints"
+        :options="{ color: 'purple', fillColor: '#CB59ED', fillOpacity: 0.2 }"
+        :key="searchPoints.length"
+      ></l-polygon>
+      <l-marker v-if="selectingTarget" 
+          :icon="target_coord_icon" 
+          :lat-lng="targetCoord"></l-marker>
     </l-map>
   </div>
 </template>
@@ -139,6 +153,10 @@ export default {
         iconUrl: "../src/assets/FRA.png",
         iconSize: [38, 38],
         }),
+      target_coord_icon: icon({
+        iconUrl: "../src/assets/target-coord-icon.png",
+        iconSize: [20, 20], 
+      })
     };
   },
   methods: {
@@ -148,7 +166,10 @@ export default {
       const lng = event.latlng.lng;
       console.log("Clicked coordinates:", lat, lng);
       const latLng: LatLngExpression = [event.latlng.lat, event.latlng.lng];
-      this.polygonPoints.push(latLng);
+      if (!this.selectingSearch && !this.selectingTarget) {
+        this.polygonPoints.push(latLng);
+      }
+      
       if (this.selectingSearch) {
         console.log("searchPoints: ",this.searchPoints);
         this.searchPoints.push(latLng);
