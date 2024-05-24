@@ -147,12 +147,16 @@ export default {
 };
 </script>
 <style scoped>
+.coordinate-form {
+  max-width: 18em;
+}
 select {
   width: 100%;
   padding: 10px;
   border: none;
   border-radius: 4px;
   font-size: 16px;
+  /* overflow:auto; */
 }
 
 select:focus {
