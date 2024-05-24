@@ -9,30 +9,6 @@
       <label for="stageName">Initial Stage Name:</label>
       <input id="stageName" v-model="stageName" placeholder="Stage Name" required />
 
-      <!-- <div v-for="(vehicle, index) in vehicleKeys" :key="index" style="display: grid; gap: 10px">
-        <label :for="'vehicleName' + index">Vehicle Name:</label>
-        <input :id="'vehicleName' + index" v-model="vehicle.vehicleName" placeholder="Vehicle Name" required /> -->
-
-        <!-- <div style="display: grid; gap: 10px">
-          <div style="display: grid; gap: 10px">
-            <label :for="'targetLatitude' + index">Target Latitude:</label>
-            <input :id="'targetLatitude' + index" v-model="vehicle.target.latitude" placeholder="Target Latitude" />
-            <input :id="'targetLongitude' + index" v-model="vehicle.target.longitude" placeholder="Target Longitude" />
-          </div>
-          <div style="display: flex">
-            <div
-              v-for="(area, index) in vehicle.searchArea"
-              :key="index"
-              style="display: grid; gap: 10px; padding: 0 10px; width: 100%"
-            >
-              <label :for="'searchAreaLatitude' + index">Search Area:</label>
-              <input :id="'searchAreaLatitude' + index" v-model="area.latitude" placeholder="Search Area Latitude" />
-              <input :id="'searchAreaLongitude' + index" v-model="area.longitude" placeholder="Search Area Longitude" />
-            </div>
-          </div>
-        </div> -->
-      <!-- </div> -->
-
       <button type="submit" @click="submitForm();">Submit</button>
     </form>
 

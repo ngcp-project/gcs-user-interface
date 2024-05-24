@@ -5,7 +5,7 @@
 
       <!-- Dropdown to show all stages -->
       <label for="stage">Stage:</label>
-      <select id="stage" v-model="selectedStage" required>
+      <select id="stage" v-model="selectedStage" required @change="this.reset()">
         <option v-for="stage in this.getStageNames()" :key="stage" :value= "stage" >
           {{ stage }}
         </option>
@@ -172,7 +172,6 @@ export default {
           for (let j = 0; j < currentStage["vehicleKeys"].length; j ++) {
               let vehicle = currentStage["vehicleKeys"][j];
               if (vehicle["vehicleName"] == this.selectedVehicle) {   // if we found selectedVehicle
-                console.log("tee")
                 let result = "";
                 if (vehicle["searchArea"] != null) {
                     for (let k = 0; k < vehicle["searchArea"].length;k++) {

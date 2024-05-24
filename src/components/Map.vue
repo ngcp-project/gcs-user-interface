@@ -68,7 +68,7 @@
         :options="{ color: 'purple', fillColor: '#CB59ED', fillOpacity: 0.2 }"
         :key="searchPoints.length"
       ></l-polygon>
-      <l-marker v-if="selectingTarget" 
+      <l-marker v-if="selectingTarget && targetCoord[0] != null && targetCoord[1] != null" 
           :icon="target_coord_icon" 
           :lat-lng="targetCoord"></l-marker>
     </l-map>
