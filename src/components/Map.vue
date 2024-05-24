@@ -71,13 +71,10 @@
 import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LPolygon, LMarker  } from "@vue-leaflet/vue-leaflet";
 import { LeafletMouseEvent, LatLngExpression, icon } from "leaflet";
-<<<<<<< HEAD
 
-import {pushZoneInPolygons, pushZoneOutPolygons, clearZoneInPolygons, clearZoneOutPolygons, clearPolygons} from "../Functions/geofence";
+import {pushZoneInPolygons, pushZoneOutPolygons, clearZoneInPolygons, clearZoneOutPolygons, clearPolygons, isInKeepInZone, isInKeepOutZone} from "../Functions/geofence";
 
-=======
 import { LMarkerRotate } from 'vue-leaflet-rotate-marker';
->>>>>>> e56a1fed0201e0a8b606d8add7d5d72deb742d42
 interface Coordinates {
   latitude: number;
   longitude: number;
@@ -395,24 +392,40 @@ export default {
     ERU_coords: {
       handler(newERUcoords) {
         this.ERU_position = [newERUcoords.latitude, newERUcoords.longitude];
+        // console.log("ERU IN KEEP IN ZONE: "+ isInKeepInZone(this.ERU_position));
+        this.$emit("keepIn", "ERU", isInKeepInZone(this.ERU_position));
+        this.$emit("keepOut", "ERU", isInKeepOutZone(this.ERU_position));
+        // console.log("IN KEEP OUT ZONE:  "+ isInKeepOutZone(this.ERU_position));
       },
       deep: true
     },
     MEA_coords: {
       handler(newMEAcoords) {
         this.MEA_position = [newMEAcoords.latitude, newMEAcoords.longitude];
+        this.$emit("keepIn", "MEA", isInKeepInZone(this.MEA_position));
+        this.$emit("keepOut", "MEA", isInKeepOutZone(this.MEA_position));
+        // console.log("IN KEEP IN ZONE: "+ isInKeepInZone(this.MEA_position));
+        // console.log("IN KEEP OUT ZONE:  "+ isInKeepOutZone(this.MEA_position));
       },
       deep: true
     },
     MRA_coords: {
       handler(newMRAcoords) {
         this.MRA_position = [newMRAcoords.latitude, newMRAcoords.longitude];
+        this.$emit("keepIn", "MRA", isInKeepInZone(this.MRA_position));
+        this.$emit("keepOut", "MRA", isInKeepOutZone(this.MRA_position));
+        // console.log("IN KEEP IN ZONE: "+ isInKeepInZone(this.MRA_position));
+        // console.log("IN KEEP OUT ZONE:  "+ isInKeepOutZone(this.MRA_position));
       },
       deep: true
     },
     FRA_coords: {
       handler(newFRAcoords) {
         this.FRA_position = [newFRAcoords.latitude, newFRAcoords.longitude];
+        this.$emit("keepIn", "FRA", isInKeepInZone(this.FRA_position));
+        this.$emit("keepOut", "FRA", isInKeepOutZone(this.FRA_position));
+        // console.log("IN KEEP IN ZONE: "+ isInKeepInZone(this.FRA_position));
+        // console.log("IN KEEP OUT ZONE:  "+ isInKeepOutZone(this.FRA_position));
       },
       deep: true
     }

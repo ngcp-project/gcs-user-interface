@@ -3,6 +3,7 @@
         <div class="vehicle-name-div"> 
                 {{ vehicleName }} 
                <img :src="getIconPath" class="vehicle-icon"/>
+               <img v-if="!isInKeepInZone || isInKeepOutZone" src="../../assets/warning.png" class="warning-icon"/>
         </div>
         <div class="vehicle-status-div">Status: {{ vehicleStatus }}</div>
     </div>
@@ -11,11 +12,15 @@
     
 <script lang="ts">
 
+// import {isInKeepInZone, isInKeepInZone2, isInKeepOutZone2} from "../../Functions/geofence";
+
     export default {
         props: {
             vehicleName: { required: true, type: String },
             vehicleStatus: { required: true, type: String },
-            vehicleIcon: { type: Object }
+            // vehicleIcon: { type: Object },
+            isInKeepInZone: { required: true, type: Boolean},
+            isInKeepOutZone: { required: true, type: Boolean}
         },
         computed: {
             getIconPath() {
@@ -50,6 +55,11 @@
     }
 
     .vehicle-icon {
+        position: relative;
+        width: 16%;
+    }
+
+    .warning-icon {
         position: relative;
         width: 16%;
     }
