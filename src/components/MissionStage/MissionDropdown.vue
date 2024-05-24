@@ -20,11 +20,11 @@
       </select>
       <div style="display: grid; gap: 10px">
         <label for="targetCoordinate">Target Coordinate: {{}}</label>
-        <input id="targetCoordinate" v-model="this.vehicle_data[this.selectedVehicle].target" type="text" /> <!-- current selected vehicle's target coord in v-model -->
+        <input id="targetCoordinate" v-model="populateTarget" type="text" /> <!-- current selected vehicle's target coord in v-model -->
         <button @click.prevent="selectTargetCoordinate">{{ target_button_text }}</button>
 
         <label for="searchArea">Search Area:</label>
-        <input id="searchArea" v-model="this.vehicle_data[this.selectedVehicle].search" type="text" /> <!-- current selected vehicle's search area coords in v-model -->
+        <input id="searchArea" v-model="populateSearch" type="text" /> <!-- current selected vehicle's search area coords in v-model -->
         <button @click.prevent="selectSearchArea">{{ search_button_text }}</button>
       </div>
       <button type="submit" @click="printMISSION_INFO()">Submit</button>
@@ -144,6 +144,55 @@ export default {
       required: true,
     },
   },
+  computed: {
+    populateTarget() {
+      // loop through stages
+      for (let i = 0; i < this.MISSION_INFO['stages'].length; i++) {
+        let currentStage = this.MISSION_INFO['stages'][i];
+        if (currentStage["stageName"] == this.selectedStage) {  // if we found selectedStage
+          for (let j = 0; j < currentStage["vehicleKeys"].length; j ++) {
+              let vehicle = currentStage["vehicleKeys"][j];
+              if (vehicle["vehicleName"] == this.selectedVehicle) {   // if we found selectedVehicle
+                if (vehicle["target"] != null) {
+                  return vehicle["target"].latitude + "," + vehicle["target"].longitude;
+                } else {
+                  return "";
+                }
+              }
+          } 
+        } 
+      } 
+      return "";
+    },
+    populateSearch() {
+      // loop through stages
+      for (let i = 0; i < this.MISSION_INFO['stages'].length; i++) {
+        let currentStage = this.MISSION_INFO['stages'][i];
+        if (currentStage["stageName"] == this.selectedStage) {  // if we found selectedStage
+          for (let j = 0; j < currentStage["vehicleKeys"].length; j ++) {
+              let vehicle = currentStage["vehicleKeys"][j];
+              if (vehicle["vehicleName"] == this.selectedVehicle) {   // if we found selectedVehicle
+                console.log("tee")
+                let result = "";
+                if (vehicle["searchArea"] != null) {
+                    for (let k = 0; k < vehicle["searchArea"].length;k++) {
+                    // console.log(vehicle["searchArea"][k].longitude);
+                    result += vehicle["searchArea"][k].latitude;
+                    result += ",";
+                    result += vehicle["searchArea"][k].longitude;
+                    if (k != vehicle["searchArea"].length - 1) {
+                      result += ",";
+                    }
+                  }
+                }
+                return result;
+              }
+          } 
+        } 
+      } 
+      return "";
+    }
+  }
 };
 </script>
 <style scoped>
