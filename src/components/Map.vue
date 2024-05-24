@@ -1,13 +1,7 @@
 <!-- offline -->
 <template>
   <div class="map">
-    <l-map
-      ref="map"
-      v-model:zoom="zoom"
-      :use-global-leaflet="false"
-      :center="mapOrigin"
-      @click="addPoint"
-    >
+    <l-map ref="map" v-model:zoom="zoom" :use-global-leaflet="false" :center="mapOrigin" @click="addPoint">
       <div class="button-container">
         <button class="send-button" @click="sendZoneInPolygonPoints">Zone In</button>
         <button class="send-button" @click="sendZoneOutPolygonPoints">Zone Out</button>
@@ -45,30 +39,45 @@
         :lat-lng="[point.latitude, point.longitude]"
       ></l-marker>
 
+      <!-- POLYGON TO SHOW CURRENTLY SELECTED AREA FOR KEEP IN/OUT -->
       <l-polygon
         v-if="polygonPoints.length > 0"
         :lat-lngs="polygonPoints"
         :options="{ fillColor: 'blue', fillOpacity: 0.2 }"
         :key="polygonPoints.length"
       ></l-polygon>
+      <!-- POLYGON TO SHOW KEEP IN ZONES -->
       <l-polygon
         v-if="zoneInPolygons.length > 0"
         :lat-lngs="zoneInPolygons"
         :options="{ color: 'green', fillColor: 'green', fillOpacity: 0 }"
         :key="zoneInPolygons.length"
       ></l-polygon>
+      <!-- POLYGON TO SHOW KEEP OUT ZONES -->
       <l-polygon
         v-if="zoneOutPolygons.length > 0"
         :lat-lngs="zoneOutPolygons"
         :options="{ fillColor: 'red', fillOpacity: 0.3 }"
         :key="zoneOutPolygons.length"
       ></l-polygon>
+
+      <!-- POLYGON TO SHOW SEARCH AREA -->
+      <l-polygon
+        v-if="searchPoints.length > 0"
+        :lat-lngs="searchPoints"
+        :options="{ color: 'purple', fillColor: '#CB59ED', fillOpacity: 0.2 }"
+        :key="searchPoints.length"
+      ></l-polygon>
+      <l-marker v-if="selectingTarget && targetCoord[0] != null && targetCoord[1] != null" 
+          :icon="target_coord_icon" 
+          :lat-lng="targetCoord"></l-marker>
     </l-map>
   </div>
 </template>
 
 <script lang="ts">
 import "leaflet/dist/leaflet.css";
+import { inject, ref } from "vue";
 import { LMap, LTileLayer, LPolygon, LMarker  } from "@vue-leaflet/vue-leaflet";
 import { LeafletMouseEvent, LatLngExpression, icon } from "leaflet";
 
@@ -81,6 +90,13 @@ interface Coordinates {
 }
 
 export default {
+  setup() {
+    const {searchCoords, selectingSearch, updateSearchCoords} = inject('SearchCoords');
+    const { targetCoord, selectingTarget } = inject('TargetCoord');
+    const { load_MISSION_INFO } = inject('Mission Info');
+
+    return { searchCoords, selectingSearch, updateSearchCoords, targetCoord, selectingTarget, load_MISSION_INFO }
+  },
   components: {
     LMap,
     LTileLayer,
@@ -111,6 +127,7 @@ export default {
       zoneInPolygons: [] as LatLngExpression[], //all zone in polygons from backend
       zoneOutPolygons: [] as LatLngExpression[], //all zone out polygons from backend
       fireCoordsList: [] as Coordinates[],
+      searchPoints: [] as LatLngExpression[],
       maxFireCoordsCount: 10,
       lastUpdate: 0,
       updateInterval: 500, // Adjust as needed
@@ -139,6 +156,10 @@ export default {
         iconUrl: "../src/assets/FRA.png",
         iconSize: [38, 38],
         }),
+      target_coord_icon: icon({
+        iconUrl: "../src/assets/target-coord-icon.png",
+        iconSize: [20, 20], 
+      })
     };
   },
   methods: {
@@ -148,8 +169,22 @@ export default {
       const lng = event.latlng.lng;
       console.log("Clicked coordinates:", lat, lng);
       const latLng: LatLngExpression = [event.latlng.lat, event.latlng.lng];
-      this.polygonPoints.push(latLng);
+      if (!this.selectingSearch && !this.selectingTarget) {
+        this.polygonPoints.push(latLng);
+      }
+      
+      if (this.selectingSearch) {
+        console.log("searchPoints: ",this.searchPoints);
+        this.searchPoints.push(latLng);
+        this.updateSearchCoords(this.searchPoints);
+      }
       console.log("polygonPoints:", this.polygonPoints);
+
+      // if selectingTarget from App.vue is true, set targetCoord (also from App.vue) to the latest point you clicked on Map
+      if (this.selectingTarget) {
+        this.targetCoord = latLng;
+        console.log("last clicked/currently selecting coordinate for target: " + this.targetCoord);
+      }      
       //testing fire pts list
       // const coords: Coordinates = {
       //   latitude: lat,
@@ -204,8 +239,12 @@ export default {
     //clear current selected polygons 
     async clearSelection(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
+      console.log(this.searchCoords.value)
       this.polygonPoints = [];
+      this.searchPoints = []
       console.log("Cleared Selected zoneInPolygonPoints:", this.polygonPoints);
+      this.updateSearchCoords(this.polygonPoints);  // also clear currently selected coords for current vehicle's search area
+      this.targetCoord = []                         // also clear currently selected coord for current vehicle's target
       
     },
     //send current selected polygons as zone in polygons
@@ -242,7 +281,7 @@ export default {
 
         const res = await response.json();
         console.log('zone In PolygonPoints sent successfully:', res);
-        await this.getZoneIn(event);
+        await this.getZoneIn();
         await this.clearSelection(event);
         // const multiPolygon = [
         //   [ // First polygon
@@ -302,7 +341,7 @@ export default {
 
         const res = await response.json();
         console.log('zone out PolygonPoints sent successfully:', res);
-        await this.getZoneOut(event);
+        await this.getZoneOut();
         await this.clearSelection(event);
       } 
       catch (error) {
@@ -375,6 +414,7 @@ export default {
     },
   },
   mounted() {
+      this.load_MISSION_INFO();
       this.getZoneIn();
       this.getZoneOut();
       const storedFireCoords = localStorage.getItem('fireCoordsList');
@@ -464,17 +504,17 @@ export default {
 .clear-button,
 .send-button {
   padding: 12px 24px;
-  font-size: 16px; 
+  font-size: 16px;
   border: none;
   border-radius: 8px;
-  background-color: #496ecc; 
+  background-color: #496ecc;
   color: white;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   transition-duration: 0.4s;
   cursor: pointer;
-  margin: 10px; 
+  margin: 10px;
 }
 .clear-button:hover,
 .send-button:hover {
@@ -487,5 +527,4 @@ export default {
   display: flex;
   z-index: 999;
 }
-
 </style>
