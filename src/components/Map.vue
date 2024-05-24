@@ -211,6 +211,10 @@ export default {
     //send current selected polygons as zone in polygons
     async sendZoneInPolygonPoints(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
+      if(this.polygonPoints.length < 3) {
+        console.log("Please select at least 3 points")
+        return;
+      }
       try {
         const coordinates = this.polygonPoints.map(proxyArray => {
           // Extract latitude and longitude from each Proxy object
@@ -267,6 +271,10 @@ export default {
     //send current selected polygons as zone out polygons
     async sendZoneOutPolygonPoints(event: LeafletMouseEvent) {
       event.stopPropagation(); // Stop event propagation
+      if(this.polygonPoints.length < 3) {
+        console.log("Please select at least 3 points")
+        return;
+      }
       try {
         const coordinates = this.polygonPoints.map(proxyArray => {
           // Extract latitude and longitude from each Proxy object
