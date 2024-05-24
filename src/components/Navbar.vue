@@ -38,8 +38,8 @@ export default {
         <span style="font-weight: bold; font-size: 1.2rem; color: white">CP</span>
       </router-link>
       <MissionStatus :missionNumber="1" :status="misson_one_status" />
-      <MissionStatus :missionNumber="2" :status="misson_two_status" />
-      <MissionStatus :missionNumber="3" :status="misson_three_status" />
+      <!-- <MissionStatus :missionNumber="2" :status="misson_two_status" />
+      <MissionStatus :missionNumber="3" :status="misson_three_status" /> -->
       <button
         style="border: 2px solid rgb(255, 0, 0); background-color: rgba(255, 0, 0); margin-left: auto; color: rgb(255, 255, 255)" type="button" @click="showEmergencyModal">
         <span style="font-size: 18px">STOP ALL</span>

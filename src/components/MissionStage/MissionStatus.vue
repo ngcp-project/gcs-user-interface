@@ -1,7 +1,7 @@
 <template>
   <div
     style="
-      width: 12rem;
+      /* width: 12rem; */
       height: 4rem;
       border: 2px solid rgb(52, 49, 49);
       background-color: rgb(255, 255, 255);
@@ -13,7 +13,7 @@
     "
   >
     <div>
-      <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0)">Mission {{ missionNumber }}</span>
+      <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0)">Mission: {{ MISSION_INFO["missionName"] }}</span>
       <button
         style="border: 2px solid rgb(0, 0, 0); margin-left: 1.2rem; color: rgb(0, 0, 0); padding: 3px 6px; font-size: 0.8rem"
         type="button"
@@ -41,8 +41,9 @@ export default {
   setup() {
     const { selectingTarget } = inject('TargetCoord');
     const { selectingSearch } = inject('SearchCoords');
+    const { MISSION_INFO } = inject("Mission Info");
 
-    return { selectingTarget, selectingSearch };
+    return { selectingTarget, selectingSearch, MISSION_INFO };
   },
 
   name: "MissionStatus",
@@ -77,7 +78,7 @@ export default {
 <style scoped>
 .popup {
   position: fixed;
-  top: 50%;
+  top: 70%;
   left: 68%;
   transform: translate(-50%, -50%);
   background: rgba(0, 0, 0, 0.5);
