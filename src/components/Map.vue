@@ -337,8 +337,7 @@ export default {
       }
     },
     //get all zone in polygons 
-    async getZoneIn(event: LeafletMouseEvent) {
-      event.stopPropagation(); // Stop event propagation
+    async getZoneIn() {
       try {
         const response = await fetch('http://localhost:5135/zones/in', {
           method: 'GET',
@@ -363,8 +362,7 @@ export default {
       }
     },
     //get all zone out polygons 
-    async getZoneOut(event: LeafletMouseEvent) {
-      event.stopPropagation(); // Stop event propagation
+    async getZoneOut() {
       try {
         const response = await fetch('http://localhost:5135/zones/out', {
           method: 'GET',
@@ -393,10 +391,26 @@ export default {
         this.fireCoordsList.shift();
       }
       //pass the fire coords here
-      this.fireCoordsList.push(coords);
+      this.fireCoordsList.push({...coords});
+      localStorage.setItem('fireCoordsList', JSON.stringify(this.fireCoordsList));
       // this.fireCoordsList.push(firePoint);
       // console.log("firstptslist:", this.fireCoordsList)
     },
+  },
+  mounted() {
+      this.getZoneIn();
+      this.getZoneOut();
+      const storedFireCoords = localStorage.getItem('fireCoordsList');
+      if (storedFireCoords) {
+      try {
+        this.fireCoordsList = JSON.parse(storedFireCoords);
+      } catch (e) {
+        console.error("Error parsing fireCoordsList from localStorage", e);
+      }
+    } else {
+      // Initialize localStorage with an empty list if it doesn't exist
+      localStorage.setItem('fireCoordsList', JSON.stringify(this.fireCoordsList));
+    }
   },
   watch: {
     // uses deep watch to watch for changes in longitude and latitude properties in firePoint
@@ -411,6 +425,7 @@ export default {
       },
       deep: true
     },
+    
     
     // firePoints(newFireCoords) {
     //   const currentTime = Date.now();
