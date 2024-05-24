@@ -57,7 +57,7 @@ import { Stage } from "../Functions/types";
 
 export default {
   setup() {
-    const { MISSION_INFO, addStage, updateSearchArea, updateTarget, checkStageExists } = inject("Mission Info");
+    const { MISSION_INFO, addStage, updateSearchArea, updateTarget, checkStageExists, save_MISSION_INFO } = inject("Mission Info");
 
     const router = useRouter();
     // function to use Vue router to navigate to StaticScreen after pressing submit
@@ -65,7 +65,7 @@ export default {
       router.push(`/StaticScreen`);
     }
     
-    return { toStaticScreen, MISSION_INFO, addStage, updateSearchArea, updateTarget, checkStageExists };
+    return { toStaticScreen, MISSION_INFO, addStage, updateSearchArea, updateTarget, checkStageExists, save_MISSION_INFO};
   },
   
   data() {
@@ -117,7 +117,6 @@ export default {
       this.addStage(firstStage);
 
       // Here you can handle the form submission, for example send a POST request to your server
-      console.log(this.missionName, this.stageName, this.vehicleKeys);
             fetch('http://localhost:5135/MissionInfo', {
                 method: 'POST',
                 headers: {

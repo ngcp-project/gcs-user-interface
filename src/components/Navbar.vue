@@ -32,7 +32,7 @@ export default {
 
 <template>
   <nav style="background-color: #011949; padding: 10px">
-    <div style="display: flex; align-items: center">
+    <div style="display: flex; align-items: center; gap: 5%;">
       <router-link to="/" style="text-decoration: none">
         <span style="font-weight: bold; font-size: 1.2rem; margin-left: 10px">NG</span>
         <span style="font-weight: bold; font-size: 1.2rem; color: white">CP</span>
@@ -40,8 +40,12 @@ export default {
       <MissionStatus :missionNumber="1" :status="misson_one_status" />
       <!-- <MissionStatus :missionNumber="2" :status="misson_two_status" />
       <MissionStatus :missionNumber="3" :status="misson_three_status" /> -->
+      <!-- <button
+        style="border: 2px solid rgb(255, 0, 0); background-color: rgba(23, 0, 0); color: rgb(255, 255, 255)" type="button" @click="refresh_MISSION()">
+        <span style="font-size: 18px">Refresh Mission</span>
+      </button> -->
       <button
-        style="border: 2px solid rgb(255, 0, 0); background-color: rgba(255, 0, 0); margin-left: auto; color: rgb(255, 255, 255)" type="button" @click="showEmergencyModal">
+        style="border: 2px solid rgb(255, 0, 0); background-color: rgba(255, 0, 0);color: rgb(255, 255, 255)" type="button" @click="showEmergencyModal">
         <span style="font-size: 18px">STOP ALL</span>
       </button>
       <EmergencyStopModal :vehicle-name="stop_all" v-show="showModal" @close="closeEmergencyModal"></EmergencyStopModal>

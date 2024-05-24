@@ -33,9 +33,51 @@ provide("TargetCoord", {
 const MISSION_INFO = ref({"missionName": "",
                           "stages": [] as Stage[]});
 
+// saves MISSION_INFO to localstorage
+function save_MISSION_INFO() {
+  localStorage.setItem('MISSION_INFO_STORED', JSON.stringify(MISSION_INFO.value));
+  console.log("Saving MISSION_INFO to localstorage: ");
+}
+
+// loads mission info object from localstorage and saves to MISSION_INFO
+function load_MISSION_INFO() {
+  console.log("Loadng MISSION_INFO from localstorage: ")
+  const data = localStorage.getItem('MISSION_INFO_STORED');
+  if (data) {
+    const parsed_data = JSON.parse(data || "");
+    MISSION_INFO.value["missionName"] = parsed_data['missionName'];
+    MISSION_INFO.value['stages'] = parsed_data['stages'];
+    console.log(MISSION_INFO.value);
+  }
+}
+
+// GET request to get Stages for the current mission (MISSION_NAME)
+// async function refresh_MISSION() {
+//   localStorage.removeItem("MISSION_INFO_STORED");
+//   MISSION_INFO.value["missionName"] = "";
+//   MISSION_INFO.value["stages"] = [] as Stage[];
+//   const mission_name = localStorage.getItem('MISSION_NAME');
+
+//   try {
+//         const response = await fetch(`http://localhost:5135/MissionInfo?missionName=${mission_name}`, {
+//           method: 'GET',
+//         });
+//         if (!response.ok) {
+//           throw new Error('Network response was not ok');
+//         }
+//         // const res = await response.json();
+//         console.log("fuck kngcp")
+//         console.log(response);
+//       }
+//       catch (error) {
+//         console.error('Unable to get Mission and its stages:', error);
+//       }
+// }
+
 // --- THIS ADDS A NEW STAGE TO MISSION_INFO'S "stages" LIST --- //
 function addStage(stage: Stage) {
   MISSION_INFO.value['stages'].push(stage);
+  save_MISSION_INFO();
 }
 
 // --- THIS UPDATES SEARCH AREA COORDS FOR SPECIFIC VEHICLE IN SPECIFIED STAGE --- //
@@ -57,9 +99,10 @@ function updateSearchArea(stageName: string, vehicleName: string, newSearchAreaC
               vehicle['searchArea'] = newSearchAreaCoords;
             }
           }
-      } //end for
-    } // end if
-  } // end for
+      } 
+    } 
+  } 
+  save_MISSION_INFO();
 } // end updateSearchArea
 
 // --- THIS UPDATES TARGET COORDS FOR SPECIFIC VEHICLE IN SPECIFIED STAGE --- //
@@ -83,9 +126,10 @@ function updateTarget(stageName: string, vehicleName: string, newTargetCoord: [s
               vehicle['target'] = newTarget;
             }
           }
-      } //end for
-    } // end if
-  } // end for
+      } 
+    } 
+  } 
+  save_MISSION_INFO();
 } // end updateTarget
 
 // --- THIS RETURNS ALL THE NAMES OF THE STAGES CURRENTLY IN MISSION_INFO (so we can use the Stage Names in the stage dropdown menu in MissionDropdown) --- //
@@ -136,7 +180,10 @@ provide("Mission Info", {
   updateTarget,
   getStageNames,
   getStageInfo,
-  checkStageExists
+  checkStageExists,
+
+  save_MISSION_INFO,
+  load_MISSION_INFO
 });
 
 export type {

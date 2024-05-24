@@ -91,8 +91,9 @@ export default {
   setup() {
     const {searchCoords, selectingSearch, updateSearchCoords} = inject('SearchCoords');
     const { targetCoord, selectingTarget } = inject('TargetCoord');
+    const { load_MISSION_INFO } = inject('Mission Info');
 
-    return { searchCoords, selectingSearch, updateSearchCoords, targetCoord, selectingTarget}
+    return { searchCoords, selectingSearch, updateSearchCoords, targetCoord, selectingTarget, load_MISSION_INFO }
   },
   components: {
     LMap,
@@ -273,7 +274,7 @@ export default {
 
         const res = await response.json();
         console.log('zone In PolygonPoints sent successfully:', res);
-        await this.getZoneIn(event);
+        await this.getZoneIn();
         await this.clearSelection(event);
         // const multiPolygon = [
         //   [ // First polygon
@@ -329,7 +330,7 @@ export default {
 
         const res = await response.json();
         console.log('zone out PolygonPoints sent successfully:', res);
-        await this.getZoneOut(event);
+        await this.getZoneOut();
         await this.clearSelection(event);
       } 
       catch (error) {
@@ -398,6 +399,7 @@ export default {
     },
   },
   mounted() {
+      this.load_MISSION_INFO();
       this.getZoneIn();
       this.getZoneOut();
       const storedFireCoords = localStorage.getItem('fireCoordsList');
