@@ -23,7 +23,7 @@
       </button>
     </div>
     <div>
-      <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0)">Status: {{ status }}</span>
+      <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0)">Current Stage: {{ this.getLastStage() }}</span>
     </div>
   </div>
   <div>
@@ -41,9 +41,9 @@ export default {
   setup() {
     const { selectingTarget } = inject('TargetCoord');
     const { selectingSearch } = inject('SearchCoords');
-    const { MISSION_INFO } = inject("Mission Info");
+    const { MISSION_INFO, getStageNames } = inject("Mission Info");
 
-    return { selectingTarget, selectingSearch, MISSION_INFO };
+    return { selectingTarget, selectingSearch, MISSION_INFO, getStageNames };
   },
 
   name: "MissionStatus",
@@ -71,7 +71,14 @@ export default {
       this.selectingTarget = false;
       this.selectingSearch = false;
       this.showPopup = false;
+    },
+    getLastStage() {
+      // console.log(this.MISSION_INFO['stages'][this.MISSION_INFO['stages'].length - 1]);
+      const stage_names = this.getStageNames()
+      
+      return stage_names[stage_names.length - 1];
     }
+    
   }
 };
 </script>
@@ -84,5 +91,9 @@ export default {
   background: rgba(0, 0, 0, 0.5);
   padding: 20px;
   z-index: 1000;
+}
+span {
+  width: 10em;
+  overflow:hidden;
 }
 </style>
