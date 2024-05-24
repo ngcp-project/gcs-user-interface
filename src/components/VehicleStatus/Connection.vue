@@ -13,7 +13,7 @@
             <div v-if="latency >= 40 || latency == 0" class="grayed_bar" style='height: 80%'></div>
             <div v-else class="bar" style='height: 80%'></div>
         </div>
-        <!-- <span class="connection_number">{{ latency }} ms</span> -->
+        <span v-if=displayLatency class="connection_number">{{ calculatedLatency }} ms</span>
     </div>
     
     </template>
@@ -22,12 +22,19 @@
 
     export default {
         data() {
-            return {};    
+            return {
+                calculatedLatency: 0
+            };    
         },
         props: {
             latency: { required: true, type: Number},
+            displayLatency: { required: true, type: Boolean}    // true - if u want to display latency value | i set it to false for the 4 camera screen
         },
-        computed: {
+        watch: {   
+            // whenever latency prop is updated, calculate the actual latency
+            latency: function() {
+                this.calculatedLatency = Date.now() - this.latency;
+            }
         }
     };
 </script>
@@ -70,7 +77,8 @@
         left: 110%;
         bottom: 0%;
         width: 180%;
-        font-size:0.8em;
+        /* font-size:0.8em; */
+        font-size: 1em;
     }
     
 </style> 
