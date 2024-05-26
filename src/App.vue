@@ -31,3 +31,4 @@ console.log("Initialize 4 websocket connections from App.vue");
   max-height: 100vh; /* Limit height to viewport height */
 }
 </style>
+<!-- //LETS GOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO -->
