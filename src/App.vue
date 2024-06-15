@@ -18,35 +18,34 @@ function updateSearchCoords(coordinate: string[]) {
 provide("SearchCoords", {
   searchCoords,
   selectingSearch,
-  updateSearchCoords,
+  updateSearchCoords
 });
 
 // --------- TARGET COORDINATE (used to select a target coordinate from Map.vue) ----------- //
 const targetCoord = ref("");
-const selectingTarget = ref(false);    // this indicates to MissionDropdown and Map6 that we are currently selecting a target coordinate 
+const selectingTarget = ref(false); // this indicates to MissionDropdown and Map6 that we are currently selecting a target coordinate
 provide("TargetCoord", {
   targetCoord,
   selectingTarget
 });
 
 // ---------------------------- MISSION INFORMATON ---------------------------- //
-const MISSION_INFO = ref({"missionName": "",
-                          "stages": [] as Stage[]});
+const MISSION_INFO = ref({ missionName: "", stages: [] as Stage[] });
 
 // saves MISSION_INFO to localstorage
 function save_MISSION_INFO() {
-  localStorage.setItem('MISSION_INFO_STORED', JSON.stringify(MISSION_INFO.value));
+  localStorage.setItem("MISSION_INFO_STORED", JSON.stringify(MISSION_INFO.value));
   console.log("Saving MISSION_INFO to localstorage: ");
 }
 
 // loads mission info object from localstorage and saves to MISSION_INFO
 function load_MISSION_INFO() {
-  console.log("Loadng MISSION_INFO from localstorage: ")
-  const data = localStorage.getItem('MISSION_INFO_STORED');
+  console.log("Loadng MISSION_INFO from localstorage: ");
+  const data = localStorage.getItem("MISSION_INFO_STORED");
   if (data) {
     const parsed_data = JSON.parse(data || "");
-    MISSION_INFO.value["missionName"] = parsed_data['missionName'];
-    MISSION_INFO.value['stages'] = parsed_data['stages'];
+    MISSION_INFO.value["missionName"] = parsed_data["missionName"];
+    MISSION_INFO.value["stages"] = parsed_data["stages"];
     console.log(MISSION_INFO.value);
   }
 }
@@ -76,67 +75,71 @@ function load_MISSION_INFO() {
 
 // --- THIS ADDS A NEW STAGE TO MISSION_INFO'S "stages" LIST --- //
 function addStage(stage: Stage) {
-  MISSION_INFO.value['stages'].push(stage);
+  MISSION_INFO.value["stages"].push(stage);
   save_MISSION_INFO();
 }
 
 // --- THIS UPDATES SEARCH AREA COORDS FOR SPECIFIC VEHICLE IN SPECIFIED STAGE --- //
-function updateSearchArea(stageName: string, vehicleName: string, newSearchAreaCoords: Coordinate[]) {
+function updateSearchArea(
+  stageName: string,
+  vehicleName: string,
+  newSearchAreaCoords: Coordinate[]
+) {
   // loop through 'stages' array to find specified stage
-  for (let i = 0; i < MISSION_INFO.value['stages'].length; i++) {
-    
+  for (let i = 0; i < MISSION_INFO.value["stages"].length; i++) {
     // if we found the stage, loop through that stage's vehicleKeys
-    let currentStage = MISSION_INFO.value['stages'][i];
+    let currentStage = MISSION_INFO.value["stages"][i];
     if (currentStage["stageName"] == stageName) {
       // loop through the stage's vehicle keys (ERU, FRA, etc)
-      for (let j = 0; j < currentStage["vehicleKeys"].length; j ++) {
-          let vehicle = currentStage["vehicleKeys"][j];
+      for (let j = 0; j < currentStage["vehicleKeys"].length; j++) {
+        let vehicle = currentStage["vehicleKeys"][j];
 
-          if (vehicle["vehicleName"] == vehicleName) {
-            if (newSearchAreaCoords.length == 0) {
-              vehicle['searchArea'] = null;
-            } else {
-              vehicle['searchArea'] = newSearchAreaCoords;
-            }
+        if (vehicle["vehicleName"] == vehicleName) {
+          if (newSearchAreaCoords.length == 0) {
+            vehicle["searchArea"] = null;
+          } else {
+            vehicle["searchArea"] = newSearchAreaCoords;
           }
-      } 
-    } 
-  } 
+        }
+      }
+    }
+  }
   save_MISSION_INFO();
 } // end updateSearchArea
 
 // --- THIS UPDATES TARGET COORDS FOR SPECIFIC VEHICLE IN SPECIFIED STAGE --- //
 function updateTarget(stageName: string, vehicleName: string, newTargetCoord: [string, string]) {
-  let newTarget: Coordinate = {latitude: newTargetCoord[0],
-                                 longitude: newTargetCoord[1]}
+  let newTarget: Coordinate = {
+    latitude: newTargetCoord[0],
+    longitude: newTargetCoord[1]
+  };
   // loop through 'stages' array to find specified stage
-  for (let i = 0; i < MISSION_INFO.value['stages'].length; i++) {
-    
+  for (let i = 0; i < MISSION_INFO.value["stages"].length; i++) {
     // if we found the stage, loop through that stage's vehicleKeys
-    let currentStage = MISSION_INFO.value['stages'][i];
+    let currentStage = MISSION_INFO.value["stages"][i];
     if (currentStage["stageName"] == stageName) {
       // loop through the stage's vehicle keys (ERU, FRA, etc)
-      for (let j = 0; j < currentStage["vehicleKeys"].length; j ++) {
-          let vehicle = currentStage["vehicleKeys"][j];
+      for (let j = 0; j < currentStage["vehicleKeys"].length; j++) {
+        let vehicle = currentStage["vehicleKeys"][j];
 
-          if (vehicle["vehicleName"] == vehicleName) {
-            if (newTargetCoord[0] == undefined) {
-              vehicle['target'] = null;
-            } else {
-              vehicle['target'] = newTarget;
-            }
+        if (vehicle["vehicleName"] == vehicleName) {
+          if (newTargetCoord[0] == undefined) {
+            vehicle["target"] = null;
+          } else {
+            vehicle["target"] = newTarget;
           }
-      } 
-    } 
-  } 
+        }
+      }
+    }
+  }
   save_MISSION_INFO();
 } // end updateTarget
 
 // --- THIS RETURNS ALL THE NAMES OF THE STAGES CURRENTLY IN MISSION_INFO (so we can use the Stage Names in the stage dropdown menu in MissionDropdown) --- //
 function getStageNames() {
   let stage_names = [] as string[];
-  for (let i = 0; i < MISSION_INFO.value['stages'].length; i++) {
-    let stage_name = MISSION_INFO.value['stages'][i]["stageName"];
+  for (let i = 0; i < MISSION_INFO.value["stages"].length; i++) {
+    let stage_name = MISSION_INFO.value["stages"][i]["stageName"];
     stage_names.push(stage_name);
   }
   return stage_names;
@@ -145,16 +148,16 @@ function getStageNames() {
 // --- THIS PRINTS OUT ALL VEHICLES AND THEIR RESPECTIVE TARGET COORD AND SEARCH AREA COORDS FOR A SPECIFIED STAGE --- //
 function getStageInfo(stage_name: string) {
   console.log("INFO FOR STAGE: " + stage_name);
-  for (let i = 0; i < MISSION_INFO.value['stages'].length; i++) {
+  for (let i = 0; i < MISSION_INFO.value["stages"].length; i++) {
     // if we found the stage, loop through that stage's vehicleKeys
-    let currentStage = MISSION_INFO.value['stages'][i];
+    let currentStage = MISSION_INFO.value["stages"][i];
     if (currentStage["stageName"] == stage_name) {
       // loop through the stage's vehicle keys (ERU, FRA, etc)
-      for (let j = 0; j < currentStage["vehicleKeys"].length; j ++) {
-          let vehicle = currentStage["vehicleKeys"][j];
-          console.log("VEHICLE: " + vehicle["vehicleName"]);
-          console.log(vehicle["target"]);
-          console.log(vehicle["searchArea"]);
+      for (let j = 0; j < currentStage["vehicleKeys"].length; j++) {
+        let vehicle = currentStage["vehicleKeys"][j];
+        console.log("VEHICLE: " + vehicle["vehicleName"]);
+        console.log(vehicle["target"]);
+        console.log(vehicle["searchArea"]);
       } //end for
     } // end if
   } // end for
@@ -163,15 +166,14 @@ function getStageInfo(stage_name: string) {
 // --- THIS CHECKS IF A STAGE WITH THE SPECIFIED NAME ALREADY EXISTS IN THE CURRENT MISSION --- //
 function checkStageExists(stage_name: string) {
   // loop through all stages of current mission
-  for (let i = 0; i < MISSION_INFO.value['stages'].length; i++) {
-    let currentStage = MISSION_INFO.value['stages'][i];
+  for (let i = 0; i < MISSION_INFO.value["stages"].length; i++) {
+    let currentStage = MISSION_INFO.value["stages"][i];
     if (currentStage["stageName"] == stage_name) {
       return true;
-    } 
-  } 
+    }
+  }
   return false;
 }
-
 
 provide("Mission Info", {
   MISSION_INFO,
@@ -186,28 +188,19 @@ provide("Mission Info", {
   load_MISSION_INFO
 });
 
-export type {
-  Coordinate, Vehicle, Stage
-}
-
-
+export type { Coordinate, Vehicle, Stage };
 </script>
 
 <template>
-  <div>
+  <div class="h-[88px]">
     <Navbar />
   </div>
-  <RouterView />
+  <div class="h-[calc(100dvh-88px)]">
+    <RouterView />
+  </div>
 </template>
 
 <style scoped>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #249b73);
-}
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 2 columns */

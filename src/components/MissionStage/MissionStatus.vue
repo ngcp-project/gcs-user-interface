@@ -13,23 +13,37 @@
     "
   >
     <div>
-      <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0)">Mission: {{ MISSION_INFO["missionName"] }}</span>
+      <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0)"
+        >Mission: {{ MISSION_INFO["missionName"] }}</span
+      >
       <button
-        style="border: 2px solid rgb(0, 0, 0); margin-left: 1.2rem; color: rgb(0, 0, 0); padding: 3px 6px; font-size: 0.8rem"
+        style="
+          border: 2px solid rgb(0, 0, 0);
+          margin-left: 1.2rem;
+          color: rgb(0, 0, 0);
+          padding: 3px 6px;
+          font-size: 0.8rem;
+        "
         type="button"
         @click="showPopup = true"
       >
-        <span style="font-weight: bold; font-size: 0.8rem" :style="{ color: status === 'initiated' ? 'black' : 'blue' }">OPEN</span>
+        <span
+          style="font-weight: bold; font-size: 0.8rem"
+          :style="{ color: status === 'initiated' ? 'black' : 'blue' }"
+          >OPEN</span
+        >
       </button>
     </div>
     <div>
-      <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0)">Current Stage: {{ this.getLastStage() }}</span>
+      <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0)"
+        >Current Stage: {{ this.getLastStage() }}</span
+      >
     </div>
   </div>
   <div>
     <div v-if="showPopup" class="popup">
       <button style="float: right" @click="closePopup()">X</button>
-      <MissionDropdown :missionNumber="missionNumber" @close="closePopup()"/>
+      <MissionDropdown :missionNumber="missionNumber" @close="closePopup()" />
     </div>
   </div>
 </template>
@@ -39,8 +53,8 @@ import MissionDropdown from "./MissionDropdown.vue";
 import { inject } from "vue";
 export default {
   setup() {
-    const { selectingTarget } = inject('TargetCoord');
-    const { selectingSearch } = inject('SearchCoords');
+    const { selectingTarget } = inject("TargetCoord");
+    const { selectingSearch } = inject("SearchCoords");
     const { MISSION_INFO, getStageNames } = inject("Mission Info");
 
     return { selectingTarget, selectingSearch, MISSION_INFO, getStageNames };
@@ -49,21 +63,21 @@ export default {
   name: "MissionStatus",
   data() {
     return {
-      showPopup: false,
+      showPopup: false
     };
   },
   components: {
-    MissionDropdown,
+    MissionDropdown
   },
   props: {
     missionNumber: {
       type: Number,
-      required: true,
+      required: true
     },
     status: {
       type: String,
-      required: true,
-    },
+      required: true
+    }
   },
   methods: {
     // make sure to set selectingTarget back to false
@@ -74,11 +88,10 @@ export default {
     },
     getLastStage() {
       // console.log(this.MISSION_INFO['stages'][this.MISSION_INFO['stages'].length - 1]);
-      const stage_names = this.getStageNames()
-      
+      const stage_names = this.getStageNames();
+
       return stage_names[stage_names.length - 1];
     }
-    
   }
 };
 </script>
@@ -94,6 +107,6 @@ export default {
 }
 span {
   width: 10em;
-  overflow:hidden;
+  overflow: hidden;
 }
 </style>

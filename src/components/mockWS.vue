@@ -30,7 +30,7 @@ function establishWebSocketConnection() {
     // Handle incoming message
     const data = JSON.parse(event.data);
     console.log("Received data:", data);
-    
+
     // Update receivedData with the parsed data
     receivedData.value = data;
   };
@@ -59,9 +59,9 @@ function sendUpdatedData() {
       lastUpdated: new Date().toLocaleTimeString(),
       currentPosition: {
         latitude: latitude.value,
-        longitude: longitude.value,
+        longitude: longitude.value
       },
-      vehicleStatus: receivedData.value?.vehicleStatus ?? 0, // Use existing vehicle status if available
+      vehicleStatus: receivedData.value?.vehicleStatus ?? 0 // Use existing vehicle status if available
     };
 
     // Send the updated data to the server as a JSON string
@@ -79,7 +79,6 @@ onBeforeUnmount(() => {
     socket.value.close();
   }
 });
-
 </script>
 
 <template>
@@ -94,16 +93,17 @@ onBeforeUnmount(() => {
       <p><strong>Altitude:</strong> {{ receivedData.altitude }}</p>
       <p><strong>Battery Life:</strong> {{ receivedData.batteryLife }}</p>
       <p><strong>Last Updated:</strong> {{ receivedData.lastUpdated }}</p>
-      <p><strong>Current Position:</strong> 
-        <p>Latitude: {{ receivedData.currentPosition.latitude }}</p>
-        <P>Longitude: {{ receivedData.currentPosition.longitude }}</P>
+      <p>
+        <strong>Current Position:</strong>
+        <span>Latitude: {{ receivedData.currentPosition.latitude }}</span>
+        <span>Longitude: {{ receivedData.currentPosition.longitude }}</span>
       </p>
       <p><strong>Vehicle Status:</strong> {{ receivedData.vehicleStatus }}</p>
     </div>
     <div v-else>
       <p>No data received yet.</p>
     </div>
-    
+
     <h2>Update Vehicle Data</h2>
     <form @submit.prevent="sendUpdatedData">
       <div>
