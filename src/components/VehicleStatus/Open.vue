@@ -1,30 +1,9 @@
-<template>
-    <button class="open-button">OPEN</button>
-</template>
-    
-<script lang="ts">
-
-    export default {
-        data() {
-            return {};    
-        }
-    };
+<script setup lang="ts">
+import { NgButton } from "../ui/button";
 </script>
-    
-    
-<style scoped>
-    .open-button {
-        position: relative;
-        display: flex;
-        justify-content: center;
-        width: 30%;
-        height: 18%;
-        background-color: #011949;
-        font-size: 1em;
-        transition: background-color 0.20s;
-    } 
 
-    .open-button:hover {
-        background-color: #194398;
-    }
-</style> 
+<template>
+  <NgButton class="w-fit bg-[#194398] text-white hover:bg-[#194398]/80" size="xs">OPEN</NgButton>
+</template>
+
+<style scoped></style>
