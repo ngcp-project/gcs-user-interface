@@ -40,7 +40,9 @@
 <script lang="ts">
 import { useRouter } from "vue-router";
 import { inject } from "vue";
-import { Stage } from "../Functions/types";
+
+import { MissionInfoProvider } from "@/types/mission-info-provider";
+import { Stage } from "@/types";
 
 export default {
   setup() {
@@ -51,7 +53,7 @@ export default {
       updateTarget,
       checkStageExists,
       save_MISSION_INFO
-    } = inject("Mission Info");
+    } = inject<MissionInfoProvider>("mission-info-provider")!;
 
     const router = useRouter();
     // function to use Vue router to navigate to StaticScreen after pressing submit
