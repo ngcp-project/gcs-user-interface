@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, Ref, onMounted } from "vue";
-import Battery from "../components/VehicleStatus/Battery.vue";
-import Connection from "../components/VehicleStatus/Connection.vue";
+import Battery from "../components/VehicleStatus/VehicleBattery.vue";
+import Connection from "../components/VehicleStatus/VehicleConnection.vue";
 import Camera from "../components/Camera.vue";
 import { useRouter } from "vue-router";
 import { getAllConnections } from "../Functions/webSocket";

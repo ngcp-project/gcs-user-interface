@@ -1,10 +1,10 @@
 <script lang="ts">
-import Battery from "./VehicleStatus/Battery.vue";
-import Connection from "./VehicleStatus/Connection.vue";
+import Battery from "./VehicleStatus/VehicleBattery.vue";
+import Connection from "./VehicleStatus/VehicleConnection.vue";
 import VehicleTitle from "./VehicleStatus/VehicleTitle.vue";
 import EmergencyStop from "./VehicleStatus/EmergencyStop.vue";
-import Open from "./VehicleStatus/Open.vue";
-import Coordinate from "./VehicleStatus/Coordinate.vue";
+import Open from "./VehicleStatus/OpenVehicleStatus.vue";
+import Coordinate from "./VehicleStatus/VehicleCoordinate.vue";
 
 export default {
   props: {

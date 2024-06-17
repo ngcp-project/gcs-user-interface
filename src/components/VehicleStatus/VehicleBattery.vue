@@ -43,6 +43,7 @@ export default {
       } else if (this.percentage <= 0) {
         return "dead";
       }
+      return undefined;
     }
   }
 };
