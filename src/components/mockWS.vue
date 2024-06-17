@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, onBeforeUnmount } from "vue";
+import { NgInput } from "@/components/ui/input";
+import { NgButton } from "@/components/ui/button";
 
 // const webSocketUrl = "ws://192.168.1.65:5135/ws"; // WebSocket server URL
 const webSocketUrl = "ws://localhost:5137/ws/fra"; // WebSocket server URL
@@ -82,8 +84,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div>
-    <h1>Vehicle Data</h1>
+  <div class="w-full max-w-xl">
+    <div class="text-xl font-bold">Vehicle Data</div>
     <div v-if="receivedData">
       <p><strong>Key:</strong> {{ receivedData.key }}</p>
       <p><strong>Speed:</strong> {{ receivedData.speed }}</p>
@@ -103,46 +105,46 @@ onBeforeUnmount(() => {
     <div v-else>
       <p>No data received yet.</p>
     </div>
+    <div class="text-xl font-bold">Update Vehicle Data</div>
 
-    <h2>Update Vehicle Data</h2>
-    <form @submit.prevent="sendUpdatedData">
+    <form @submit.prevent="sendUpdatedData" class="grid gap-2">
       <div>
         <label>Key:</label>
-        <input type="text" v-model="key" />
+        <NgInput type="text" v-model="key" />
       </div>
       <div>
         <label>Speed:</label>
-        <input type="number" v-model="speed" step="0.1" />
+        <NgInput type="number" v-model="speed" step="0.1" />
       </div>
       <div>
         <label>Pitch:</label>
-        <input type="number" v-model="pitch" step="0.1" />
+        <NgInput type="number" v-model="pitch" step="0.1" />
       </div>
       <div>
         <label>Yaw:</label>
-        <input type="number" v-model="yaw" step="0.1" />
+        <NgInput type="number" v-model="yaw" step="0.1" />
       </div>
       <div>
         <label>Roll:</label>
-        <input type="number" v-model="roll" step="0.1" />
+        <NgInput type="number" v-model="roll" step="0.1" />
       </div>
       <!-- <div>
         <label>Altitude:</label>
-        <input type="number" v-model="altitude" step="0.1" />
+        <NgInput type="number" v-model="altitude" step="0.1" />
       </div> -->
       <!-- <div>
         <label>Battery Life:</label>
-        <input type="number" v-model="batteryLife" step="0.1" />
+        <NgInput type="number" v-model="batteryLife" step="0.1" />
       </div> -->
       <!-- <div>
         <label>Latitude:</label>
-        <input type="number" v-model="latitude" step="0.1" />
+        <NgInput type="number" v-model="latitude" step="0.1" />
       </div>
       <div>
         <label>Longitude:</label>
-        <input type="number" v-model="longitude" step="0.1" />
+        <NgInput type="number" v-model="longitude" step="0.1" />
       </div> -->
-      <button type="submit">Send Updated Data</button>
+      <NgButton type="submit">Send Updated Data</NgButton>
     </form>
   </div>
 </template>

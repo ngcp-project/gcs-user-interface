@@ -1,50 +1,112 @@
 <template>
-  <div class="coordinate-form">
-    <h2>{{ this.MISSION_INFO["missionName"] }}</h2>
-    <form @submit.prevent="submitCoordinates()">
-      <!-- Dropdown to show all stages -->
-      <label for="stage">Stage:</label>
-      <select id="stage" v-model="selectedStage" required @change="this.reset()">
-        <option v-for="stage in this.getStageNames()" :key="stage" :value="stage">
-          {{ stage }}
-        </option>
-      </select>
+  <DialogHeader>
+    <DialogTitle>{{
+      MISSION_INFO.missionName === "" ? "Unknown mission" : MISSION_INFO.missionName
+    }}</DialogTitle>
+    <DialogDescription> Make changes to your mission here. </DialogDescription>
+  </DialogHeader>
+  <form @submit.prevent="submitCoordinates()" class="flex flex-col gap-1">
+    <!-- Dropdown to show all stages -->
+    <label for="stage">Stage:</label>
+    <Select id="stage" v-model="selectedStage">
+      <SelectTrigger>
+        <SelectValue placeholder="Select a stage" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectItem v-for="(stage, index) in getStageNames()" :key="index" :value="stage">
+            {{ stage }}
+          </SelectItem>
+        </SelectGroup>
+      </SelectContent>
+    </Select>
 
-      <!-- Dropdown to show all vehicles -->
-      <label for="vehicle">Vehicle:</label>
-      <select id="vehicle" v-model="selectedVehicle" required @change="this.reset()">
-        <option v-for="vehicle in vehicles" :key="vehicle" :value="vehicle">
-          {{ vehicle }}
-        </option>
-      </select>
-      <div style="display: grid; gap: 10px">
-        <label for="targetCoordinate">Target Coordinate: {{}}</label>
-        <input id="targetCoordinate" v-model="populateTarget" type="text" />
-        <!-- current selected vehicle's target coord in v-model -->
-        <button @click.prevent="selectTargetCoordinate">
-          {{ target_button_text }}
-        </button>
+    <!-- Dropdown to show all vehicles -->
+    <label for="vehicle">Vehicle:</label>
+    <Select id="vehicle" v-model="selectedVehicle">
+      <SelectTrigger>
+        <SelectValue placeholder="Select a stage" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectItem v-for="vehicle in vehicles" :key="vehicle" :value="vehicle">
+            {{ vehicle }}
+          </SelectItem>
+        </SelectGroup>
+      </SelectContent>
+    </Select>
 
-        <label for="searchArea">Search Area:</label>
-        <input id="searchArea" v-model="populateSearch" type="text" />
-        <!-- current selected vehicle's search area coords in v-model -->
-        <button @click.prevent="selectSearchArea">
-          {{ search_button_text }}
-        </button>
-      </div>
-      <button type="submit" @click="printMISSION_INFO()">Submit</button>
-    </form>
-  </div>
+    <label for="targetCoordinate">Target Coordinate: {{}}</label>
+    <NgInput id="targetCoordinate" v-model="populateTarget" type="text" />
+    <!-- current selected vehicle's target coord in v-model -->
+    <NgButton @click.prevent="selectTargetCoordinate" size="sm" variant="secondary">
+      {{ target_button_text }}
+    </NgButton>
+
+    <label for="searchArea">Search Area:</label>
+    <NgInput id="searchArea" v-model="populateSearch" type="text" />
+    <!-- current selected vehicle's search area coords in v-model -->
+    <NgButton @click.prevent="selectSearchArea" size="sm" variant="secondary">
+      {{ search_button_text }}
+    </NgButton>
+  </form>
+  <DialogFooter>
+    <DialogClose><NgButton variant="destructive" size="sm">Cancel</NgButton></DialogClose>
+    <DialogClose>
+      <NgButton type="submit" @click="printMISSION_INFO" size="sm">Submit</NgButton>
+    </DialogClose>
+  </DialogFooter>
 </template>
 
-<script>
+<script lang="ts">
 import { inject } from "vue";
+
+import { MissionInfoProvider } from "@/types/mission-info-provider";
+import { SearchCoordsProvider } from "@/types/search-coords-provider";
+import { TargetCoordsProvider } from "@/types/target-coords.provider";
+import {
+  DialogClose,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+
+import { NgButton } from "../ui/button";
+import { NgInput } from "../ui/input";
+
 export default {
+  components: {
+    DialogClose,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    NgButton,
+    NgInput,
+    // eslint-disable-next-line vue/no-reserved-component-names
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+  },
   setup() {
-    const { searchCoords, selectingSearch } = inject("SearchCoords");
-    const { targetCoord, selectingTarget } = inject("TargetCoord");
+    const { searchCoords, selectingSearch } =
+      inject<SearchCoordsProvider>("search-coords-provider")!;
+    const { targetCoord, selectingTarget } =
+      inject<TargetCoordsProvider>("target-coords-provider")!;
     const { MISSION_INFO, addStage, updateSearchArea, updateTarget, getStageNames, getStageInfo } =
-      inject("Mission Info");
+      inject<MissionInfoProvider>("mission-info-provider")!;
 
     return {
       searchCoords,
@@ -229,16 +291,15 @@ export default {
 };
 </script>
 <style scoped>
-.coordinate-form {
+/* .coordinate-form {
   max-width: 18em;
-}
-select {
+} */
+/* select {
   width: 100%;
   padding: 10px;
   border: none;
   border-radius: 4px;
   font-size: 16px;
-  /* overflow:auto; */
 }
 
 select:focus {
@@ -247,5 +308,5 @@ select:focus {
 }
 select option {
   padding: 10px;
-}
+} */
 </style>
