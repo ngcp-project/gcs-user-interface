@@ -3,7 +3,10 @@ import Navbar from "./components/Navbar.vue";
 import { provide, ref } from "vue";
 import { RouterView } from "vue-router";
 import { initializeWSConnections } from "./Functions/webSocket";
-import { Coordinate, Vehicle, Stage } from "./Functions/types";
+import { Coordinate, Vehicle, Stage } from "./types";
+import { SearchCoordsProvider } from "./types/search-coords-provider";
+import { TargetCoordsProvider } from "./types/target-coords.provider";
+import { MissionInformation } from "./types/mission-info";
 
 initializeWSConnections(); // initialize 4 websocket connections for all 4 vehicles at entry point of project
 console.log("Initialize 4 websocket connections from App.vue");
@@ -15,7 +18,8 @@ function updateSearchCoords(coordinate: string[]) {
   // searchCoords.value = coordinate.toString();
   searchCoords.value = coordinate;
 }
-provide("SearchCoords", {
+
+provide<SearchCoordsProvider>("search-coords-provider", {
   searchCoords,
   selectingSearch,
   updateSearchCoords
@@ -24,13 +28,13 @@ provide("SearchCoords", {
 // --------- TARGET COORDINATE (used to select a target coordinate from Map.vue) ----------- //
 const targetCoord = ref("");
 const selectingTarget = ref(false); // this indicates to MissionDropdown and Map6 that we are currently selecting a target coordinate
-provide("TargetCoord", {
+provide<TargetCoordsProvider>("target-coords-provider", {
   targetCoord,
   selectingTarget
 });
 
 // ---------------------------- MISSION INFORMATON ---------------------------- //
-const MISSION_INFO = ref({ missionName: "", stages: [] as Stage[] });
+const MISSION_INFO = ref<MissionInformation>({ missionName: "", stages: [] });
 
 // saves MISSION_INFO to localstorage
 function save_MISSION_INFO() {
@@ -146,12 +150,12 @@ function getStageNames() {
 }
 
 // --- THIS PRINTS OUT ALL VEHICLES AND THEIR RESPECTIVE TARGET COORD AND SEARCH AREA COORDS FOR A SPECIFIED STAGE --- //
-function getStageInfo(stage_name: string) {
-  console.log("INFO FOR STAGE: " + stage_name);
+function getStageInfo(stageName: string) {
+  console.log("INFO FOR STAGE: " + stageName);
   for (let i = 0; i < MISSION_INFO.value["stages"].length; i++) {
     // if we found the stage, loop through that stage's vehicleKeys
     let currentStage = MISSION_INFO.value["stages"][i];
-    if (currentStage["stageName"] == stage_name) {
+    if (currentStage["stageName"] == stageName) {
       // loop through the stage's vehicle keys (ERU, FRA, etc)
       for (let j = 0; j < currentStage["vehicleKeys"].length; j++) {
         let vehicle = currentStage["vehicleKeys"][j];
@@ -164,18 +168,18 @@ function getStageInfo(stage_name: string) {
 } // end getStageInfo
 
 // --- THIS CHECKS IF A STAGE WITH THE SPECIFIED NAME ALREADY EXISTS IN THE CURRENT MISSION --- //
-function checkStageExists(stage_name: string) {
+function checkStageExists(stageName: string) {
   // loop through all stages of current mission
   for (let i = 0; i < MISSION_INFO.value["stages"].length; i++) {
     let currentStage = MISSION_INFO.value["stages"][i];
-    if (currentStage["stageName"] == stage_name) {
+    if (currentStage["stageName"] == stageName) {
       return true;
     }
   }
   return false;
 }
 
-provide("Mission Info", {
+provide("mission-info-provider", {
   MISSION_INFO,
   addStage,
   updateSearchArea,
@@ -183,7 +187,6 @@ provide("Mission Info", {
   getStageNames,
   getStageInfo,
   checkStageExists,
-
   save_MISSION_INFO,
   load_MISSION_INFO
 });
