@@ -71,20 +71,22 @@ export default {
 
 <template>
   <nav class="h-[88px] bg-background p-3">
-    <div style="display: flex; align-items: center; gap: 5%">
+    <div class="flex items-center justify-between gap-2">
       <router-link to="/" class="text-lg font-bold text-[#249b73]">
         <span class="hover:text-[#646cff]">NG</span>CP
       </router-link>
-      <MissionStatus :missionNumber="1" :status="misson_one_status" />
-      <!-- <MissionStatus :missionNumber="2" :status="misson_two_status" />
-      <MissionStatus :missionNumber="3" :status="misson_three_status" /> -->
-      <!-- <button
-        style="border: 2px solid rgb(255, 0, 0); background-color: rgba(23, 0, 0); color: rgb(255, 255, 255)" type="button" @click="refresh_MISSION()">
-        <span style="font-size: 18px">Refresh Mission</span>
-      </button> -->
-      <NgButton @click="showEmergencyModal" class="text-lg font-bold" variant="destructive">
-        STOP ALL
-      </NgButton>
+      <div class="flex items-center gap-2">
+        <MissionStatus :missionNumber="1" :status="misson_one_status" />
+        <!-- <MissionStatus :missionNumber="2" :status="misson_two_status" />
+        <MissionStatus :missionNumber="3" :status="misson_three_status" /> -->
+        <!-- <button
+          style="border: 2px solid rgb(255, 0, 0); background-color: rgba(23, 0, 0); color: rgb(255, 255, 255)" type="button" @click="refresh_MISSION()">
+          <span style="font-size: 18px">Refresh Mission</span>
+        </button> -->
+        <NgButton @click="showEmergencyModal" class="text-lg font-bold" variant="destructive">
+          STOP ALL
+        </NgButton>
+      </div>
       <EmergencyStopModal
         :vehicle-name="stop_all"
         v-show="showModal"
