@@ -1,6 +1,6 @@
 <!-- offline -->
 <template>
-  <div class="map">
+  <div class="h-full w-full">
     <l-map
       ref="map"
       v-model:zoom="zoom"
@@ -8,7 +8,7 @@
       :center="mapOrigin"
       @click="addPoint"
     >
-      <div class="button-container">
+      <div class="absolute right-0 top-0 flex items-center gap-2 p-2" style="z-index: 1000">
         <NgButton @click="sendZoneInPolygonPoints">Zone In</NgButton>
         <NgButton @click="sendZoneOutPolygonPoints">Zone Out</NgButton>
         <!-- <button class="send-button" @click="FetchZones" >Get In/Out</button> -->
@@ -32,6 +32,7 @@
         :lat-lng="ERU_position"
         :icon="ERU_icon"
         :rotationAngle="ERU_yaw"
+        class="-z-10"
       ></l-marker-rotate>
       <l-marker-rotate
         :lat-lng="MEA_position"
@@ -117,6 +118,9 @@ import {
 
 import { LMarkerRotate } from "vue-leaflet-rotate-marker";
 import { NgButton } from "@/components/ui/button";
+import { SearchCoordsProvider } from "@/types/search-coords-provider";
+import { TargetCoordsProvider } from "@/types/target-coords.provider";
+import { MissionInfoProvider } from "@/types/mission-info-provider";
 interface Coordinates {
   latitude: number;
   longitude: number;
@@ -124,9 +128,11 @@ interface Coordinates {
 
 export default {
   setup() {
-    const { searchCoords, selectingSearch, updateSearchCoords } = inject("SearchCoords");
-    const { targetCoord, selectingTarget } = inject("TargetCoord");
-    const { load_MISSION_INFO } = inject("Mission Info");
+    const { searchCoords, selectingSearch, updateSearchCoords } =
+      inject<SearchCoordsProvider>("search-coords-provider")!;
+    const { targetCoord, selectingTarget } =
+      inject<TargetCoordsProvider>("target-coords-provider")!;
+    const { load_MISSION_INFO } = inject<MissionInfoProvider>("mission-info-provider")!;
 
     return {
       searchCoords,
@@ -207,6 +213,7 @@ export default {
   methods: {
     //creating the current selected polygon
     addPoint(event: LeafletMouseEvent) {
+      console.log("event", event);
       const lat = event.latlng.lat;
       const lng = event.latlng.lng;
       console.log("Clicked coordinates:", lat, lng);
@@ -532,37 +539,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.map {
-  height: 100%;
-}
-/* .clear-button,
-.send-button {
-  padding: 12px 24px;
-  font-size: 16px;
-  border: none;
-  border-radius: 8px;
-  background-color: #496ecc;
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  transition-duration: 0.4s;
-  cursor: pointer;
-  margin: 10px;
-}
-.clear-button:hover,
-.send-button:hover {
-  background-color: #3d569c;
-} */
-.button-container {
-  /* position: absolute;
-  right: 0px;
-  top: 0px;
-  display: flex;
-  z-index: 999;
-   */
-  @apply absolute right-0 top-0 z-50 flex items-center gap-2 p-2;
-}
-</style>
