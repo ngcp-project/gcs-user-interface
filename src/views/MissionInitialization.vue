@@ -1,38 +1,40 @@
 <template>
-  <div style="width: fit-content; margin: auto; min-width: 35%">
-    <h1>Mission Initialization</h1>
-    <h2 v-if="missionExists" style="text-align: center">Already in this Mission</h2>
-    <form @submit.prevent="submitForm()" style="display: grid; gap: 10px">
-      <label for="missionName">Mission Name:</label>
-      <input
-        id="missionName"
-        v-model="missionName"
-        placeholder="Mission Name"
-        required
-        @change="missionExists = false"
-      />
-
-      <label for="stageName">Initial Stage Name:</label>
-      <input id="stageName" v-model="stageName" placeholder="Stage Name" required />
-
-      <button type="submit" @click="submitForm()">Submit</button>
-    </form>
-
-    <div v-if="MISSION_INFO['missionName'] != ''">
-      <h1 style="margin-top: 20%">Current Mission: {{ MISSION_INFO["missionName"] }}</h1>
-      <h2 style="text-align: center">Create New Stage</h2>
-      <h2 v-if="stageExists" style="text-align: center">Stage with that name already Exists!</h2>
-      <form @submit.prevent="" style="display: grid; gap: 10px">
-        <label for="stageName">Stage Name:</label>
-        <input
-          id="stageName"
-          v-model="newStageName"
-          placeholder="Stage Name"
+  <div class="flex w-full justify-center px-6 py-4">
+    <div class="flex w-full max-w-xl flex-col items-center">
+      <h1>Mission Initialization</h1>
+      <h2>Already in this Mission</h2>
+      <form @submit.prevent="submitForm()" class="grid w-full gap-2">
+        <label for="missionName">Mission Name:</label>
+        <NgInput
+          id="missionName"
+          v-model="missionName"
+          placeholder="New mission"
           required
-          @change="stageExists = false"
+          @change="missionExists = false"
         />
-        <button type="submit" @click="createNewStage()">Submit</button>
+
+        <label for="stageName">Initial Stage Name:</label>
+        <NgInput id="stageName" v-model="stageName" placeholder="Stage Name" required />
+
+        <NgButton type="submit" @click="submitForm()">Submit</NgButton>
       </form>
+
+      <div class="w-full" v-if="MISSION_INFO['missionName'] != ''">
+        <h1>Current Mission: {{ MISSION_INFO["missionName"] }}</h1>
+        <h2 style="text-align: center">Create New Stage</h2>
+        <h2 v-if="stageExists" style="text-align: center">Stage with that name already Exists!</h2>
+        <form @submit.prevent="" style="display: grid; gap: 10px">
+          <label for="stageName">Stage Name:</label>
+          <NgInput
+            id="stageName"
+            v-model="newStageName"
+            placeholder="Stage Name"
+            required
+            @change="stageExists = false"
+          />
+          <NgButton type="submit" @click="createNewStage()">Submit</NgButton>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -43,8 +45,11 @@ import { inject } from "vue";
 
 import { MissionInfoProvider } from "@/types/mission-info-provider";
 import { Stage } from "@/types";
+import { NgInput } from "@/components/ui/input";
+import { NgButton } from "@/components/ui/button";
 
 export default {
+  components: { NgInput, NgButton },
   setup() {
     const {
       MISSION_INFO,
@@ -168,3 +173,17 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+h1 {
+  @apply text-xl font-bold;
+}
+
+h2 {
+  @apply text-lg font-semibold;
+}
+
+form label {
+  @apply text-foreground/70;
+}
+</style>
