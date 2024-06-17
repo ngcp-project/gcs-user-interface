@@ -3,11 +3,7 @@ import mockWS from "../components/mockWS.vue";
 </script>
 
 <template>
-  <div class="grid">
-    <div>
-      <h1>
-        <mockWS />
-      </h1>
-    </div>
+  <div class="flex h-full w-full justify-center overflow-y-scroll px-6 py-2">
+    <mockWS />
   </div>
 </template>

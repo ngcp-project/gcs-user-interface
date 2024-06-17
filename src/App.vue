@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Navbar from "./components/Navbar.vue";
+import Navbar from "./components/HeaderNavbar.vue";
 import { provide, ref } from "vue";
 import { RouterView } from "vue-router";
 import { initializeWSConnections } from "./Functions/webSocket";
@@ -195,11 +195,13 @@ export type { Coordinate, Vehicle, Stage };
 </script>
 
 <template>
-  <div class="h-[88px]">
-    <Navbar />
-  </div>
-  <div class="h-[calc(100dvh-88px)]">
-    <RouterView />
+  <div class="flex h-[100dvh] flex-col">
+    <div class="flex-shrink-0">
+      <Navbar />
+    </div>
+    <div class="flex-grow overflow-y-auto">
+      <RouterView />
+    </div>
   </div>
 </template>
 

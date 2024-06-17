@@ -1,6 +1,6 @@
-<script lang="ts">
+<script setup lang="ts">
 import MissionStatus from "./MissionStage/MissionStatus.vue";
-import EmergencyStopModal from "../components/VehicleStatus/EmergencyStopModal.vue";
+import EmergencyStopModal from "../components/VehicleStatus/EmergencyStopDialog.vue";
 import ThemeToggle from "./ThemeToggle.vue";
 import { NgButton } from "./ui/button";
 import {
@@ -10,69 +10,37 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Icon } from "@iconify/vue";
+import { ref } from "vue";
 
-export default {
-  components: {
-    EmergencyStopModal,
-    MissionStatus,
-    ThemeToggle,
-    // eslint-disable-next-line vue/no-reserved-component-names
-    NgButton,
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-    Icon
+const misson_one_status = ref("Done");
+const misson_two_status = ref("In Progress");
+const misson_three_status = ref("initiated");
+
+// nav links
+const nav_links = [
+  {
+    label: "Home",
+    href: "/"
   },
-  data() {
-    return {
-      isNavbarOpen: false,
-      misson_one_status: "Done",
-      misson_two_status: "In Progress",
-      misson_three_status: "initiated",
-      // track whether to display EmergencyStopModal
-      showModal: false,
-      // send to EmergencyStopModal to indicate we want to stop all vehicles
-      stop_all: "all",
-      // nav links
-      nav_links: [
-        {
-          label: "Home",
-          href: "/"
-        },
-        {
-          label: "Map Screen",
-          href: "/StaticScreen"
-        },
-        {
-          label: "Mission Initialization",
-          href: "/MissionInitialization"
-        },
-        {
-          label: "Test",
-          href: "/test"
-        }
-      ]
-    };
+  {
+    label: "Map Screen",
+    href: "/StaticScreen"
   },
-  methods: {
-    toggleNavbar() {
-      this.isNavbarOpen = !this.isNavbarOpen;
-    },
-    showEmergencyModal() {
-      this.showModal = true;
-    },
-    closeEmergencyModal() {
-      this.showModal = false;
-    }
+  {
+    label: "Mission Initialization",
+    href: "/MissionInitialization"
+  },
+  {
+    label: "Test",
+    href: "/test"
   }
-};
+];
 </script>
 
 <template>
-  <nav class="h-[88px] bg-background p-3">
+  <nav class="h-fit bg-background p-3">
     <div class="flex items-center justify-between gap-2">
-      <router-link to="/" class="text-lg font-bold text-[#249b73]">
+      <router-link to="/" class="text-3xl font-bold tracking-wider text-[#249b73]">
         <span class="hover:text-[#646cff]">NG</span>CP
       </router-link>
       <div class="flex items-center gap-2">
@@ -83,20 +51,15 @@ export default {
           style="border: 2px solid rgb(255, 0, 0); background-color: rgba(23, 0, 0); color: rgb(255, 255, 255)" type="button" @click="refresh_MISSION()">
           <span style="font-size: 18px">Refresh Mission</span>
         </button> -->
-        <NgButton @click="showEmergencyModal" class="text-lg font-bold" variant="destructive">
-          STOP ALL
-        </NgButton>
+        <!-- <NgButton @click="showEmergencyModal" variant="destructive"> STOP ALL </NgButton> -->
+        <EmergencyStopModal :vehicle-name="'all'" />
       </div>
-      <EmergencyStopModal
-        :vehicle-name="stop_all"
-        v-show="showModal"
-        @close="closeEmergencyModal"
-      ></EmergencyStopModal>
+
       <div class="flex items-center gap-2">
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <NgButton @click="toggleNavbar" size="icon" variant="secondary">
+            <NgButton size="icon" variant="secondary">
               <Icon icon="radix-icons:hamburger-menu" />
             </NgButton>
           </DropdownMenuTrigger>
