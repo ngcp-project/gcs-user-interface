@@ -49,10 +49,6 @@ export default {
       </div>
       <div class="flex h-[30px] w-[70px] flex-none">
         <Connection :latency="latency" :displayLatency="true" class="h-full w-[100px]" />
-        <!-- <div class="connection-status-specifics">                  <-- moved the text showing latency into actual Connection component 
-                    <span style="font-size: 0.9em;">Connection:</span>              bcuz we calculate latency in Connection.vue
-                    <span style="font-size: 0.9em;">Last Packet: {{ latency }} </span>
-                </div> -->
       </div>
     </div>
 
@@ -66,92 +62,3 @@ export default {
     </div>
   </div>
 </template>
-
-<style scoped>
-.status_container {
-  /* display: flex;
-  position: relative;
-  height: 100%;
-  width: 100%;
-  border: 0.1em solid black;
-  background-color: white;
-  color: black; */
-  @apply flex h-full w-full bg-secondary;
-}
-
-.left-container {
-  /* position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 46%; */
-  @apply flex h-full w-1/2 flex-col;
-}
-
-.right-container {
-  /* position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 54%; */
-  @apply flex h-full w-1/2 flex-col;
-}
-
-.battery-status-container {
-  /* display: flex;
-  position: relative;
-  width: 100%;
-  height: 20%;
-  gap: 6%;
-  margin-top: auto; */
-  @apply mt-auto flex h-1/5 w-full;
-}
-
-.connection-status-container {
-  /* display: flex;
-  position: relative;
-  width: 100%;
-  height: 30%;
-  margin-bottom: 2%; */
-  /*  margin-left: 10%;  */
-  @apply flex h-1/3 w-full;
-}
-
-.connection-status-specifics {
-  /* display: flex;
-  flex-direction: column;
-  padding-left: 3%;
-  padding-top: 6%; */
-  @apply flex flex-col;
-}
-
-.adjust-battery {
-  /* height: 84%;
-  width: 34%;
-  margin-left: 8%; */
-  @apply ml-1 h-full w-1/3;
-}
-
-.adjust-connection {
-  /* height: 92%;
-  width: 26%;
-  padding-left: 10%; */
-  @apply h-full w-1/5;
-}
-
-.adjust-emergency-button {
-  /* margin-top: auto;
-  margin-bottom: 5%;
-  margin-left: 10%; */
-}
-
-.adjust-open-button {
-  /* margin-top: 4%;
-  margin-left: 58%; */
-}
-
-.adjust-coordinates {
-  /* margin-top: 18%;
-  margin-left: 8%; */
-}
-</style>
