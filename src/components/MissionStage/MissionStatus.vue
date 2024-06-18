@@ -32,17 +32,7 @@ import { SearchCoordsProvider, defaultSearchCoords } from "@/types/search-coords
 import { TargetCoordsProvider, defaultTargetCoords } from "@/types/target-coords.provider";
 import { MissionInfoProvider } from "@/types/mission-info-provider";
 
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
-import MissionDialog from "./MissionDialog.vue";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export default {
   setup() {
