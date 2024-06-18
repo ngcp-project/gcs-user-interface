@@ -31,31 +31,7 @@ export default {
 };
 </script>
 <template>
-  <div class="box video-section">
-    <img :src="getCameraImageUrl(cameraID)" class="video-image" />
+  <div class="h-full w-full border-2">
+    <img :src="getCameraImageUrl(cameraID)" class="h-full w-full" />
   </div>
 </template>
-<style scoped>
-/* .app {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  } */
-
-.video-section {
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  border: 2px solid #ccc;
-}
-
-.video-image {
-  width: 100%;
-  height: 100%;
-  /* object-fit: contain; */
-}
-.box {
-  border: 2px solid #030303;
-}
-</style>

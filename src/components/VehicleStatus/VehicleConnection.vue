@@ -1,5 +1,5 @@
 <template>
-  <div class="relative flex h-full w-fit items-end gap-1">
+  <div class="relative flex h-6 w-fit items-end gap-1">
     <div class="relative flex h-full w-fit flex-grow justify-center gap-[1px]">
       <div :class="cn('bar h-1/4 bg-foreground', latency === 0 && 'bg-foreground/50')" />
       <div
