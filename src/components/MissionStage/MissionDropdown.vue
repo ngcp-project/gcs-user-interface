@@ -4,35 +4,49 @@
     <form @submit.prevent="submitCoordinates()">
       <!-- Dropdown to show all stages -->
       <label for="stage">Stage:</label>
-      <select id="stage" v-model="selectedStage" required @change="this.reset()">
-        <option v-for="stage in this.getStageNames()" :key="stage" :value="stage">
-          {{ stage }}
-        </option>
-      </select>
+      <Select id="stage" v-model="selectedStage">
+        <SelectTrigger>
+          <SelectValue placeholder="Select a stage" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem v-for="(stage, index) in getStageNames()" :key="index" :value="stage">
+              {{ stage }}
+            </SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
 
       <!-- Dropdown to show all vehicles -->
       <label for="vehicle">Vehicle:</label>
-      <select id="vehicle" v-model="selectedVehicle" required @change="this.reset()">
-        <option v-for="vehicle in vehicles" :key="vehicle" :value="vehicle">
-          {{ vehicle }}
-        </option>
-      </select>
+      <Select id="vehicle" v-model="selectedVehicle">
+        <SelectTrigger>
+          <SelectValue placeholder="Select a stage" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem v-for="vehicle in vehicles" :key="vehicle" :value="vehicle">
+              {{ vehicle }}
+            </SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
       <div style="display: grid; gap: 10px">
         <label for="targetCoordinate">Target Coordinate: {{}}</label>
-        <input id="targetCoordinate" v-model="populateTarget" type="text" />
+        <NgInput id="targetCoordinate" v-model="populateTarget" type="text" />
         <!-- current selected vehicle's target coord in v-model -->
-        <button @click.prevent="selectTargetCoordinate">
+        <NgButton @click.prevent="selectTargetCoordinate" size="sm" variant="secondary">
           {{ target_button_text }}
-        </button>
+        </NgButton>
 
         <label for="searchArea">Search Area:</label>
-        <input id="searchArea" v-model="populateSearch" type="text" />
+        <NgInput id="searchArea" v-model="populateSearch" type="text" />
         <!-- current selected vehicle's search area coords in v-model -->
-        <button @click.prevent="selectSearchArea">
+        <NgButton @click.prevent="selectSearchArea" size="sm" variant="secondary">
           {{ search_button_text }}
-        </button>
+        </NgButton>
       </div>
-      <button type="submit" @click="printMISSION_INFO()">Submit</button>
+      <NgButton type="submit" @click="printMISSION_INFO()">Submit</NgButton>
     </form>
   </div>
 </template>
@@ -43,7 +57,30 @@ import { SearchCoordsProvider } from "@/types/search-coords-provider";
 import { TargetCoordsProvider } from "@/types/target-coords.provider";
 import { MissionInfoProvider } from "@/types/mission-info-provider";
 
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+
+import { NgButton } from "../ui/button";
+import { NgInput } from "../ui/input";
+
 export default {
+  components: {
+    NgButton,
+    NgInput,
+    // eslint-disable-next-line vue/no-reserved-component-names
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+  },
   setup() {
     // const { searchCoords, selectingSearch } = inject("SearchCoords");
     // const { targetCoord, selectingTarget } = inject("TargetCoord");
@@ -257,5 +294,6 @@ select:focus {
 }
 select option {
   padding: 10px;
+  color: #000000;
 }
 </style>
