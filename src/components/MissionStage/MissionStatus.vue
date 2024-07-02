@@ -1,45 +1,66 @@
 <template>
   <div
-    class="flex flex-col items-start justify-center rounded-sm border bg-secondary p-2 font-semibold text-secondary-foreground"
+    style="
+      /* width: 12rem; */
+      height: 4rem;
+      border: 2px solid rgb(52, 49, 49);
+      background-color: rgb(255, 255, 255);
+      margin-left: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+    "
   >
-    <div class="flex w-full items-center justify-between gap-2">
-      <div>
-        <span class="opacity-80">Mission: </span>
-        {{ MISSION_INFO.missionName === "" ? "null" : MISSION_INFO.missionName }}
-      </div>
-      <Dialog>
-        <DialogTrigger asChild>
-          <NgButton size="xs">OPEN</NgButton>
-        </DialogTrigger>
-        <DialogContent>
-          <MissionDropdown :missionNumber="missionNumber" @close="closePopup()" />
-        </DialogContent>
-      </Dialog>
+    <div>
+      <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0)"
+        >Mission: {{ MISSION_INFO["missionName"] }}</span
+      >
+      <button
+        style="
+          border: 2px solid rgb(0, 0, 0);
+          margin-left: 1.2rem;
+          color: rgb(0, 0, 0);
+          padding: 3px 6px;
+          font-size: 0.8rem;
+        "
+        type="button"
+        @click="showPopup = true"
+      >
+        <span
+          style="font-weight: bold; font-size: 0.8rem"
+          :style="{ color: status === 'initiated' ? 'black' : 'blue' }"
+          >OPEN</span
+        >
+      </button>
     </div>
-    <div class="flex w-full items-center gap-2">
-      <span class="opacity-80">Current Stage: </span><span>{{ getLastStage() ?? "null" }}</span>
+    <div>
+      <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0)"
+        >Current Stage: {{ this.getLastStage() }}</span
+      >
+    </div>
+  </div>
+  <div>
+    <div v-if="showPopup" class="popup">
+      <button style="float: right" @click="closePopup()">X</button>
+      <MissionDropdown :missionNumber="missionNumber" @close="closePopup()" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { inject } from "vue";
 import MissionDropdown from "./MissionDropdown.vue";
-
-import { NgButton } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { SearchCoordsProvider, defaultSearchCoords } from "@/types/search-coords-provider";
-import { TargetCoordsProvider, defaultTargetCoords } from "@/types/target-coords.provider";
+import { inject } from "vue";
+import { SearchCoordsProvider } from "@/types/search-coords-provider";
+import { TargetCoordsProvider } from "@/types/target-coords.provider";
 import { MissionInfoProvider } from "@/types/mission-info-provider";
-
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export default {
   setup() {
-    const { selectingTarget } =
-      inject<TargetCoordsProvider>("target-coords-provider") ?? defaultTargetCoords;
-    const { selectingSearch } =
-      inject<SearchCoordsProvider>("search-coords-provider") ?? defaultSearchCoords;
+    const { searchCoords, selectingSearch, updateSearchCoords } =
+      inject<SearchCoordsProvider>("search-coords-provider")!;
+    const { targetCoord, selectingTarget } =
+      inject<TargetCoordsProvider>("target-coords-provider")!;
     const { MISSION_INFO, getStageNames } = inject<MissionInfoProvider>("mission-info-provider")!;
 
     return { selectingTarget, selectingSearch, MISSION_INFO, getStageNames };
@@ -52,12 +73,7 @@ export default {
     };
   },
   components: {
-    MissionDropdown,
-    // eslint-disable-next-line vue/no-reserved-component-names
-    Dialog,
-    DialogContent,
-    DialogTrigger,
-    NgButton
+    MissionDropdown
   },
   props: {
     missionNumber: {
@@ -81,8 +97,7 @@ export default {
       const stage_names = this.getStageNames();
 
       return stage_names[stage_names.length - 1];
-    },
-    cn
+    }
   }
 };
 </script>
@@ -95,5 +110,9 @@ export default {
   background: rgba(0, 0, 0, 0.5);
   padding: 20px;
   z-index: 1000;
+}
+span {
+  width: 10em;
+  overflow: hidden;
 }
 </style>
