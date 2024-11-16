@@ -4,14 +4,18 @@ import Connection from "./VehicleStatus/VehicleConnection.vue";
 import VehicleTitle from "./VehicleStatus/VehicleTitle.vue";
 import EmergencyStop from "./VehicleStatus/EmergencyStop.vue";
 import Open from "./VehicleStatus/OpenVehicleStatus.vue";
-import Coordinate from "./VehicleStatus/VehicleCoordinate.vue";
+import VehicleCoordinate from "./VehicleStatus/VehicleCoordinate.vue";
+import { PropType } from "vue";
 
 const props = defineProps({
   vehicleName: { required: true, type: String },
   vehicleStatus: { required: true, type: String },
   batteryPct: { required: true, type: Number },
   latency: { required: true, type: Number },
-  coordinates: { required: true, type: Object },
+  coordinates: {
+    required: true,
+    type: Object as PropType<{ longitude: number; latitude: number }>
+  },
   isInKeepInZone: { required: true, type: Boolean },
   isInKeepOutZone: { required: true, type: Boolean }
 });
@@ -44,7 +48,7 @@ const props = defineProps({
 
     <!-- Right side of container (Open button, Coordinates, Emergency Stop)-->
     <div class="flex h-full w-full flex-col gap-1">
-      <Coordinate :coordinates="props.coordinates"></Coordinate>
+      <VehicleCoordinate :coordinates="props.coordinates"></VehicleCoordinate>
       <div class="flex w-full items-center justify-between gap-2">
         <Open />
         <EmergencyStop :vehicleName="props.vehicleName" />

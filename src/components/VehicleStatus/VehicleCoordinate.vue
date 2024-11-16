@@ -13,26 +13,23 @@
   </div>
 </template>
 
-<script lang="ts">
-export default {
-  props: {
-    coordinates: { required: true, type: Object }
+<script setup lang="ts">
+import { computed, defineProps } from "vue";
+
+const props = defineProps<{
+  coordinates: { longitude: number; latitude: number };
+}>();
+
+const displayInfo = computed(() => [
+  {
+    label: "Longitude",
+    value: props.coordinates.longitude.toFixed(6)
   },
-  computed: {
-    displayInfo() {
-      return [
-        {
-          label: "Longtitude",
-          value: this.$props.coordinates.longitude.toFixed(6)
-        },
-        {
-          label: "Latitude",
-          value: this.$props.coordinates.latitude.toFixed(6)
-        }
-      ];
-    }
+  {
+    label: "Latitude",
+    value: props.coordinates.latitude.toFixed(6)
   }
-};
+]);
 </script>
 
 <style scoped>

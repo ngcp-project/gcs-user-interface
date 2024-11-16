@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Camera from "../components/CameraFeed.vue";
 import IndicatorComponent from "../components/IndicatorComponent.vue";
-import Status from "../components/VehicleStatusComponent.vue";
+import VehicleStatusComponent from "../components/VehicleStatusComponent.vue";
 import { useRoute } from "vue-router";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { getConnection, getVehicleStatus } from "../Functions/webSocket";
 
 const route = useRoute();
@@ -31,7 +31,7 @@ wsConnection.addEventListener("message", (event) => {
 
     <div class="vehicle-info-container">
       <div class="vehicle-status-parent">
-        <Status
+        <VehicleStatusComponent
           :batteryPct="parseFloat(vehicleData.batteryLife)"
           :latency="parseFloat(vehicleData.lastUpdated)"
           :coordinates="vehicleData.currentPosition"
