@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Camera from "../components/Camera.vue";
+import Camera from "../components/CameraFeed.vue";
 </script>
 
 <template>
