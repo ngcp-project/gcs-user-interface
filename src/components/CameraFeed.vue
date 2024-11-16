@@ -5,7 +5,7 @@ const props = defineProps<{ cameraID: number }>();
 
 const localIp = ref("http://192.168.1.173"); //maybe change accordingly .env?
 const port = ref("5000"); //maybe change accordingly
-const cameraUrls = ref({
+const cameraUrls = ref<{ [key: number]: string }>({
   1: "video_feed", //cam url here
   2: "video_feed2"
 });
