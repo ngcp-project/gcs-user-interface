@@ -2,7 +2,7 @@
   <div class="rounded-md bg-foreground px-2 py-1 text-background">
     <div class="flex items-center justify-between gap-4">
       <div>Mission: {{ !!MISSION_INFO.missionName ? MISSION_INFO.missionName : "N/A" }}</div>
-      <Button size="sm" variant="secondary" type="button" @click="showPopup = true">OPEN</Button>
+      <Button size="sm" variant="secondary" type="button" @click="openStatusWindow">OPEN</Button>
     </div>
     <div>Current Stage: {{ getLastStage() ?? "N/A" }}</div>
   </div>
@@ -24,8 +24,7 @@ import Button from "../ui/button/Button.vue";
 
 const showPopup = ref(false);
 
-const { searchCoords, selectingSearch, updateSearchCoords } =
-  inject<SearchCoordsProvider>("search-coords-provider")!;
+const { selectingSearch } = inject<SearchCoordsProvider>("search-coords-provider")!;
 const { targetCoord, selectingTarget } = inject<TargetCoordsProvider>("target-coords-provider")!;
 const { MISSION_INFO, getStageNames } = inject<MissionInfoProvider>("mission-info-provider")!;
 
@@ -43,6 +42,10 @@ const closePopup = () => {
 const getLastStage = () => {
   const stage_names = getStageNames();
   return stage_names[stage_names.length - 1];
+};
+
+const openStatusWindow = () => {
+  showPopup.value = true;
 };
 </script>
 
