@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Camera from "../components/CameraFeed.vue";
+import CameraFeed from "../components/CameraFeed.vue";
 import IndicatorComponent from "../components/IndicatorComponent.vue";
 import VehicleStatusComponent from "../components/VehicleStatusComponent.vue";
 import { useRoute } from "vue-router";
@@ -24,7 +24,7 @@ wsConnection.addEventListener("message", (event) => {
     <div class="camera-container">
       <div class="camera-wrapper">
         <router-link to="/" class="back">Back</router-link>
-        <Camera :cameraID="cameraID" />
+        <CameraFeed :cameraID="cameraID" />
         <!-- Back button -->
       </div>
     </div>
