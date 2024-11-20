@@ -21,6 +21,7 @@ import { SearchCoordsProvider } from "@/types/search-coords-provider";
 import { TargetCoordsProvider } from "@/types/target-coords.provider";
 import { MissionInfoProvider } from "@/types/mission-info-provider";
 import Button from "../ui/button/Button.vue";
+import { WebviewWindow } from "@tauri-apps/api/window";
 
 const showPopup = ref(false);
 
@@ -44,8 +45,28 @@ const getLastStage = () => {
   return stage_names[stage_names.length - 1];
 };
 
-const openStatusWindow = () => {
-  showPopup.value = true;
+const openStatusWindow = async () => {
+  // showPopup.value = true;
+  const label = `mission-status-${props.missionNumber}`;
+  const existingWindow = WebviewWindow.getByLabel(label);
+  if (existingWindow) {
+    await existingWindow.setFocus();
+  } else {
+    const webview = new WebviewWindow(label, {
+      url: `http://localhost:4000/#/mission-status/${props.missionNumber}`,
+      // adjust width and height of the window
+      width: 400,
+      height: 800
+    });
+    webview.once("tauri://created", function () {
+      // webview window successfully created
+      console.log("webview window successfully created");
+    });
+    webview.once("tauri://error", function (e) {
+      // an error occurred during webview window creation
+      console.log("an error occurred during webview window creation", e);
+    });
+  }
 };
 </script>
 

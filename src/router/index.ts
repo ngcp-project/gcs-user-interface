@@ -5,6 +5,7 @@ import Cam2Focus from "../views/Cam2Focus.vue";
 import CamFocus from "../views/CamFocus.vue";
 import mockWS from "../views/mockWS.vue";
 import MissionInitialization from "../views/MissionInitialization.vue";
+import MissionStatus from "@/views/MissionStatus.vue";
 
 const routes = [
   { path: "/", component: HomeScreen },
@@ -13,7 +14,8 @@ const routes = [
   { path: "/2", component: Cam2Focus },
   // { path: '/CamFocus/:id', component: CamFocus },
   { path: "/CamFocus/:id/:vehicleID", component: CamFocus }, // passing vehicle id (name)
-  { path: "/test", component: mockWS }
+  { path: "/test", component: mockWS },
+  { path: "/mission-status/:id", component: MissionStatus }
 ];
 
 const router = createRouter({

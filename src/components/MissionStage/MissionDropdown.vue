@@ -1,10 +1,10 @@
 <template>
-  <div class="coordinate-form">
-    <h2>{{ this.MISSION_INFO["missionName"] }}</h2>
-    <form @submit.prevent="submitCoordinates()">
+  <div class="flex w-full flex-col gap-4">
+    <h2>{{ MISSION_INFO["missionName"] }}</h2>
+    <form @submit.prevent="submitCoordinates()" class="flex w-full flex-col gap-3">
       <!-- Dropdown to show all stages -->
       <label for="stage">Stage:</label>
-      <Select id="stage" v-model="selectedStage">
+      <Select id="stage" :v-model="selectedStage">
         <SelectTrigger>
           <SelectValue placeholder="Select a stage" />
         </SelectTrigger>
@@ -121,7 +121,7 @@ export default {
         MEA: { target: "", search: "" },
         MRA: { target: "", search: "" },
         FRA: { target: "", search: "" }
-      }
+      } as Record<string, { target: string; search: string }>
     };
   },
   methods: {
@@ -275,25 +275,3 @@ export default {
   }
 };
 </script>
-<style scoped>
-.coordinate-form {
-  max-width: 18em;
-}
-select {
-  width: 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  /* overflow:auto; */
-}
-
-select:focus {
-  outline: none;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-select option {
-  padding: 10px;
-  color: #000000;
-}
-</style>

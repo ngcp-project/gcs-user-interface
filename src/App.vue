@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Navbar from "./components/HeaderNavbar.vue";
-import { provide, ref } from "vue";
-import { RouterView } from "vue-router";
+import { computed, provide, ref } from "vue";
+import { RouterView, useRoute } from "vue-router";
 import { initializeWSConnections } from "./Functions/webSocket";
 import { Coordinate, Vehicle, Stage } from "./types";
 import { SearchCoordsProvider } from "./types/search-coords-provider";
@@ -191,12 +191,17 @@ provide("mission-info-provider", {
   load_MISSION_INFO
 });
 
+const route = useRoute();
+const showNavbar = computed(() => {
+  return !route.path.startsWith("/mission-status");
+});
+
 export type { Coordinate, Vehicle, Stage };
 </script>
 
 <template>
   <div class="flex h-[100dvh] flex-col">
-    <div class="flex-shrink-0">
+    <div v-if="showNavbar" class="flex-shrink-0">
       <Navbar />
     </div>
     <div class="flex-grow overflow-y-auto">
