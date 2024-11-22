@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import Camera from "../components/Camera.vue";
+import CameraFeed from "../components/CameraFeed.vue";
 </script>
 
 <template>
   <div class="camera-container">
-    <Camera :cameraNumber="2" />
+    <CameraFeed :cameraID="2" />
   </div>
 </template>
 

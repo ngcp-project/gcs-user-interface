@@ -13,8 +13,8 @@ import { Icon } from "@iconify/vue";
 import { ref } from "vue";
 
 const misson_one_status = ref("Done");
-const misson_two_status = ref("In Progress");
-const misson_three_status = ref("initiated");
+// const misson_two_status = ref("In Progress");
+// const misson_three_status = ref("initiated");
 
 // nav links
 const nav_links = [

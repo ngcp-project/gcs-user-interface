@@ -2,7 +2,7 @@
 import { ref, Ref, onMounted } from "vue";
 import Battery from "../components/VehicleStatus/VehicleBattery.vue";
 import Connection from "../components/VehicleStatus/VehicleConnection.vue";
-import Camera from "../components/Camera.vue";
+import Camera from "../components/CameraFeed.vue";
 import { useRouter } from "vue-router";
 import { getAllConnections } from "../Functions/webSocket";
 

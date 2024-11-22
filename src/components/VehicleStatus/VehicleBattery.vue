@@ -14,39 +14,36 @@
   </div>
 </template>
 
-<script lang="ts">
-export default {
-  data() {
-    return {};
-  },
-  props: {
-    percentage: { required: true, type: Number },
-    charging: { required: true, type: Boolean }
-  },
-  computed: {
-    percentageCSS() {
-      if (this.percentage <= 0) {
-        return "zeroPercent";
-      } else if (this.percentage > 0 && this.percentage <= 0.15) {
-        return "tenPercent";
-      } else if (this.percentage > 0.15 && this.percentage <= 0.3) {
-        return "twentyFivePercent";
-      } else if (this.percentage > 0.3 && this.percentage <= 0.5) {
-        return "fiftyPercent";
-      } else {
-        return "normalPercent";
-      }
-    },
-    batteryStatus() {
-      if (this.charging == true) {
-        return "charging";
-      } else if (this.percentage <= 0) {
-        return "dead";
-      }
-      return undefined;
-    }
+<script lang="ts" setup>
+import { computed, defineProps } from "vue";
+
+const props = defineProps<{
+  percentage: number;
+  charging: boolean;
+}>();
+
+const percentageCSS = computed(() => {
+  if (props.percentage <= 0) {
+    return "zeroPercent";
+  } else if (props.percentage > 0 && props.percentage <= 0.15) {
+    return "tenPercent";
+  } else if (props.percentage > 0.15 && props.percentage <= 0.3) {
+    return "twentyFivePercent";
+  } else if (props.percentage > 0.3 && props.percentage <= 0.5) {
+    return "fiftyPercent";
+  } else {
+    return "normalPercent";
   }
-};
+});
+
+const batteryStatus = computed(() => {
+  if (props.charging) {
+    return "charging";
+  } else if (props.percentage <= 0) {
+    return "dead";
+  }
+  return undefined;
+});
 </script>
 
 <style scoped>

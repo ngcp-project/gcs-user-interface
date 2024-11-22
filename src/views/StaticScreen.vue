@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Status from "../components/VehicleStatusComponent.vue";
-import { onMounted, onBeforeUnmount, ref, reactive, Ref } from "vue";
+import VehicleStatus from "../components/VehicleStatusComponent.vue";
+import { onMounted, ref, Ref } from "vue";
 import Map from "../components/Map.vue";
-import { getAllConnections, closeConnections, getVehicleStatus } from "../Functions/webSocket";
+import { getAllConnections, getVehicleStatus } from "../Functions/webSocket";
 
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
 const ERU_data = ref({
@@ -129,7 +129,7 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
     <div
       class="flex h-full w-fit max-w-[300px] flex-none flex-col gap-[6px] overflow-y-scroll bg-background p-[6px]"
     >
-      <Status
+      <VehicleStatus
         :batteryPct="ERU_data.batteryPct"
         :latency="ERU_data.lastUpdated"
         :coordinates="ERU_data.coordinates"
@@ -138,7 +138,7 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
         :isInKeepInZone="ERU_data.inKeepIn"
         :isInKeepOutZone="ERU_data.inKeepOut"
       />
-      <Status
+      <VehicleStatus
         :batteryPct="MEA_data.batteryPct"
         :latency="MEA_data.lastUpdated"
         :coordinates="MEA_data.coordinates"
@@ -147,7 +147,7 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
         :isInKeepInZone="MEA_data.inKeepIn"
         :isInKeepOutZone="MEA_data.inKeepOut"
       />
-      <Status
+      <VehicleStatus
         :batteryPct="MRA_data.batteryPct"
         :latency="MRA_data.lastUpdated"
         :coordinates="MRA_data.coordinates"
@@ -156,7 +156,7 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
         :isInKeepInZone="MRA_data.inKeepIn"
         :isInKeepOutZone="MRA_data.inKeepOut"
       />
-      <Status
+      <VehicleStatus
         :batteryPct="FRA_data.batteryPct"
         :latency="FRA_data.lastUpdated"
         :coordinates="FRA_data.coordinates"
