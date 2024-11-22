@@ -4,11 +4,13 @@
     <l-map
       ref="map"
       v-model:zoom="zoom"
+      :options="{zoomControl: false}"
       :use-global-leaflet="false"
       :center="mapOrigin"
       @click="addPoint"
     >
-      <div class="absolute right-0 top-0 flex items-center gap-2 p-2" style="z-index: 1000">
+      <div class="absolute left-0 top-20 flex flex-col items-left gap-2 p-2" style="z-index: 1000">
+        <l-control-zoom position="topleft"></l-control-zoom>
         <NgButton @click="sendZoneInPolygonPoints">Zone In</NgButton>
         <NgButton @click="sendZoneOutPolygonPoints">Zone Out</NgButton>
         <!-- <button class="send-button" @click="FetchZones" >Get In/Out</button> -->
@@ -103,7 +105,7 @@
 <script lang="ts">
 import "leaflet/dist/leaflet.css";
 import { inject, ref } from "vue";
-import { LMap, LTileLayer, LPolygon, LMarker } from "@vue-leaflet/vue-leaflet";
+import { LMap, LTileLayer, LPolygon, LMarker, LControlZoom } from "@vue-leaflet/vue-leaflet";
 import { LeafletMouseEvent, LatLngExpression, icon } from "leaflet";
 
 import {
@@ -121,6 +123,8 @@ import { NgButton } from "@/components/ui/button";
 import { SearchCoordsProvider } from "@/types/search-coords-provider";
 import { TargetCoordsProvider } from "@/types/target-coords.provider";
 import { MissionInfoProvider } from "@/types/mission-info-provider";
+import { setupControlZoom } from "@vue-leaflet/vue-leaflet/dist/src/functions/controlZoom";
+import { ControlZoom } from "@vue-leaflet/vue-leaflet/dist/src/functions";
 interface Coordinates {
   latitude: number;
   longitude: number;
@@ -149,6 +153,7 @@ export default {
     LPolygon,
     LMarker,
     LMarkerRotate,
+    LControlZoom,
     // eslint-disable-next-line vue/no-reserved-component-names
     NgButton
   },
@@ -539,3 +544,15 @@ export default {
   }
 };
 </script>
+<style>
+    .leaflet-touch .leaflet-bar {
+        @apply flex flex-col border-none;
+    }
+    .leaflet-touch .leaflet-bar a {
+        @apply rounded-md text-gray-500 inline-block h-[1.4em] w-[5.5em];
+        /* background-color: black !important; */
+    }
+    .leaflet-bar .leaflet-control-zoom-out {
+        @apply mt-2;
+    }
+</style>
