@@ -8,6 +8,8 @@
     "preview": "vite preview",
     "styleguide": "vue-cli-service styleguidist --config styleguide.config.cjs",
     "styleguide:build": "vue-cli-service styleguidist:build",
+    "osm-setup": "docker-compose run osm-setup",
+    "osm-server": "docker-compose up osm-server",
     "tauri": "tauri",
     "format": "prettier --write src/",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
