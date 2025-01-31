@@ -50,7 +50,8 @@ onMounted(() => {
 
 <template>
   <div class="grid h-full w-full gap-1 p-1">
-    <div
+    <Carousel />
+    <!-- <div
       v-for="(vehicle, index) in vehiclesData"
       :key="index"
       class="relative flex cursor-pointer"
@@ -62,6 +63,6 @@ onMounted(() => {
         <Battery :percentage="vehicle.batteryPct" :charging="false" />
         <Connection :latency="vehicle.connection" :displayLatency="false" />
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
