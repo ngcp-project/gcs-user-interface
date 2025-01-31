@@ -6,6 +6,8 @@ import Camera from "../components/CameraFeed.vue";
 import { useRouter } from "vue-router";
 import { getAllConnections } from "../Functions/webSocket";
 
+import Carousel from "../components/CameraCarousel.vue"
+
 const router = useRouter();
 
 const handleCameraClick = (cameraID: number, vehicleKey: string) => {
@@ -54,6 +56,7 @@ onMounted(() => {
       class="relative flex cursor-pointer"
       @click="handleCameraClick(vehicle.cameraID, vehicle.key)"
     >
+      <
       <Camera :cameraID="vehicle.cameraID" />
       <div class="absolute left-4 top-4 flex items-center gap-2">
         <Battery :percentage="vehicle.batteryPct" :charging="false" />
