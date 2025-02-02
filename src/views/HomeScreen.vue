@@ -6,7 +6,7 @@ import Camera from "../components/CameraFeed.vue";
 import { useRouter } from "vue-router";
 import { getAllConnections } from "../Functions/webSocket";
 
-import Carousel from "../components/CameraCarousel.vue"
+import CameraCarousel from "../components/CameraCarousel.vue";
 
 const router = useRouter();
 
@@ -49,8 +49,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="grid h-full w-full gap-1 p-1">
-    <Carousel />
+  <CameraCarousel />
     <!-- <div
       v-for="(vehicle, index) in vehiclesData"
       :key="index"
@@ -64,5 +63,4 @@ onMounted(() => {
         <Connection :latency="vehicle.connection" :displayLatency="false" />
       </div>
     </div> -->
-  </div>
 </template>

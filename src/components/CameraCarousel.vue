@@ -1,30 +1,55 @@
 <script lang="ts">
-import { 
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious
 } from "@/components/ui/carousel";
 
-import "@/assets";
-
-export default {
-    
-}
-
+export default {};
 </script>
 
 <template>
-    <div>
-        <Carousel>
-            <CarouselContent>
-                <CarouselItem>
-                    <img
-                        src="MEA.png"
-                    >
-                </CarouselItem>
-            </CarouselContent>
-        </Carousel>
-    </div>
+  <Carousel class="relative w-full max-w-xs">
+    <CarouselContent class="flex">
+      <CarouselItem class="basis-full">
+        <img
+          src="../assets/MRA.png"
+          alt="Carousel Image 1"
+          class="w-full h-[400px] object-cover rounded-lg"
+        />
+      </CarouselItem>
+      <CarouselItem class="basis-full">
+        <img
+          src="../assets/MRA.png"
+          alt="Carousel Image 2"
+          class="w-full h-[400px] object-cover rounded-lg"
+        />
+      </CarouselItem>
+      <CarouselItem class="basis-full">
+        <img
+          src="../assets/MRA.png"
+          alt="Carousel Image 3"
+          class="w-full h-[400px] object-cover rounded-lg"
+        />
+      </CarouselItem>
+      <CarouselItem class="basis-full">
+        <img
+          src="../assets/MRA.png"
+          alt="Carousel Image 4"
+          class="w-full h-[400px] object-cover rounded-lg"
+        />
+      </CarouselItem>
+      <CarouselItem class="basis-full">
+        <img
+          src="../assets/MRA.png"
+          alt="Carousel Image 5"
+          class="w-full h-[400px] object-cover rounded-lg"
+        />
+      </CarouselItem>
+    </CarouselContent>
+    <CarouselPrevious />
+    <CarouselNext />
+  </Carousel>
 </template>
