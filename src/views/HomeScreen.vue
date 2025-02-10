@@ -49,8 +49,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <CameraCarousel />
-    <!-- <div
+  <div class="flex flex-row min-h-screen justify-center items-center">
+    <CameraCarousel />
+  </div>
+  <!-- Legacy code
+   <div
       v-for="(vehicle, index) in vehiclesData"
       :key="index"
       class="relative flex cursor-pointer"
