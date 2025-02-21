@@ -49,9 +49,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-row min-h-screen justify-center items-center">
-    <CameraCarousel />
-  </div>
+  <!-- HOW DO I CENTER DIV????-->
+  <CameraCarousel />
   <!-- Legacy code
    <div
       v-for="(vehicle, index) in vehiclesData"
