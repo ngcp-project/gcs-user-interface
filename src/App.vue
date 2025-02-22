@@ -2,14 +2,11 @@
 import Navbar from "./components/HeaderNavbar.vue";
 import { provide, ref } from "vue";
 import { RouterView } from "vue-router";
-import { initializeWSConnections } from "./Functions/webSocket";
 import { Coordinate, Vehicle, Stage } from "./types";
 import { SearchCoordsProvider } from "./types/search-coords-provider";
 import { TargetCoordsProvider } from "./types/target-coords.provider";
 import { MissionInformation } from "./types/mission-info";
 
-initializeWSConnections(); // initialize 4 websocket connections for all 4 vehicles at entry point of project
-console.log("Initialize 4 websocket connections from App.vue");
 
 // --------- SEARCH AREA COORDINATES (used to select a search area from Map.vue) ------ //
 const searchCoords = ref([""]);
