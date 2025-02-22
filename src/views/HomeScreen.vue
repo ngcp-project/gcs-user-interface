@@ -49,7 +49,6 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- HOW DO I CENTER DIV????-->
   <CameraCarousel />
   <!-- Legacy code
    <div

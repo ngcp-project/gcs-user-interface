@@ -4,9 +4,7 @@ import {
   Carousel,
   type CarouselApi,
   CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious
+  CarouselItem
 } from "@/components/ui/carousel";
 import { watchOnce } from "@vueuse/core";
 import { ref } from "vue";
@@ -15,9 +13,6 @@ import Fade from "embla-carousel-fade";
 const emblaMainApi = ref<CarouselApi>();
 const emblaThumbnailApi = ref<CarouselApi>();
 const selectedIndex = ref(0);
-
-// Hardcoded camera placeholders
-const cameras: string[] = ["ERU", "FRA", "MEA", "MRA"];
 
 function onSelect() {
   if (!emblaMainApi.value || !emblaThumbnailApi.value) return;
@@ -41,55 +36,77 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
 
 <template>
   <!-- Main Carousel -->
-  <div class="w-full h-full">
-    <!-- Plugin adds fade transition -->
-    <Carousel
-      class="relative w-full max-w-2xl"
-      @init-api="(val) => (emblaMainApi = val)"
-      :plugins="[Fade()]"
-    >
-      <CarouselContent>
-        <CarouselItem v-for="(_, index) in 4" :key="index">
-          <div class="p-1">
-            <Card>
-              <CardContent class="flex items-center justify-center p-6">
-                <span class="text-4xl font-semibold">{{ cameras[index] }}</span>
-                <img v-if="index === 0" src="@/assets/ERU.png" />
-                <img v-if="index === 1" src="@/assets/FRA.png" />
-                <img v-if="index === 2" src="@/assets/MEA.png" />
-                <img v-if="index === 3" src="@/assets/MRA.png" />
-              </CardContent>
-            </Card>
-          </div>
-        </CarouselItem>
-      </CarouselContent>
-    </Carousel>
-
-    <!-- Carousel Thumbnails -->
-    <Carousel class="relative w-full max-w-2xl" @init-api="(val) => (emblaThumbnailApi = val)">
-      <CarouselContent class="ml-0 flex justify-center gap-1">
-        <CarouselItem
-          v-for="(_, index) in 4"
-          :key="index"
-          class="basis-1/3 cursor-pointer pl-0"
-          :class="{ hidden: index === selectedIndex }"
-          @click="onThumbClick(index)"
-        >
-          <div v-if="index !== selectedIndex">
-            <div class="p-1" :class="index === selectedIndex ? '' : 'opacity-50'">
+ <div class="carousel-container">
+      <!-- Plugin adds fade transition -->
+      <Carousel class="p-5" @init-api="(val) => (emblaMainApi = val)" :plugins="[Fade()]">
+        <CarouselContent>
+          <CarouselItem v-for="(_, index) in 3" :key="index">
+            <div class="focused-camera">
               <Card>
-                <CardContent class="flex aspect-square items-center justify-center p-6">
-                  <span class="text-4xl font-semibold">{{ cameras[index] }}</span>
-                  <img v-if="index === 0" src="@/assets/ERU.png" />
-                  <img v-if="index === 1" src="@/assets/FRA.png" />
-                  <img v-if="index === 2" src="@/assets/MEA.png" />
-                  <img v-if="index === 3" src="@/assets/MRA.png" />
+                <CardContent class="flex p-0">
+                  <!-- <span class="text-4xl font-semibold">{{ cameras[index] }}</span> -->
+                  <img class="image" v-if="index === 0" src="@/assets/ERU-view.jpg" />
+                  <img class="image" v-if="index === 1" src="@/assets/MEA-view.jpg" />
+                  <img class="image" v-if="index === 2" src="@/assets/MRA-view.jpg" />
                 </CardContent>
               </Card>
             </div>
-          </div>
-        </CarouselItem>
-      </CarouselContent>
-    </Carousel>
-  </div>
+          </CarouselItem>
+        </CarouselContent>
+      </Carousel>
+
+      <!-- Carousel Thumbnails -->
+      <Carousel
+        class="relative max-w-lg items-center justify-center"
+        @init-api="(val) => (emblaThumbnailApi = val)"
+      >
+        <CarouselContent class="flex justify-center gap-5">
+          <CarouselItem
+            v-for="(_, index) in 3"
+            :key="index"
+            class="basis-1/2 cursor-pointer pl-0"
+            :class="{ hidden: index === selectedIndex }"
+            @click="onThumbClick(index)"
+          >
+          <!-- NOTE: You can click and drag around the thumbnails. This is meant for multiple thumbnails that don't fit the carousel. I do not know how to disable this feature.-->
+            <div v-if="index !== selectedIndex">
+              <Card>
+                <CardContent class="flex p-0">
+                  <!-- <span class="text-4xl font-semibold">{{ cameras[index] }}</span> -->
+                  <img class="image" v-if="index === 0" src="@/assets/ERU-view.jpg" />
+                  <img class="image" v-if="index === 1" src="@/assets/MEA-view.jpg" />
+                  <img class="image" v-if="index === 2" src="@/assets/MRA-view.jpg" />
+                </CardContent>
+              </Card>
+            </div>
+          </CarouselItem>
+        </CarouselContent>
+      </Carousel>
+    </div>
 </template>
+
+<style lang="css" scoped>
+.carousel-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.focused-camera {
+  max-height: 70vh;
+  max-width: 60vw;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.p-0 { /* Removes card padding inherited from CardContent UI */
+  padding: 0 !important;
+}
+.image {
+  aspect-ratio: 5/3;
+  border-radius: 0.5rem;
+  object-fit: fill;
+  width: 100%;
+  height: 100%;
+}
+</style>
