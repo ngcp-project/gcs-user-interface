@@ -5,6 +5,7 @@ import Connection from "../components/VehicleStatus/VehicleConnection.vue";
 import Camera from "../components/CameraFeed.vue";
 import { useRouter } from "vue-router";
 import { getAllConnections } from "../Functions/webSocket";
+import { invoke } from "@vueuse/core";
 
 const router = useRouter();
 
@@ -39,6 +40,10 @@ function addListeners() {
     });
   }
 }
+
+// async function listener() {
+//   data = await invoke("get_telemetry", { vehicle: "eru" });
+// }
 
 // gets all 4 websocket connections and adds event listeners to each of them once Static Screen finishes initial rendering
 onMounted(() => {

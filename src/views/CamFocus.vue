@@ -3,19 +3,28 @@ import CameraFeed from "../components/CameraFeed.vue";
 import IndicatorComponent from "../components/IndicatorComponent.vue";
 import VehicleStatusComponent from "../components/VehicleStatusComponent.vue";
 import { useRoute } from "vue-router";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { getConnection, getVehicleStatus } from "../Functions/webSocket";
+import { listen } from "@tauri-apps/api/event";
 
 const route = useRoute();
 const cameraID = Number(route.params.id); // Assuming we're using camera Number
 const vehicleID = String(route.params.vehicleID);
 
+//generic type, and for now its null;
 const vehicleData = ref<any>(null);
 
 const wsConnection = getConnection(vehicleID); // get websocket connection for this specific vehicle
 console.log("Got connection for " + vehicleID + " | " + typeof wsConnection);
 wsConnection.addEventListener("message", (event) => {
   vehicleData.value = JSON.parse(event.data);
+});
+//exposition of command getTelemetry event driven architecture
+onMounted(async () => {
+  await listen("getTelemetry", (event) => {
+    vehicleData.value = event.payload;
+    console.log(event.payload);
+  });
 });
 </script>
 

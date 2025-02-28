@@ -1,15 +1,17 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+use tauri::Manager;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+mod telemetry;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![telemetry::get_telemetry])
+        .setup(|app| {
+            let app_data = telemetry::initialize_telemetry_data();
+            app.manage(Arc::new(Mutex::new(app_data)));
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
