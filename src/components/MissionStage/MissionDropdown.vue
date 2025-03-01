@@ -33,13 +33,13 @@
       </Select>
       <div style="display: grid; gap: 10px">
         <label for="targetCoordinate">Target Coordinate: </label>
-        <NgInput id="targetCoordinate" v-model="populateTarget" type="text" />
+        <Input id="targetCoordinate" v-model="populateTarget" type="text" />
         <Button @click.prevent="selectTargetCoordinate" size="sm" variant="secondary">
           {{ target_button_text }}
         </Button>
 
         <label for="searchArea">Search Area:</label>
-        <NgInput id="searchArea" v-model="populateSearch" type="text" />
+        <Input id="searchArea" v-model="populateSearch" type="text" />
         <Button @click.prevent="selectSearchArea" size="sm" variant="secondary">
           {{ search_button_text }}
         </Button>
@@ -65,12 +65,12 @@ import {
 } from "@/components/ui/select";
 
 import { Button } from "../ui/button";
-import { NgInput } from "../ui/input";
+import { Input } from "../ui/input";
 
 export default {
   components: {
     Button,
-    NgInput,
+    Input,
     Select,
     SelectContent,
     SelectGroup,

@@ -5,7 +5,7 @@
       <h2>Already in this Mission</h2>
       <form @submit.prevent="submitForm()" class="grid w-full gap-2">
         <label for="missionName">Mission Name:</label>
-        <NgInput
+        <Input
           id="missionName"
           v-model="missionName"
           placeholder="New mission"
@@ -14,7 +14,7 @@
         />
 
         <label for="stageName">Initial Stage Name:</label>
-        <NgInput id="stageName" v-model="stageName" placeholder="Stage Name" required />
+        <Input id="stageName" v-model="stageName" placeholder="Stage Name" required />
 
         <Button type="submit" @click="submitForm()">Submit</Button>
       </form>
@@ -25,7 +25,7 @@
         <h2 v-if="stageExists" style="text-align: center">Stage with that name already Exists!</h2>
         <form @submit.prevent="" style="display: grid; gap: 10px">
           <label for="stageName">Stage Name:</label>
-          <NgInput
+          <Input
             id="stageName"
             v-model="newStageName"
             placeholder="Stage Name"
@@ -45,11 +45,11 @@ import { inject } from "vue";
 
 import { MissionInfoProvider } from "@/types/mission-info-provider";
 import { Stage } from "@/types";
-import { NgInput } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default {
-  components: { NgInput, Button },
+  components: { Input, Button },
   setup() {
     const {
       MISSION_INFO,

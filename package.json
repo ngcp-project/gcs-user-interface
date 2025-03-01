@@ -13,7 +13,7 @@
   "dependencies": {
     "@rushstack/eslint-patch": "^1.10.3",
     "@tauri-apps/api": "^1.4.0",
-    "@vueuse/core": "^10.11.0",
+    "@vueuse/core": "^12.7.0",
     "axios": "^1.6.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
