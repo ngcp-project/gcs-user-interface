@@ -34,17 +34,17 @@
       <div style="display: grid; gap: 10px">
         <label for="targetCoordinate">Target Coordinate: </label>
         <NgInput id="targetCoordinate" v-model="populateTarget" type="text" />
-        <NgButton @click.prevent="selectTargetCoordinate" size="sm" variant="secondary">
+        <Button @click.prevent="selectTargetCoordinate" size="sm" variant="secondary">
           {{ target_button_text }}
-        </NgButton>
+        </Button>
 
         <label for="searchArea">Search Area:</label>
         <NgInput id="searchArea" v-model="populateSearch" type="text" />
-        <NgButton @click.prevent="selectSearchArea" size="sm" variant="secondary">
+        <Button @click.prevent="selectSearchArea" size="sm" variant="secondary">
           {{ search_button_text }}
-        </NgButton>
+        </Button>
       </div>
-      <NgButton type="submit" @click="printMISSION_INFO()">Submit</NgButton>
+      <Button type="submit" @click="printMISSION_INFO()">Submit</Button>
     </form>
   </div>
 </template>
@@ -64,12 +64,12 @@ import {
   SelectValue
 } from "@/components/ui/select";
 
-import { NgButton } from "../ui/button";
+import { Button } from "../ui/button";
 import { NgInput } from "../ui/input";
 
 export default {
   components: {
-    NgButton,
+    Button,
     NgInput,
     Select,
     SelectContent,

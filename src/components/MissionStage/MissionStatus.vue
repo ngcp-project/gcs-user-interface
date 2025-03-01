@@ -36,7 +36,7 @@
     </div>
     <div>
       <span style="font-weight: bold; font-size: 1.2rem; color: rgb(0, 0, 0)"
-        >Current Stage: {{ this.getLastStage() }}</span
+        >Current Stage: {{ getLastStage() }}</span
       >
     </div>
   </div>

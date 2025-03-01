@@ -16,7 +16,7 @@
         <label for="stageName">Initial Stage Name:</label>
         <NgInput id="stageName" v-model="stageName" placeholder="Stage Name" required />
 
-        <NgButton type="submit" @click="submitForm()">Submit</NgButton>
+        <Button type="submit" @click="submitForm()">Submit</Button>
       </form>
 
       <div class="w-full" v-if="MISSION_INFO['missionName'] != ''">
@@ -32,7 +32,7 @@
             required
             @change="stageExists = false"
           />
-          <NgButton type="submit" @click="createNewStage()">Submit</NgButton>
+          <Button type="submit" @click="createNewStage()">Submit</Button>
         </form>
       </div>
     </div>
@@ -46,10 +46,10 @@ import { inject } from "vue";
 import { MissionInfoProvider } from "@/types/mission-info-provider";
 import { Stage } from "@/types";
 import { NgInput } from "@/components/ui/input";
-import { NgButton } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 export default {
-  components: { NgInput, NgButton },
+  components: { NgInput, Button },
   setup() {
     const {
       MISSION_INFO,
