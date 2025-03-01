@@ -4,19 +4,13 @@ import IndicatorComponent from "../components/IndicatorComponent.vue";
 import VehicleStatusComponent from "../components/VehicleStatusComponent.vue";
 import { useRoute } from "vue-router";
 import { ref } from "vue";
-import { getConnection, getVehicleStatus } from "../Functions/webSocket";
-
 const route = useRoute();
 const cameraID = Number(route.params.id); // Assuming we're using camera Number
 const vehicleID = String(route.params.vehicleID);
 
 const vehicleData = ref<any>(null);
 
-const wsConnection = getConnection(vehicleID); // get websocket connection for this specific vehicle
-console.log("Got connection for " + vehicleID + " | " + typeof wsConnection);
-wsConnection.addEventListener("message", (event) => {
-  vehicleData.value = JSON.parse(event.data);
-});
+;
 </script>
 
 <template>
@@ -36,7 +30,7 @@ wsConnection.addEventListener("message", (event) => {
           :latency="parseFloat(vehicleData.lastUpdated)"
           :coordinates="vehicleData.currentPosition"
           :vehicleName="vehicleID.toUpperCase()"
-          :vehicleStatus="getVehicleStatus(vehicleData.vehicleStatus)"
+          :vehicleStatus="vehicleData.vehicleStatus"
           :isInKeepInZone="true"
           :isInKeepOutZone="false"
         />

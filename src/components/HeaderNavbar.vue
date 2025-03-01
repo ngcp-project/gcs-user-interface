@@ -2,7 +2,7 @@
 import MissionStatus from "./MissionStage/MissionStatus.vue";
 import EmergencyStopModal from "../components/VehicleStatus/EmergencyStopDialog.vue";
 import ThemeToggle from "./ThemeToggle.vue";
-import { NgButton } from "./ui/button";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,7 +51,7 @@ const nav_links = [
           style="border: 2px solid rgb(255, 0, 0); background-color: rgba(23, 0, 0); color: rgb(255, 255, 255)" type="button" @click="refresh_MISSION()">
           <span style="font-size: 18px">Refresh Mission</span>
         </button> -->
-        <!-- <NgButton @click="showEmergencyModal" variant="destructive"> STOP ALL </NgButton> -->
+        <!-- <Button @click="showEmergencyModal" variant="destructive"> STOP ALL </Button> -->
         <EmergencyStopModal :vehicle-name="'all'" />
       </div>
 
@@ -59,9 +59,9 @@ const nav_links = [
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <NgButton size="icon" variant="secondary">
+            <Button size="icon" variant="secondary">
               <Icon icon="radix-icons:hamburger-menu" />
-            </NgButton>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <router-link v-for="(nav, index) in nav_links" :key="index" :to="nav.href">

@@ -9,11 +9,11 @@
       @click="addPoint"
     >
       <div class="absolute right-0 top-0 flex items-center gap-2 p-2" style="z-index: 1000">
-        <NgButton @click="sendZoneInPolygonPoints">Zone In</NgButton>
-        <NgButton @click="sendZoneOutPolygonPoints">Zone Out</NgButton>
+        <Button @click="sendZoneInPolygonPoints">Zone In</Button>
+        <Button @click="sendZoneOutPolygonPoints">Zone Out</Button>
         <!-- <button class="send-button" @click="FetchZones" >Get In/Out</button> -->
-        <NgButton @click="clearPolygons">Clear All</NgButton>
-        <NgButton @click="clearSelection">Clear Selected</NgButton>
+        <Button @click="clearPolygons">Clear All</Button>
+        <Button @click="clearSelection">Clear Selected</Button>
         <!-- <div class="fire-info" v-if="fire">
           <h3>Fire Information</h3>
           <p>coords:{{ fire.longitude.toFixed(6) }} {{ fire.latitude.toFixed(6) }}</p>
@@ -117,7 +117,7 @@ import {
 } from "../Functions/geofence";
 
 import { LMarkerRotate } from "vue-leaflet-rotate-marker";
-import { NgButton } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { SearchCoordsProvider } from "@/types/search-coords-provider";
 import { TargetCoordsProvider } from "@/types/target-coords.provider";
 import { MissionInfoProvider } from "@/types/mission-info-provider";
@@ -150,7 +150,7 @@ export default {
     LMarker,
     LMarkerRotate,
     // eslint-disable-next-line vue/no-reserved-component-names
-    NgButton
+    Button
   },
   props: {
     //import fire prop from telemetry

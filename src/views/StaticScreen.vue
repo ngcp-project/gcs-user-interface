@@ -2,7 +2,6 @@
 import VehicleStatus from "../components/VehicleStatusComponent.vue";
 import { onMounted, ref, Ref } from "vue";
 import Map from "../components/Map.vue";
-import { getAllConnections, getVehicleStatus } from "../Functions/webSocket";
 
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
 const ERU_data = ref({
@@ -51,52 +50,41 @@ const vehicleMap: { [key: string]: Ref<any> } = {
   fra: FRA_data
 };
 
-let wsConnections: { [key: string]: WebSocket } = {};
-// this function runs once (in mounted) and adds event listeners for each vehicle WS connection, so that the reactive variables update whenever new data is received
-function addListeners() {
-  wsConnections = getAllConnections(); // gets all 4 Websocket connections that were initialized in App.vue (when Vue project first ran)
+// let wsConnections: { [key: string]: WebSocket } = {};
+// // this function runs once (in mounted) and adds event listeners for each vehicle WS connection, so that the reactive variables update whenever new data is received
+// function addListeners() {
 
-  for (const [vehicleKey, webSocketConnection] of Object.entries(wsConnections)) {
-    // loops through each WS connection and adds an event listener to it
-    webSocketConnection.addEventListener("message", (event) => {
-      const receivedData = JSON.parse(event.data);
+//   for (const [vehicleKey, webSocketConnection] of Object.entries(wsConnections)) {
+//     // loops through each WS connection and adds an event listener to it
+//     webSocketConnection.addEventListener("message", (event) => {
+//       const receivedData = JSON.parse(event.data);
 
-      vehicleMap[vehicleKey].value.status = getVehicleStatus(receivedData.vehicleStatus);
-      vehicleMap[vehicleKey].value.batteryPct = parseFloat(receivedData.batteryLife);
-      vehicleMap[vehicleKey].value.coordinates.latitude = parseFloat(
-        receivedData.currentPosition.latitude
-      );
-      vehicleMap[vehicleKey].value.coordinates.longitude = parseFloat(
-        receivedData.currentPosition.longitude
-      );
-      // vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.dummyConnection);   // <-- uncomment to use dummyConnection value from mockWebsock.cjs
-      vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.lastUpdated);
-      vehicleMap[vehicleKey].value.yaw = parseInt(receivedData.yaw);
+//       vehicleMap[vehicleKey].value.status = getVehicleStatus(receivedData.vehicleStatus);
+//       vehicleMap[vehicleKey].value.batteryPct = parseFloat(receivedData.batteryLife);
+//       vehicleMap[vehicleKey].value.coordinates.latitude = parseFloat(
+//         receivedData.currentPosition.latitude
+//       );
+//       vehicleMap[vehicleKey].value.coordinates.longitude = parseFloat(
+//         receivedData.currentPosition.longitude
+//       );
+//       // vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.dummyConnection);   // <-- uncomment to use dummyConnection value from mockWebsock.cjs
+//       vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.lastUpdated);
+//       vehicleMap[vehicleKey].value.yaw = parseInt(receivedData.yaw);
 
-      // FRA is sending additional fire coordinates
-      if (vehicleKey == "fra") {
-        vehicleMap[vehicleKey].value.fire_coordinates.latitude = parseFloat(
-          receivedData.fireCoordinates.latitude
-        );
-        vehicleMap[vehicleKey].value.fire_coordinates.longitude = parseFloat(
-          receivedData.fireCoordinates.longitude
-        );
-      }
-    });
-  } // end for loop
-} // end addListeners
+//       // FRA is sending additional fire coordinates
+//       if (vehicleKey == "fra") {
+//         vehicleMap[vehicleKey].value.fire_coordinates.latitude = parseFloat(
+//           receivedData.fireCoordinates.latitude
+//         );
+//         vehicleMap[vehicleKey].value.fire_coordinates.longitude = parseFloat(
+//           receivedData.fireCoordinates.longitude
+//         );
+//       }
+//     });
+//   } // end for loop
+// } // end addListeners
 
 // gets all 4 websocket connections and adds event listeners to each of them once Static Screen finishes initial rendering
-onMounted(() => {
-  addListeners();
-  // setInterval(() => {
-  //     console.log("ERU KEEP IN: " + ERU_data.value.inKeepIn);
-  //     console.log("ERU KEEP IN: " + ERU_data.value.inKeepIn);
-  //     console.log("ERU KEEP IN: " + ERU_data.value.inKeepIn);
-  //     console.log("ERU KEEP IN: " + ERU_data.value.inKeepIn);
-  //     console.log("ERU KEEP IN: " + ERU_data.value.inKeepIn);
-  // }, 1000);
-});
 
 function updateIsInKeepIn(vehicleKey: string, isInZone: boolean) {
   vehicleMap[vehicleKey.toLowerCase()].value.inKeepIn = isInZone;
