@@ -2,6 +2,8 @@
 import Battery from "../components/VehicleStatus/VehicleBattery.vue";
 import Connection from "../components/VehicleStatus/VehicleConnection.vue";
 import Camera from "../components/CameraFeed.vue";
+import HomeSidebar from "@/components/HomeSidebar.vue";
+import SidebarProvider from "@/components/ui/sidebar/SidebarProvider.vue";
 
 const vehicleDataExample = [
   {
@@ -18,22 +20,30 @@ const vehicleDataExample = [
     cameraID: 98765,
     batteryPct: 70,
     connection: 300
+  },
+  {
+    cameraID: 43210,
+    batteryPct: 50,
+    connection: 20
   }
 ];
 </script>
 
 <template>
-  <div class="grid h-full w-full gap-1 p-1">
-    <div
-      v-for="(vehicle, index) in vehicleDataExample"
-      :key="index"
-      class="relative flex cursor-pointer"
-    >
-      <Camera :cameraID="vehicle.cameraID" />
-      <div class="absolute left-4 top-4 flex items-center gap-2">
-        <Battery :percentage="vehicle.batteryPct" :charging="false" />
-        <Connection :latency="vehicle.connection" :displayLatency="false" />
+    <div class="flex w-full h-full">
+      <HomeSidebar />
+      <div class="grid grid-cols-2 grid-rows-2 w-full gap-1 p-1">
+        <div
+          v-for="(vehicle, index) in vehicleDataExample"
+          :key="index"
+          class="relative flex cursor-pointer"
+        >
+          <Camera :cameraID="vehicle.cameraID" />
+          <div class="absolute left-4 top-4 flex items-center gap-2">
+            <Battery :percentage="vehicle.batteryPct" :charging="false" />
+            <Connection :latency="vehicle.connection" :displayLatency="false" />
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 </template>

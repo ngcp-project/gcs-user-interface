@@ -6,6 +6,7 @@ import { Coordinate, Vehicle, Stage } from "./types";
 import { SearchCoordsProvider } from "./types/search-coords-provider";
 import { TargetCoordsProvider } from "./types/target-coords.provider";
 import { MissionInformation } from "./types/mission-info";
+import SidebarProvider from "./components/ui/sidebar/SidebarProvider.vue";
 
 // --------- SEARCH AREA COORDINATES (used to select a search area from Map.vue) ------ //
 const searchCoords = ref([""]);
@@ -110,7 +111,9 @@ export type { Coordinate, Vehicle, Stage };
       <Navbar />
     </div>
     <div class="flex-grow overflow-y-auto">
-      <RouterView />
+      <SidebarProvider>
+        <RouterView />
+      </SidebarProvider>
     </div>
   </div>
 </template>
