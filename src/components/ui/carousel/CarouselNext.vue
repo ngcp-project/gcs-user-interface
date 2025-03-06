@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { WithClassAsProps } from './interface'
-import { NgButton } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { ArrowRight } from 'lucide-vue-next'
 import { useCarousel } from './useCarousel'
@@ -11,7 +11,7 @@ const { orientation, canScrollNext, scrollNext } = useCarousel()
 </script>
 
 <template>
-  <NgButton
+  <Button
     :disabled="!canScrollNext"
     :class="cn(
       'touch-manipulation absolute h-8 w-8 rounded-full p-0',
@@ -27,5 +27,5 @@ const { orientation, canScrollNext, scrollNext } = useCarousel()
       <ArrowRight class="h-4 w-4 text-current" />
       <span class="sr-only">Next Slide</span>
     </slot>
-  </NgButton>
+  </Button>
 </template>
