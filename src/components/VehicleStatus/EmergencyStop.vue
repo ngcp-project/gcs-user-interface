@@ -1,11 +1,11 @@
 <template>
   <EmergencyStopDialog :vehicle-name="vehicleName">
-    <NgButton variant="destructive" size="xs">EMERGENCY STOP</NgButton>
+    <Button variant="destructive" size="xs">EMERGENCY STOP</Button>
   </EmergencyStopDialog>
 </template>
 
 <script setup lang="ts">
-import { NgButton } from "../ui/button";
+import { Button } from "../ui/button";
 import EmergencyStopDialog from "./EmergencyStopDialog.vue";
 
 defineProps<{
