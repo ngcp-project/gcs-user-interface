@@ -6,6 +6,8 @@
     "build": "vue-tsc --noEmit && vite build",
     "dev": "vite",
     "preview": "vite preview",
+    "osm:setup": "docker-compose run osm-setup",
+    "osm:run": "docker-compose up osm-server",
     "tauri": "tauri",
     "format": "prettier --write src/",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"

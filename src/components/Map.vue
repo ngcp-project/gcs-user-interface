@@ -170,7 +170,7 @@ export default {
     return {
       mapOrigin: [35.33004319829399, -120.75064544958856], // area of interest origin, CPP: 34.058, -117.819
       zoom: 16,
-      localTileURL: "http://localhost:8001/{z}/{x}/{y}.png", // Update to local server URL
+      localTileURL: "http://localhost:8080/tile/{z}/{x}/{y}.png", // Update to local server URL
       polygonPoints: [] as LatLngExpression[], // current selected polygons
       zoneInPolygons: [] as LatLngExpression[], // all zone in polygons from backend
       zoneOutPolygons: [] as LatLngExpression[], // all zone out polygons from backend
