@@ -4,36 +4,45 @@ import Connection from "../components/VehicleStatus/VehicleConnection.vue";
 import Camera from "../components/CameraFeed.vue";
 import CameraCarousel from "../components/CameraCarousel.vue";
 import HomeSidebar from "@/components/HomeSidebar.vue";
-import SidebarProvider from "@/components/ui/sidebar/SidebarProvider.vue";
 
-const vehicleDataExample = [
+const vehicleDataExample: {
+  vehicleName: 'ERU' | 'MEA' | 'MRA';
+  cameraID: number;
+  batteryPct: number;
+  connection: number;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+}[] = [
   {
+    vehicleName: 'ERU',
     cameraID: 12345,
     batteryPct: 90,
-    connection: 0
+    connection: 0,
+    coordinates: { latitude: 20, longitude: 40 },
   },
   {
+    vehicleName: 'MEA',
     cameraID: 67890,
     batteryPct: 80,
-    connection: 50
+    connection: 50,
+    coordinates: { latitude: 60, longitude: 80 },
   },
   {
+    vehicleName: 'MRA',
     cameraID: 98765,
     batteryPct: 70,
-    connection: 300
+    connection: 300,
+    coordinates: { latitude: 32, longitude: 48 },
   },
-  {
-    cameraID: 43210,
-    batteryPct: 50,
-    connection: 20
-  }
 ];
 </script>
 
 <template>
-    <div class="flex w-full h-full">
-      <HomeSidebar />
-      <div class="grid grid-cols-2 grid-rows-2 w-full gap-1 p-1">
+    <div class="flex w-full">
+      <HomeSidebar :vehicles="vehicleDataExample" />
+      <div class="grid grid-cols-2 grid-rows-2 w-full h-[90dvh] gap-1 p-1">
         <div
           v-for="(vehicle, index) in vehicleDataExample"
           :key="index"
