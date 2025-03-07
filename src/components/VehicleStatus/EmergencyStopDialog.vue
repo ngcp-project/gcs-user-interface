@@ -2,7 +2,7 @@
   <Dialog>
     <DialogTrigger as-child>
       <slot>
-        <Button variant="destructive">Stop All</Button>
+        <Button variant="destructive">EMERGENCY STOP ALL</Button>
       </slot>
     </DialogTrigger>
     <DialogContent>
