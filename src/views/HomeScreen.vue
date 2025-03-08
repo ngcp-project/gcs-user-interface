@@ -42,7 +42,7 @@ const vehicleDataExample: {
 <template>
     <div class="flex w-full">
       <HomeSidebar :vehicles="vehicleDataExample" />
-      <div class="grid grid-cols-2 grid-rows-2 w-full h-[90dvh] gap-1 p-1">
+      <div class="grid grid-cols-2 grid-rows-2 w-full gap-1 p-1">
         <div
           v-for="(vehicle, index) in vehicleDataExample"
           :key="index"
