@@ -110,11 +110,9 @@ export type { Coordinate, Vehicle, Stage };
     <div class="flex-shrink-0">
       <Navbar />
     </div>
-    <div class="flex-grow overflow-y-auto">
-      <SidebarProvider>
-        <RouterView />
-      </SidebarProvider>
-    </div>
+    <SidebarProvider class="min-h-0 flex-grow overflow-y-hidden">
+      <RouterView />
+    </SidebarProvider>
   </div>
 </template>
 
