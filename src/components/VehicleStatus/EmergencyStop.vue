@@ -1,6 +1,6 @@
 <template>
   <EmergencyStopDialog :vehicle-name="vehicleName">
-    <Button variant="destructive" size="xs">EMERGENCY STOP</Button>
+    <Button class="h-8" variant="destructive">STOP</Button>
   </EmergencyStopDialog>
 </template>
 
