@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Card, CardContent, CardTitle } from '@/components/ui/card'
+import CardFooter from '@/components/ui/card/CardFooter.vue';
 import EmergencyStop from '@/components/VehicleStatus/EmergencyStop.vue';
 import Battery from "@/components/VehicleStatus/VehicleBattery.vue";
 import Connection from "@/components/VehicleStatus/VehicleConnection.vue";
@@ -19,31 +20,34 @@ defineProps<{
     <!-- Vehicle Name -->
     <CardTitle class="text-xl font-bold">{{ vehicleName }}</CardTitle>
 
-    <CardContent class="flex flex-col gap-2">
+    <CardContent class="mt-2 flex flex-col items-start space-y-3">
       <!-- Battery & Connection Info -->
-      <section class="mt-2 flex justify-center gap-6 [&>*]:flex [&>*]:items-center [&>*]:gap-1">
-        <div>
-          <Connection :latency="connection" :display-latency="false" />
-          <span>{{ `${connection}ms` }}</span>
-        </div>
-        <div>
-          <Battery :percentage="battery" :charging="false" />
-          <span>{{ `${battery}%` }}</span>
-        </div>
+      <section class="flex items-center justify-between py-1 gap-x-2 ">
+        <Connection :latency="connection" :display-latency="false" />
+        <span class="font-semibold">
+          {{ `${connection}ms` }}
+        </span>
+        <Battery :percentage="battery" :charging="false" />
+        <span class="font-semibold">
+          {{ `${battery}%` }}
+        </span>
       </section>
 
-      <section class="mt-2 flex flex-col font-semibold tracking-wide">
-        <span>
+      <!-- Coordinates -->
+      <section class="mt-2 flex flex-col">
+        <span class="font-semibold">
           Latitude:
-          <span class="font-medium tracking-tight">{{  latitude  }}</span>
+          {{  latitude  }}
         </span>
-        <span>
+        <span class="font-semibold">
           Longitude:
-          <span class="font-medium tracking-tight">{{  longitude  }}</span>
+          {{  longitude  }}
         </span>
       </section>
 
-      <EmergencyStop :vehicle-name="vehicleName"/>
+      <CardFooter class="inline-block mt-4 justify-center">
+        <EmergencyStop :vehicle-name="vehicleName"/>
+      </CardFooter>
     </CardContent>
   </Card>
 </template>
