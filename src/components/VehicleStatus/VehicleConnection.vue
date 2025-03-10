@@ -1,10 +1,22 @@
 <template>
-  <div class="relative flex h-5 w-fit items-end gap-1"> <!-- Smaller container -->
-    <div class="relative flex h-full w-fit flex-grow justify-center gap-[1px]"> <!-- Tighter gap -->
-      <div :class="cn('bar h-1/4 bg-background', latency <= 90 && 'bg-foreground')" />
-      <div :class="cn('bar h-1/2 bg-background', latency <= 70 && 'bg-foreground')" />
-      <div :class="cn('bar h-3/4 bg-background', latency <= 60 && 'bg-foreground')" />
-      <div :class="cn('bar h-full bg-background', latency <= 40 && 'bg-foreground')" />
+  <div class="relative flex h-6 w-fit items-end gap-1">
+    <div class="relative flex h-full w-fit flex-grow justify-center gap-[1px]">
+      <div :class="cn('bar h-1/4 bg-background', latency === 0 && 'bg-background/50')" />
+      <div
+        :class="
+          cn('bar h-1/2 bg-background', (latency >= 70 || latency === 0) && 'bg-background/50')
+        "
+      />
+      <div
+        :class="
+          cn('bar h-3/4 bg-background', (latency >= 60 || latency === 0) && 'bg-background/50')
+        "
+      />
+      <div
+        :class="
+          cn('bar h-full bg-background', (latency >= 40 || latency === 0) && 'bg-background/50')
+        "
+      />
     </div>
     <span v-if="displayLatency" class="flex w-fit flex-none items-end text-xs"> <!-- Smaller text -->
       {{ calculatedLatency }} ms
