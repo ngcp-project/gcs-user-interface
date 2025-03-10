@@ -1,20 +1,20 @@
 <template>
   <div class="relative flex h-6 w-fit items-end gap-1">
     <div class="relative flex h-full w-fit flex-grow justify-center gap-[1px]">
-      <div :class="cn('bar h-1/4 bg-foreground', latency === 0 && 'bg-foreground/50')" />
+      <div :class="cn('bar h-1/4 bg-background', latency === 0 && 'bg-background/50')" />
       <div
         :class="
-          cn('bar h-1/2 bg-foreground', (latency >= 70 || latency === 0) && 'bg-foreground/50')
+          cn('bar h-1/2 bg-background', (latency >= 70 || latency === 0) && 'bg-background/50')
         "
       />
       <div
         :class="
-          cn('bar h-3/4 bg-foreground', (latency >= 60 || latency === 0) && 'bg-foreground/50')
+          cn('bar h-3/4 bg-background', (latency >= 60 || latency === 0) && 'bg-background/50')
         "
       />
       <div
         :class="
-          cn('bar h-full bg-foreground', (latency >= 40 || latency === 0) && 'bg-foreground/50')
+          cn('bar h-full bg-background', (latency >= 40 || latency === 0) && 'bg-background/50')
         "
       />
     </div>
