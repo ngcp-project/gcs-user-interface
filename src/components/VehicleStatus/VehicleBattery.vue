@@ -1,71 +1,29 @@
-<template>
-  <div class="relative flex h-full w-full items-center gap-[1px]">
-    <div class="relative flex h-[14px] w-[32px] rounded-[3px] border bg-white">
-      <!-- <div :class="percentageCSS" :style="{ width: this.percentage + '%' }"></div> -->
-      <div
-        :class="percentageCSS"
-        :style="[percentage > 0.15 ? { width: percentage * 100 + '%' } : { width: '15%' }]"
-      ></div>
-      <div class="absolute flex h-full w-full items-center justify-center">
-        <img class="h-4/5" :class="batteryStatus" src="..\..\assets\lightning-icon-png-5.png" />
-      </div>
-    </div>
-    <div class="h-1/4 w-[1px] rounded-br-md rounded-tr-md bg-white"></div>
-  </div>
-</template>
-
 <script lang="ts" setup>
-import { computed, defineProps } from "vue";
+import { defineProps } from "vue";
 
-const props = defineProps<{
+defineProps<{
   percentage: number;
   charging: boolean;
 }>();
-
-const percentageCSS = computed(() => {
-  if (props.percentage <= 0) {
-    return "zeroPercent";
-  } else if (props.percentage > 0 && props.percentage <= 0.15) {
-    return "tenPercent";
-  } else if (props.percentage > 0.15 && props.percentage <= 0.3) {
-    return "twentyFivePercent";
-  } else if (props.percentage > 0.3 && props.percentage <= 0.5) {
-    return "fiftyPercent";
-  } else {
-    return "normalPercent";
-  }
-});
-
-const batteryStatus = computed(() => {
-  if (props.charging) {
-    return "charging";
-  } else if (props.percentage <= 0) {
-    return "dead";
-  }
-  return undefined;
-});
 </script>
 
+<template>
+  <div class="relative flex flex-col h-full w-full items-center">
+    <div class="h-[1px] w-2 border-2 border-[#020817]"></div>
+    <div class="relative flex h-6 w-4 rounded-[4px] border-[3px] border-[#020817] items-end">
+      <!-- <div :class="percentageCSS" :style="{ width: this.percentage + '%' }"></div> -->
+      <div
+        class="bg-background w-full"
+        :style="{ height: Math.max(percentage , 5) + '%' }"
+      />
+      <div class="absolute flex h-full w-full items-center justify-center">
+        <img class="h-4/5 w-full" src="..\..\assets\lightning-icon-png-5.png" />
+      </div>
+    </div>
+  </div>
+</template>
+
 <style scoped>
-.outer_div {
-  display: flex;
-  position: relative;
-  height: 18%;
-  width: 18%;
-}
-
-.battery_widget {
-  position: relative;
-  height: 50%;
-  width: 10%;
-  background-color: black;
-  top: 30%;
-  left: 1%;
-  /* top: 30%; */
-  /* border-radius: 0 12px 12px 0; */
-  border-radius: 0 25% 25% 0;
-}
-
 /* .battery_icon {
         position: absolute;
         width: 40%;
@@ -74,13 +32,6 @@ const batteryStatus = computed(() => {
         animation: blinker 1s linear infinite;
         visibility: hidden;
     } */
-.lightingSymbol {
-  position: absolute;
-  width: 40%;
-  left: 30%;
-  top: 15%;
-  visibility: hidden;
-}
 .dead {
   visibility: visible;
   animation: blinker 1s linear infinite;
@@ -93,45 +44,5 @@ const batteryStatus = computed(() => {
   50% {
     opacity: 0;
   }
-}
-
-.battery_container {
-  position: relative;
-  display: flex;
-  border: 0.1em solid black;
-  height: 100%;
-  width: 100%;
-  border-radius: 12%;
-  background-color: white;
-}
-
-#battery_progress {
-  background-color: rgb(83, 255, 83);
-  border-radius: 12%;
-  height: 100%;
-  width: 100%;
-}
-
-.zeroPercent {
-  width: 0%;
-}
-.tenPercent {
-  background-color: red;
-  border-radius: 12%;
-  height: 100%;
-}
-.twentyFivePercent {
-  background-color: rgb(116, 115, 109);
-  border-radius: 12%;
-  height: 100%;
-}
-.fiftyPercent {
-  background-color: rgb(245, 225, 44);
-  border-radius: 12%;
-  height: 100%;
-}
-.normalPercent {
-  background-color: rgb(87, 255, 87);
-  border-radius: 12%;
 }
 </style>

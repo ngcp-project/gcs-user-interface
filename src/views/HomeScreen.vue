@@ -25,14 +25,14 @@ const vehicleDataExample: {
   {
     vehicleName: "MEA",
     cameraID: 67890,
-    batteryPct: 80,
+    batteryPct: 50,
     connection: 50,
     coordinates: { latitude: 60, longitude: 80 }
   },
   {
     vehicleName: "MRA",
     cameraID: 98765,
-    batteryPct: 70,
+    batteryPct: 20,
     connection: 300,
     coordinates: { latitude: 32, longitude: 48 }
   }

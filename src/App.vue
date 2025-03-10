@@ -7,6 +7,7 @@ import { SearchCoordsProvider } from "./types/search-coords-provider";
 import { TargetCoordsProvider } from "./types/target-coords.provider";
 import { MissionInformation } from "./types/mission-info";
 import SidebarProvider from "./components/ui/sidebar/SidebarProvider.vue";
+import { useColorMode } from "@vueuse/core";
 
 // --------- SEARCH AREA COORDINATES (used to select a search area from Map.vue) ------ //
 const searchCoords = ref([""]);
@@ -102,14 +103,14 @@ provide("mission-info-provider", {
   load_MISSION_INFO
 });
 
+// DEFAULT COLOR SCHEME TO DARKMODE
+useColorMode();
+
 export type { Coordinate, Vehicle, Stage };
 </script>
 
 <template>
   <div class="flex h-[100dvh] flex-col">
-    <div class="flex-shrink-0">
-      <Navbar />
-    </div>
     <SidebarProvider class="min-h-0 flex-grow overflow-y-hidden">
       <RouterView />
     </SidebarProvider>
