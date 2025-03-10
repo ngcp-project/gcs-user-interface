@@ -1,13 +1,36 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/tooling/cli/schema.json",
   "build": {
-    "beforeBuildCommand": "bun run build",
     "beforeDevCommand": "bun run dev",
-    "devUrl": "http://localhost:4000",
-    "frontendDist": "../dist"
+    "beforeBuildCommand": "bun run build",
+    "devPath": "http://localhost:4000",
+    "distDir": "../dist",
+    "withGlobalTauri": false
   },
-  "identifier": "com.gcs-user-interface.app", 
-  "app": {
+  "package": {
+    "productName": "Interface",
+    "version": "0.0.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false,
+        "open": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "com.gcs-user-interface.app",
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ]
+    },
     "security": {
       "csp": null
     },
