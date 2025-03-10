@@ -13,8 +13,7 @@ edition = "2021"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-# Use specific version for Tauri without window-emit feature (which doesn't exist in v2)
-tauri = { version = "2.0.0", features = [] }
+tauri = { version = "2", features = [] }
 serde = { version = "1.0", features = ["derive"] }
 specta = {version = "=2.0.0-rc.22", features= ["derive"] }
 tokio = { version = "1.41.1", features = ["full"] }
