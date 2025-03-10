@@ -1,16 +1,17 @@
 <template>
-  <div class="relative flex h-full w-full items-center gap-[1px]">
-    <div class="relative flex h-[14px] w-[32px] rounded-[3px] border bg-white">
+  <div class="relative flex flex-col h-full w-full items-center ">
+    <div class="h-[1px] w-2 border-2 "></div>
+    <div class="relative flex h-6 w-4 rounded-[4px] border-[3px] bg-white">
       <!-- <div :class="percentageCSS" :style="{ width: this.percentage + '%' }"></div> -->
       <div
         :class="percentageCSS"
-        :style="[percentage > 0.15 ? { width: percentage * 100 + '%' } : { width: '15%' }]"
-      ></div>
-      <div class="absolute flex h-full w-full items-center justify-center">
-        <img class="h-4/5" :class="batteryStatus" src="..\..\assets\lightning-icon-png-5.png" />
-      </div>
+        :style="{ width: Math.max(percentage * 100, 5) + '%' }"
+        >
+        <div class="absolute flex h-full w-full items-center justify-center">
+          <img class="h-4/5 w-full" src="..\..\assets\lightning-icon-png-5.png" />
+        </div>
     </div>
-    <div class="h-1/4 w-[1px] rounded-br-md rounded-tr-md bg-white"></div>
+    </div>
   </div>
 </template>
 
@@ -36,14 +37,6 @@ const percentageCSS = computed(() => {
   }
 });
 
-const batteryStatus = computed(() => {
-  if (props.charging) {
-    return "charging";
-  } else if (props.percentage <= 0) {
-    return "dead";
-  }
-  return undefined;
-});
 </script>
 
 <style scoped>
@@ -131,7 +124,7 @@ const batteryStatus = computed(() => {
   height: 100%;
 }
 .normalPercent {
-  background-color: rgb(87, 255, 87);
+  background-color: rgb(2, 8, 23);
   border-radius: 12%;
 }
 </style>
