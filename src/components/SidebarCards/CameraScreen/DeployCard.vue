@@ -45,7 +45,7 @@ defineProps<{
         </span>
       </section>
 
-      <CardFooter class="inline-block mt-4 justify-center">
+      <CardFooter class="mt-4">
         <EmergencyStop :vehicle-name="vehicleName"/>
       </CardFooter>
     </CardContent>
