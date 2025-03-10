@@ -3,14 +3,22 @@
 version = 4
 
 [[package]]
+name = "Inflector"
+version = "0.11.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe438c63458706e03479442743baae6c88256498e6431708f6dfc520a26515d3"
+
+[[package]]
 name = "Interface"
 version = "0.0.0"
 dependencies = [
  "serde",
  "serde_json",
+ "specta",
  "tauri",
  "tauri-build",
  "tauri-plugin-shell",
+ "taurpc",
 ]
 
 [[package]]
@@ -75,9 +83,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.87"
+version = "1.0.97"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10f00e1f6e58a40e807377c75c6a7f97bf9044fab57816f2414e6f5f4499d7b8"
+checksum = "dcfed56ad506cb2c684a14971b8861fdc3baaaae314b9e5f9bb532cbe3ba7a4f"
 
 [[package]]
 name = "atk"
@@ -652,6 +660,12 @@ name = "dyn-clone"
 version = "1.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1c7a8fb8a9fbf66c1f703fe16184d10ca0ee9d23be5b4436400408ba54a95005"
+
+[[package]]
+name = "either"
+version = "1.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
 name = "embed-resource"
@@ -1399,6 +1413,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2061,6 +2084,12 @@ dependencies = [
  "smallvec",
  "windows-targets 0.52.6",
 ]
+
+[[package]]
+name = "paste"
+version = "1.0.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "pathdiff"
@@ -2739,9 +2768,9 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.210"
+version = "1.0.219"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8e3592472072e6e22e0a54d5904d9febf8508f65fb8552499a1abc7d1078c3a"
+checksum = "5f0e2c6ed6606019b4e29e69dbaba95b11854410e5347d525002456dbbb786b6"
 dependencies = [
  "serde_derive",
 ]
@@ -2759,9 +2788,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.210"
+version = "1.0.219"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "243902eda00fad750862fc144cea25caca5e20d615af0a81bee94ca738f1df1f"
+checksum = "5b0276cf7f2c73365f7157c8123c21cd9a50fbbd844757af28ca1f5925fc2a00"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2781,9 +2810,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.128"
+version = "1.0.140"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ff5456707a1de34e7e37f2a6fd3d3f808c318259cbd01ab6377795054b483d8"
+checksum = "20068b6e96dc6c9bd23e01df8827e6c7e1f2fddd43c21810382803c136b99373"
 dependencies = [
  "itoa 1.0.11",
  "memchr",
@@ -2913,6 +2942,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
+name = "signal-hook-registry"
+version = "1.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a9e9e0b4211b72e7b8b6e85c807d36c212bdb33ea8587f7569562a84df5465b1"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "simd-adler32"
 version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2995,6 +3033,51 @@ dependencies = [
  "gobject-sys",
  "libc",
  "system-deps",
+]
+
+[[package]]
+name = "specta"
+version = "2.0.0-rc.22"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab7f01e9310a820edd31c80fde3cae445295adde21a3f9416517d7d65015b971"
+dependencies = [
+ "ctor",
+ "paste",
+ "specta-macros",
+ "thiserror 1.0.63",
+]
+
+[[package]]
+name = "specta-macros"
+version = "2.0.0-rc.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c0074b9e30ed84c6924eb63ad8d2fe71cdc82628525d84b1fcb1f2fd40676517"
+dependencies = [
+ "Inflector",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.100",
+]
+
+[[package]]
+name = "specta-serde"
+version = "0.0.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77216504061374659e7245eac53d30c7b3e5fe64b88da97c753e7184b0781e63"
+dependencies = [
+ "specta",
+ "thiserror 1.0.63",
+]
+
+[[package]]
+name = "specta-typescript"
+version = "0.0.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3220a0c365e51e248ac98eab5a6a32f544ff6f961906f09d3ee10903a4f52b2d"
+dependencies = [
+ "specta",
+ "specta-serde",
+ "thiserror 1.0.63",
 ]
 
 [[package]]
@@ -3185,6 +3268,7 @@ dependencies = [
  "serde_json",
  "serde_repr",
  "serialize-to-javascript",
+ "specta",
  "swift-rs",
  "tauri-build",
  "tauri-macros",
@@ -3397,6 +3481,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "taurpc"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "09478d2fbdbcd0ed4f79dfe006607be17be198642e2996ed04c4ba5e411bcea4"
+dependencies = [
+ "anyhow",
+ "heck 0.5.0",
+ "itertools",
+ "serde",
+ "serde_json",
+ "specta",
+ "specta-macros",
+ "specta-serde",
+ "specta-typescript",
+ "tauri",
+ "taurpc-macros",
+ "tokio",
+]
+
+[[package]]
+name = "taurpc-macros"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce59f068c6e34f4ad8bd37fa710a0af917a949f4c38f75ea4e2e272ac55a5016"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn 2.0.100",
+]
+
+[[package]]
 name = "tendril"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3509,9 +3626,23 @@ dependencies = [
  "bytes",
  "libc",
  "mio",
+ "parking_lot",
  "pin-project-lite",
+ "signal-hook-registry",
  "socket2",
+ "tokio-macros",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "tokio-macros"
+version = "2.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "693d596312e88961bc67d7f1f97af8a70227d9f90c31bba5806eec004978d752"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.100",
 ]
 
 [[package]]
