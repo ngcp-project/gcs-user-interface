@@ -14,6 +14,13 @@ const emblaMainApi = ref<CarouselApi>();
 const emblaThumbnailApi = ref<CarouselApi>();
 const selectedIndex = ref(0);
 
+// NOTE: To run the cameras for development, run the flask server from https://github.com/ngcp-project/gcs-infrastructure-fpvtest/tree/josh
+const cameraFeeds = ref([
+  { id: 1, name: "ERU", src: "http://127.0.0.1:5000/video_feed" },
+  { id: 2, name: "MEA", src: "http://127.0.0.1:5000/video_feed" },
+  { id: 3, name: "MRU", src: "http://127.0.0.1:5000/video_feed" }
+]);
+
 function onSelect() {
   if (!emblaMainApi.value || !emblaThumbnailApi.value) return;
   selectedIndex.value = emblaMainApi.value.selectedScrollSnap();
@@ -44,14 +51,11 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
       :plugins="[Fade()]"
     >
       <CarouselContent>
-        <CarouselItem v-for="(_, index) in 3" :key="index">
+        <CarouselItem v-for="(feed, index) in cameraFeeds" :key="feed.id">
           <div class="focused-camera">
             <Card>
               <CardContent class="flex p-0">
-                <!-- <span class="text-4xl font-semibold">{{ cameras[index] }}</span> -->
-                <img class="image" v-if="index === 0" src="@/assets/ERU-view.jpg" />
-                <img class="image" v-if="index === 1" src="@/assets/MEA-view.jpg" />
-                <img class="image" v-if="index === 2" src="@/assets/MRA-view.jpg" />
+                <img class="image" :src="feed.src" :alt="feed.name" />
               </CardContent>
             </Card>
           </div>
@@ -64,12 +68,13 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
       class="relative max-w-lg items-center justify-center"
       @init-api="(val) => (emblaThumbnailApi = val)"
     >
+      <!-- IMPORTANT: You can click and drag around the thumbnails. This is meant for multiple thumbnails that don't fit the carousel. I do not know how to disable this feature.-->
       <CarouselContent class="flex justify-center gap-5">
         <CarouselItem
-          v-for="(_, index) in 3"
-          :key="index"
+          v-for="(feed, index) in cameraFeeds"
+          :key="feed.id"
           class="basis-1/2 cursor-pointer pl-0"
-          :class="{ hidden: index === selectedIndex }"
+          v-show="index !== selectedIndex"
           @click="onThumbClick(index)"
         >
           <!-- NOTE: You can click and drag around the thumbnails. This is meant for multiple thumbnails that don't fit the carousel. I do not know how to disable this feature.-->
@@ -77,9 +82,7 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
             <Card>
               <CardContent class="flex p-0">
                 <!-- <span class="text-4xl font-semibold">{{ cameras[index] }}</span> -->
-                <img class="image" v-if="index === 0" src="@/assets/ERU-view.jpg" />
-                <img class="image" v-if="index === 1" src="@/assets/MEA-view.jpg" />
-                <img class="image" v-if="index === 2" src="@/assets/MRA-view.jpg" />
+                <img class="image" :src="feed.src" :alt="feed.name" />
               </CardContent>
             </Card>
           </div>
