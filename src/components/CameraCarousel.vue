@@ -68,7 +68,6 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
       class="relative max-w-lg items-center justify-center"
       @init-api="(val) => (emblaThumbnailApi = val)"
     >
-      <!-- IMPORTANT: You can click and drag around the thumbnails. This is meant for multiple thumbnails that don't fit the carousel. I do not know how to disable this feature.-->
       <CarouselContent class="flex justify-center gap-5">
         <CarouselItem
           v-for="(feed, index) in cameraFeeds"
