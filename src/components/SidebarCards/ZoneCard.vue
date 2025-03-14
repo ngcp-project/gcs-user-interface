@@ -11,8 +11,8 @@ defineProps<{
 // Title Styles
 const titleStyles = computed(() => ({
   titleColor: {
-    'In': 'bg-green-700',
-    'Out': 'bg-red-600'
+    'In': 'bg-chart-2',
+    'Out': 'bg-destructive'
   }
 }))
 
@@ -38,9 +38,9 @@ const toggleVisibility = (zoneID: number) => {
 </script>
 
 <template>
-  <Card class="w-64 p-2 relative">
+  <Card class="p-2 m-2 relative">
     <!-- Mission Title -->
-    <CardTitle class="text-x2 font-bold text-black flex items-center">
+    <CardTitle class="text-x2 font-bold flex items-center">
       Keep {{ zoneType }}
       <Square class="w-5 h-5 ml-3 rounded-sm text-transparent" :class="titleStyles.titleColor[zoneType]" />
     </CardTitle>
@@ -58,7 +58,7 @@ const toggleVisibility = (zoneID: number) => {
           />
           <Trash2 
             @click="deleteZone(zone.id)" 
-            class="w-5 h-5 text-gray-700 hover:text-red-500 cursor-pointer"
+            class="w-5 h-5 text-gray-700 hover:text-destructive cursor-pointer"
           />
         </div>
       </div>
@@ -68,7 +68,7 @@ const toggleVisibility = (zoneID: number) => {
     <CardFooter class="mt-4 justify-center items-center">
       <Button 
         @click="addZone"
-        class="bg-transparent shadow-none text-black flex flex-col items-center hover:bg-transparent"
+        class="bg-transparent shadow-none flex flex-col items-center hover:bg-transparent"
       >
         <Plus class="w-5 h-5" />
         Add Zone
