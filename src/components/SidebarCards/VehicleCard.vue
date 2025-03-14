@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 // Define Props
 defineProps<{
   vehicleName: 'ERU' | 'MEA' | 'MRA'
-  patientStatus: 'Secured' | 'Not Secured'
+  patientStatus: 'Secured' | 'Unsecured'
 }>()
 
 // Temp stages for the vehicle
@@ -21,8 +21,8 @@ const stageName = computed(() => stages[currentStageIndex.value])
 // Status Styles
 const patientStatusStyles = computed(() => ({
   statusColor: {
-    'Secured': 'text-green-700 font-semibold',
-    'Not Secured': 'text-red-700 font-semibold'
+    'Secured': 'text-chart-2 font-semibold',
+    'Unsecured': 'text-destructive font-semibold'
   }
 }))
 
@@ -35,9 +35,9 @@ function nextStage() {
 </script>
 
 <template>
-  <Card class="w-64 p-2 relative">
+  <Card class="p-2 m-2 relative">
     <!-- Vehicle Name -->
-    <CardTitle class="text-xl font-bold text-black">{{ vehicleName }}</CardTitle>
+    <CardTitle class="text-xl font-bold">{{ vehicleName }}</CardTitle>
 
     <!-- Vehicle Stage & Patient Status -->
     <CardContent class="mt-2 flex flex-col items-start">
@@ -56,7 +56,6 @@ function nextStage() {
     <CardFooter class="mt-4 justify-start">
       <Button 
         @click="nextStage"
-        class="bg-gray-200 text-gray-700 hover:bg-gray-300"
         :disabled="currentStageIndex === stages.length - 1"
       >
         Next Stage

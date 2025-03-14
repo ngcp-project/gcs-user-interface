@@ -13,7 +13,7 @@ defineProps<{
     <div class="relative flex h-6 w-4 rounded-[4px] border-[3px] border-[#020817] items-end">
       <!-- <div :class="percentageCSS" :style="{ width: this.percentage + '%' }"></div> -->
       <div
-        class="bg-background w-full"
+        class="bg-foreground w-full"
         :style="{ height: Math.max(percentage , 5) + '%' }"
       />
       <div class="absolute flex h-full w-full items-center justify-center">

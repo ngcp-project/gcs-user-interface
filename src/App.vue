@@ -103,8 +103,8 @@ provide("mission-info-provider", {
   load_MISSION_INFO
 });
 
-// DEFAULT COLOR SCHEME TO DARKMODE
-useColorMode();
+// DEFAULT COLOR SCHEME TO LIGHT MODE
+useColorMode().value = "light";
 
 export type { Coordinate, Vehicle, Stage };
 </script>

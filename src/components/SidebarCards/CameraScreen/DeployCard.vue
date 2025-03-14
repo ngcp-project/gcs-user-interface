@@ -16,13 +16,13 @@ defineProps<{
 </script>
 
 <template>
-  <Card class="m-2 p-2 relative bg-primary text-secondary">
+  <Card class="m-2 p-2 relative bg-sidebar-foreground text-foreground">
     <!-- Vehicle Name -->
     <CardTitle class="text-xl font-bold">{{ vehicleName }}</CardTitle>
 
     <CardContent class="mt-2 flex flex-col items-start space-y-3">
       <!-- Battery & Connection Info -->
-      <section class="flex items-center justify-between py-1 gap-x-2 ">
+      <section class="flex items-center justify-between py-1 gap-x-2">
         <Connection :latency="connection" :display-latency="false" />
         <span class="font-semibold">
           {{ `${connection}ms` }}

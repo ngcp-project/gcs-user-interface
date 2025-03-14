@@ -20,11 +20,11 @@ defineProps<{
 
 <template>
   <Sidebar>
-    <SidebarHeader>
+    <SidebarHeader class="bg-sidebar-background">
       <EmergencyStopDialog :vehicle-name="'all'" />
     </SidebarHeader>
 
-    <SidebarContent>
+    <SidebarContent class="bg-sidebar-background">
       <div v-for="(vehicle, index) in vehicles" :key="index">
         <DeployCard
           :vehicle-name="vehicle.vehicleName"
