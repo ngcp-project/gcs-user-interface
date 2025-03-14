@@ -1,20 +1,20 @@
 <template>
   <div class="relative flex h-7 w-fit items-end gap-1">
     <div class="relative flex h-full w-fit flex-grow justify-center gap-[1.75px]">
-      <div :class="cn('bar h-1/4 bg-white', latency <= 90 && 'bg-background')" />
+      <div :class="cn('bar h-1/4 bg-background', latency <= 90 && 'bg-foreground')" />
       <div
         :class="
-          cn('bar h-1/2 bg-white', (latency <= 70) && 'bg-background')
+          cn('bar h-1/2 bg-background', (latency <= 70) && 'bg-foreground')
         "
       />
       <div
         :class="
-          cn('bar h-3/4 bg-white', (latency <= 60) && 'bg-background')
+          cn('bar h-3/4 bg-background', (latency <= 60) && 'bg-foreground')
         "
       />
       <div
         :class="
-          cn('bar h-full bg-white', (latency <= 40) && 'bg-background')
+          cn('bar h-full bg-background', (latency <= 40) && 'bg-foreground')
         "
       />
     </div>
@@ -46,6 +46,6 @@ const props = defineProps<{
 
 <style scoped>
 .bar {
-  @apply mt-auto w-[9px] rounded-[2px] border-2;
+  @apply mt-auto w-[9px] rounded-[2px] border-2 border-foreground;
 }
 </style>

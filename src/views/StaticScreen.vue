@@ -2,42 +2,8 @@
 import VehicleStatus from "../components/VehicleStatusComponent.vue";
 import { onMounted, ref, Ref, onUnmounted } from "vue";
 import Map from "../components/Map.vue";
-import { Button } from "@/components/ui/button";
-import MapSidebar from "@/components/MapSidebar.vue";
-import mapStore from "@/lib/MapStore";import { core } from "@tauri-apps/api";
-import { listen, UnlistenFn } from "@tauri-apps/api/event";
+import MapSidebar from "../components/MapSidebar.vue";
 
-interface VehicleData {
-  batteryPct: number;
-  //Signal String
-  signal_string: number;
-  coordinates: { longitude: number; latitude: number };
-  status: string;
-  yaw: number;
-  inKeepIn: boolean;
-  inKeepOut: boolean;
-  fire_coordinates?: { longitude: number; latitude: number };
-}
-
-interface TelemetryEvent {
-  vehicleKey: string;
-  data: {
-    batteryLife: number;
-    vehicleStatus: string;
-    currentPosition: {
-      latitude: number;
-      longitude: number;
-    };
-    lastUpdated: number;
-    yaw: number;
-    fireCoordinates?: {
-      latitude: number;
-      longitude: number;
-    };
-  };
-}
-
-const unlistenFunctions: UnlistenFn[] = [];
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
 const ERU_data = ref({
   batteryPct: 5,
@@ -267,9 +233,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-
-  <div class="flex h-full w-[100dvw] flex-row">
-
+  <div class="flex flex-row h-full w-[100dvw]">
     <div class="flex-grow">
        <!-- should be fire coords --> <Map
         ref="mapRef"
@@ -286,9 +250,10 @@ onUnmounted(() => {
         @keepOut="updateIsInKeepOut"
       />
     </div>
-     <!-- <div
-      class="flex h-full w-fit max-w-[300px] flex-none flex-col gap-[6px] overflow-y-scroll bg-background p-[6px]"
-    > --> <MapSidebar side="right" /> <!-- </div> -->
+
+    <div>
+      <MapSidebar side="right"/>
+    </div>
   </div>
 
 </template>
