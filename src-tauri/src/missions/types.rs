@@ -1,8 +1,10 @@
+use std::collections::HashMap;
+
 #[taurpc::ipc_type]
 #[derive(Debug)]
 pub struct MissionsStruct {
     pub current_mission: u32,
-    pub missions: Vec<MissionStruct>,
+    pub missions: HashMap<u32, MissionStruct>,
 }
 
 #[taurpc::ipc_type]
@@ -28,15 +30,15 @@ pub struct VehicleStruct {
     pub vehicle_name: VehicleEnum,
     pub current_stage: u32,
     pub patient_status: Option<PatientStatusEnum>,
-    pub stages: Vec<StageStruct>,
+    pub stages: HashMap<u32, StageStruct>,
 }
 
 #[taurpc::ipc_type]
 #[derive(Debug)]
 #[allow(non_snake_case)]
-// taurpc doesnt support hashmaps
-// so we split the keys into their own struct
-// and ingore snake case to match VehicleEnum
+// create a VehiclesStruct for each vehicle
+// since each mission requires all 3 vehicles to exist
+// so hardcode in the vehicle enums as keys
 pub struct VehiclesStruct {
     pub MEA: VehicleStruct,
     pub ERU: VehicleStruct,
