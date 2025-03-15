@@ -1,9 +1,9 @@
+use super::types::*;
+use std::collections::HashMap;
 use std::sync::Arc;
 use tauri::{AppHandle, Runtime};
 use taurpc;
 use tokio::sync::Mutex;
-
-use super::types::*;
 
 // Define the MissionApiImpl struct that contains a mutable MissionsStruct
 #[derive(Clone)]
@@ -17,205 +17,96 @@ impl Default for MissionApiImpl {
     fn default() -> Self {
         // Use long default state for now
         // Remove later
+        let stage = StageStruct {
+            stage_name: "Takeoff".to_string(),
+            stage_status: MissionStageStatusEnum::Complete,
+            search_area: vec![
+                GeoCoordinateStruct {
+                    lat: 0.0,
+                    long: 0.0,
+                },
+                GeoCoordinateStruct {
+                    lat: 0.0,
+                    long: 1.0,
+                },
+                GeoCoordinateStruct {
+                    lat: 1.0,
+                    long: 1.0,
+                },
+                GeoCoordinateStruct {
+                    lat: 1.0,
+                    long: 0.0,
+                },
+            ],
+        };
+
         let initial_state = MissionsStruct {
             current_mission: 0,
-            missions: vec![MissionStruct {
-                mission_name: "Mission 1".to_string(),
-                mission_status: MissionStageStatusEnum::Active,
-                vehicles: VehiclesStruct {
-                    MEA: VehicleStruct {
-                        vehicle_name: VehicleEnum::MEA,
-                        current_stage: 0,
-                        patient_status: Some(PatientStatusEnum::Secured),
-                        stages: vec![
-                            StageStruct {
-                                stage_name: "Takeoff".to_string(),
-                                stage_status: MissionStageStatusEnum::Complete,
-                                search_area: vec![
-                                    GeoCoordinateStruct {
-                                        lat: 0.0,
-                                        long: 0.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 0.0,
-                                        long: 1.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 1.0,
-                                        long: 1.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 1.0,
-                                        long: 0.0,
-                                    },
-                                ],
+            missions: HashMap::from([(
+                0,
+                MissionStruct {
+                    mission_name: "Mission 1".to_string(),
+                    mission_status: MissionStageStatusEnum::Active,
+                    vehicles: VehiclesStruct {
+                        MEA: VehicleStruct {
+                            vehicle_name: VehicleEnum::MEA,
+                            current_stage: 0,
+                            patient_status: Some(PatientStatusEnum::Secured),
+                            stages: HashMap::from([(0, stage.clone()), (1, stage.clone())]),
+                        },
+                        ERU: VehicleStruct {
+                            vehicle_name: VehicleEnum::ERU,
+                            current_stage: 0,
+                            patient_status: Some(PatientStatusEnum::Unsecured),
+                            stages: HashMap::from([(0, stage.clone()), (1, stage.clone())]),
+                        },
+                        MRA: VehicleStruct {
+                            vehicle_name: VehicleEnum::MRA,
+                            current_stage: 0,
+                            patient_status: None,
+                            stages: HashMap::from([(0, stage.clone()), (1, stage.clone())]),
+                        },
+                    },
+                    zones: ZonesStruct {
+                        keep_in_zones: vec![
+                            GeoCoordinateStruct {
+                                lat: 0.0,
+                                long: 0.0,
                             },
-                            StageStruct {
-                                stage_name: "Search".to_string(),
-                                stage_status: MissionStageStatusEnum::Inactive,
-                                search_area: vec![
-                                    GeoCoordinateStruct {
-                                        lat: 0.0,
-                                        long: 0.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 0.0,
-                                        long: 1.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 1.0,
-                                        long: 1.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 1.0,
-                                        long: 0.0,
-                                    },
-                                ],
+                            GeoCoordinateStruct {
+                                lat: 0.0,
+                                long: 1.0,
+                            },
+                            GeoCoordinateStruct {
+                                lat: 1.0,
+                                long: 1.0,
+                            },
+                            GeoCoordinateStruct {
+                                lat: 1.0,
+                                long: 0.0,
                             },
                         ],
-                    },
-                    ERU: VehicleStruct {
-                        vehicle_name: VehicleEnum::ERU,
-                        current_stage: 0,
-                        patient_status: Some(PatientStatusEnum::Unsecured),
-                        stages: vec![
-                            StageStruct {
-                                stage_name: "Takeoff".to_string(),
-                                stage_status: MissionStageStatusEnum::Complete,
-                                search_area: vec![
-                                    GeoCoordinateStruct {
-                                        lat: 0.0,
-                                        long: 0.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 0.0,
-                                        long: 1.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 1.0,
-                                        long: 1.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 1.0,
-                                        long: 0.0,
-                                    },
-                                ],
+                        keep_out_zones: vec![
+                            GeoCoordinateStruct {
+                                lat: 0.0,
+                                long: 0.0,
                             },
-                            StageStruct {
-                                stage_name: "Search".to_string(),
-                                stage_status: MissionStageStatusEnum::Inactive,
-                                search_area: vec![
-                                    GeoCoordinateStruct {
-                                        lat: 0.0,
-                                        long: 0.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 0.0,
-                                        long: 1.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 1.0,
-                                        long: 1.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 1.0,
-                                        long: 0.0,
-                                    },
-                                ],
+                            GeoCoordinateStruct {
+                                lat: 0.0,
+                                long: 1.0,
                             },
-                        ],
-                    },
-                    MRA: VehicleStruct {
-                        vehicle_name: VehicleEnum::MRA,
-                        current_stage: 0,
-                        patient_status: None,
-                        stages: vec![
-                            StageStruct {
-                                stage_name: "Takeoff".to_string(),
-                                stage_status: MissionStageStatusEnum::Inactive,
-                                search_area: vec![
-                                    GeoCoordinateStruct {
-                                        lat: 0.0,
-                                        long: 0.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 0.0,
-                                        long: 1.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 1.0,
-                                        long: 1.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 1.0,
-                                        long: 0.0,
-                                    },
-                                ],
+                            GeoCoordinateStruct {
+                                lat: 1.0,
+                                long: 1.0,
                             },
-                            StageStruct {
-                                stage_name: "Search".to_string(),
-                                stage_status: MissionStageStatusEnum::Inactive,
-                                search_area: vec![
-                                    GeoCoordinateStruct {
-                                        lat: 0.0,
-                                        long: 0.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 0.0,
-                                        long: 1.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 1.0,
-                                        long: 1.0,
-                                    },
-                                    GeoCoordinateStruct {
-                                        lat: 1.0,
-                                        long: 0.0,
-                                    },
-                                ],
+                            GeoCoordinateStruct {
+                                lat: 1.0,
+                                long: 0.0,
                             },
                         ],
                     },
                 },
-                zones: ZonesStruct {
-                    keep_in_zones: vec![
-                        GeoCoordinateStruct {
-                            lat: 0.0,
-                            long: 0.0,
-                        },
-                        GeoCoordinateStruct {
-                            lat: 0.0,
-                            long: 1.0,
-                        },
-                        GeoCoordinateStruct {
-                            lat: 1.0,
-                            long: 1.0,
-                        },
-                        GeoCoordinateStruct {
-                            lat: 1.0,
-                            long: 0.0,
-                        },
-                    ],
-                    keep_out_zones: vec![
-                        GeoCoordinateStruct {
-                            lat: 0.0,
-                            long: 0.0,
-                        },
-                        GeoCoordinateStruct {
-                            lat: 0.0,
-                            long: 1.0,
-                        },
-                        GeoCoordinateStruct {
-                            lat: 1.0,
-                            long: 1.0,
-                        },
-                        GeoCoordinateStruct {
-                            lat: 1.0,
-                            long: 0.0,
-                        },
-                    ],
-                },
-            }],
+            )]),
         };
 
         // Create a new instance of MissionApiImpl with the initial state
@@ -284,7 +175,10 @@ pub trait MissionApi {
     // ) -> StageStruct;
     // async fn get_zones_data(mission_id: u32) -> ZonesStruct;
 
-    async fn submit_mission(app_handle: AppHandle<impl Runtime>) -> Result<(), String>;
+    async fn submit_mission(
+        app_handle: AppHandle<impl Runtime>,
+        mission_data: MissionStruct,
+    ) -> Result<(), String>;
 
     #[taurpc(event)]
     async fn on_updated(new_data: MissionsStruct);
@@ -325,9 +219,15 @@ impl MissionApi for MissionApiImpl {
     //         .clone()
     // }
 
-    async fn submit_mission(self, app_handle: AppHandle<impl Runtime>) -> Result<(), String> {
-        let mut state = self.state.lock().await;
-        state.current_mission += 1;
+    async fn submit_mission(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_data: MissionStruct,
+    ) -> Result<(), String> {
+        let state = self.state.lock().await;
+        println!("Submitting Mission: {:?}", state);
+        // Append to missions array
+        // state.missions.push(mission_data);
         self.emit_state_update(&app_handle, &state)
     }
 
