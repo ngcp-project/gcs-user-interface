@@ -1,30 +1,16 @@
 <script setup lang="ts">
-import { ref, computed} from 'vue';
-import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from '@/components/ui/sidebar';
-import BreadcrumbNav from '@/components/SidebarCards/BreadcrumbNav.vue'
-import MissionView from '@/views/MissionView.vue'
-import VehicleView from '@/views/VehicleView.vue'
-import StageView from '@/views/StageView.vue'
-import ZoneView from '@/views/ZoneView.vue'
-import { Plus } from 'lucide-vue-next'
+import { ref, computed, onMounted } from "vue";
+import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
+import BreadcrumbNav from "@/components/SidebarCards/BreadcrumbNav.vue";
+import MissionView from "@/views/MissionView.vue";
+import VehicleView from "@/views/VehicleView.vue";
+import StageView from "@/views/StageView.vue";
+// import ZoneView from '@/views/ZoneView.vue'
+import { Plus } from "lucide-vue-next";
 
-const state = ref('mission'); // Default state
+import { missionStore } from "@/lib/MissionStore";
 
-const currentView = computed(() => {
-  switch (state.value) {
-    case 'mission':
-      return MissionView;
-    case 'vehicle':
-      return VehicleView;
-    case 'stage':
-      return StageView;
-    case 'zone':
-      return ZoneView;
-    default:
-      return null;
-  }
-
-});
+const currentView = computed(() => missionStore.view.currentView);
 
 // Function to add a mission via MissionView's exposed method
 const missionViewRef = ref<InstanceType<typeof MissionView> | null>(null);
@@ -47,76 +33,67 @@ const addStage = () => {
     console.warn("stageViewRef is not available yet.");
   }
 };
-
-// Function to change views using the breadcrumb
-const navigateTo = (view: string) => {
-  state.value = view;
-};
-
 </script>
 
 <template>
   <!-- Mission View -->
-  <Sidebar v-if="state === 'mission'" side="right">
-    <SidebarHeader class="items-center bg-sidebar-background">
-      <BreadcrumbNav :currentState="state" :navigateTo="navigateTo" />
+  <Sidebar v-if="missionStore.view.currentView === 'mission'" side="right">
+    <SidebarHeader class="bg-sidebar-background items-center">
+      <BreadcrumbNav :currentState="currentView" />
     </SidebarHeader>
 
     <SidebarContent class="bg-sidebar-background">
-      <component :is="currentView" ref="missionViewRef"/>
+      <MissionView ref="missionViewRef" />
     </SidebarContent>
 
     <SidebarFooter class="bg-sidebar-background">
-      <Button 
+      <Button
         @click="addMission"
-        class="bg-transparent shadow-none text-background flex flex-col items-center "
+        class="flex flex-col items-center bg-transparent text-background shadow-none"
       >
-        <Plus class="w-5 h-5" />
+        <Plus class="h-5 w-5" />
         Add Mission
       </Button>
     </SidebarFooter>
-
   </Sidebar>
 
   <!-- Vehicle View -->
-  <Sidebar v-if="state === 'vehicle'" side="right">
+  <Sidebar v-if="missionStore.view.currentView === 'vehicle'" side="right">
     <SidebarHeader class="bg-sidebar-background items-center">
-      <BreadcrumbNav :currentState="state" :navigateTo="navigateTo" />
+      <BreadcrumbNav :currentState="currentView" />
     </SidebarHeader>
 
     <SidebarContent class="bg-sidebar-background">
-      <component :is="currentView" />
+      <VehicleView ref="vehicleViewRef" />
     </SidebarContent>
   </Sidebar>
 
   <!-- Stage View -->
-  <Sidebar v-if="state === 'stage'" side="right">
+  <Sidebar v-if="missionStore.view.currentView === 'stage'" side="right">
     <SidebarHeader class="bg-sidebar-background items-center">
-      <BreadcrumbNav :currentState="state" :navigateTo="navigateTo" />
+      <BreadcrumbNav :currentState="currentView" />
     </SidebarHeader>
 
     <SidebarContent class="bg-sidebar-background">
-      <component :is="currentView" ref="stageViewRef"/>
+      <StageView ref="stageViewRef" />
     </SidebarContent>
 
     <SidebarFooter class="bg-sidebar-background">
-      <Button 
+      <Button
         @click="addStage"
-        class="bg-transparent shadow-none text-background flex flex-col items-center"
+        class="flex flex-col items-center bg-transparent text-background shadow-none"
       >
-        <Plus class="w-5 h-5" />
+        <Plus class="h-5 w-5" />
         Add Stage
       </Button>
     </SidebarFooter>
   </Sidebar>
 
   <!-- Zone View -->
-  <Sidebar v-if="state === 'zone'" side="right">
-    <SidebarHeader class=" items-center">
-      Zones
-    </SidebarHeader>
+  <Sidebar v-if="missionStore.view.currentView === 'zone'" side="right">
+    <SidebarHeader class="items-center"> Zones </SidebarHeader>
     <SidebarContent class="bg-sidebar-background">
-      <component :is="currentView" />
+      <!-- Zone View Component -->
     </SidebarContent>
   </Sidebar>
 </template>
