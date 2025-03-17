@@ -12,17 +12,6 @@ import { missionStore } from "@/lib/MissionStore";
 
 const currentView = computed(() => missionStore.view.currentView);
 
-// Function to add a mission via MissionView's exposed method
-const missionViewRef = ref<InstanceType<typeof MissionView> | null>(null);
-
-const addMission = () => {
-  if (missionViewRef.value?.addMission) {
-    missionViewRef.value.addMission();
-  } else {
-    console.warn("missionViewRef is not available yet.");
-  }
-};
-
 // Function to add a stage via StageView's exposed method
 const stageViewRef = ref<InstanceType<typeof StageView> | null>(null);
 
@@ -48,7 +37,7 @@ const addStage = () => {
 
     <SidebarFooter class="bg-sidebar-background">
       <Button
-        @click="addMission"
+        @click="missionStore.view.addMission"
         class="flex flex-col items-center bg-transparent text-background shadow-none"
       >
         <Plus class="h-5 w-5" />

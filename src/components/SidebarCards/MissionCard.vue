@@ -1,39 +1,33 @@
 <script setup lang="ts">
-import { Card, CardContent, CardTitle, CardFooter } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { computed, defineEmits } from 'vue'
-import { Trash2 } from 'lucide-vue-next'
+import { Card, CardContent, CardTitle, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { computed, defineEmits } from "vue";
+import { Trash2 } from "lucide-vue-next";
+import { missionStore } from "@/lib/MissionStore";
 
 defineProps<{
-  missionNumber: number
-  status: 'Active' | 'Inactive' | 'Failed' | 'Complete'
-}>()
-
-const emit = defineEmits(['deleteMission'])
+  missionNumber: number;
+  status: "Active" | "Inactive" | "Failed" | "Complete";
+}>();
 
 // Status Styles
 const statusStyles = computed(() => ({
   statusColor: {
-    'Inactive': 'text-muted-foreground font-semibold',
-    'Failed': 'text-destructive font-semibold',
-    'Active': 'text-chart-4 font-semibold',
-    'Complete': 'text-chart-2 font-semibold'
+    Inactive: "text-muted-foreground font-semibold",
+    Failed: "text-destructive font-semibold",
+    Active: "text-chart-4 font-semibold",
+    Complete: "text-chart-2 font-semibold"
   }
-}))
-
-// Emit delete event to parent
-function deleteMission(missionNumber: number) {
-  emit('deleteMission', missionNumber)
-}
+}));
 </script>
 
 <template>
-  <Card class="p-2 m-2 relative bg-sidebar-foreground text-foreground">
+  <Card class="relative m-2 bg-sidebar-foreground p-2 text-foreground">
     <!-- Trash Icon -->
-    <div class="absolute top-2 right-2 cursor-pointer">
-      <Trash2 
-        @click="deleteMission(missionNumber)"
-        class="w-5 h-5 text-secondary hover:text-destructive" 
+    <div class="absolute right-2 top-2 cursor-pointer">
+      <Trash2
+        @click="missionStore.view.deleteMission(missionNumber)"
+        class="h-5 w-5 text-secondary hover:text-destructive"
       />
     </div>
 
@@ -49,16 +43,13 @@ function deleteMission(missionNumber: number) {
 
     <!-- Submit Button -->
     <CardFooter class="mt-4 justify-start">
-      <Button 
+      <Button
         class="mr-2"
-        :disabled="status === 'Active'||status === 'Complete'||status === 'Failed'"
+        :disabled="status === 'Active' || status === 'Complete' || status === 'Failed'"
       >
         Submit
       </Button>
-      <Button
-      >
-        Zones
-      </Button>
+      <Button> Zones </Button>
     </CardFooter>
   </Card>
 </template>
