@@ -48,6 +48,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Icon } from "@iconify/vue";
+import { invoke } from '@tauri-apps/api/tauri';
 
 const props = defineProps<{
   vehicleName: string;
@@ -56,52 +57,18 @@ const props = defineProps<{
 const vehicle_names = ["ERU", "MEA", "MRA", "FRA"];
 
 function sendStopCommand() {
-  const promises: any[] = [];
-  if (props.vehicleName == "all") {
-    // send Emergency Stop command for all vehicles
+  if (props.vehicleName === "all") {
+    // For "all", iterate through all vehicles and invoke the command.
     vehicle_names.forEach((name) => {
-      const promise = fetch("http://localhost:5135/EmergencyStop", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ Key: name })
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => console.log(data))
-        .catch((error) => console.error("Error sending stop command:", error));
-      promises.push(promise);
+      invoke("emergency_stop", { vehicle: name })
+        .then((res) => console.log("Ack for", name, res))
+        .catch((err) => console.error("Error sending stop command for", name, err));
     });
-
-    Promise.all(promises)
-      .then((data) => {
-        console.log("Sent stop commands to all four vehicles!");
-      })
-      .catch((error) => {
-        console.error("Error sending stop command:", error);
-      });
   } else {
-    // send Emergency Stop command for specific vehicle
-    fetch("http://localhost:5135/EmergencyStop", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ Key: props.vehicleName })
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => console.log(data))
-      .catch((error) => console.error("Error sending stop command:", error));
-  } //end else
+    // For a specific vehicle, invoke the emergency_stop command.
+    invoke("emergency_stop", { vehicle: props.vehicleName })
+      .then((res) => console.log("Ack for", props.vehicleName, res))
+      .catch((err) => console.error("Error sending stop command:", err));
+  }
 }
 </script>

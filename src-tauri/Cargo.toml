@@ -7,8 +7,6 @@ license = ""
 repository = ""
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [build-dependencies]
 tauri-build = { version = "1.4", features = [] }
 
@@ -16,8 +14,9 @@ tauri-build = { version = "1.4", features = [] }
 tauri = { version = "1.4", features = ["shell-open"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+lapin = "2"
+tokio-amqp = "0.3"
 
 [features]
-# this feature is used for production builds or when `devPath` points to the filesystem
-# DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
