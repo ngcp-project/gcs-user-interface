@@ -6,17 +6,13 @@ import {
   BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 import { missionStore } from "@/lib/MissionStore";
-
-defineProps<{
-  currentState: string;
-}>();
 </script>
 
 <template>
   <Breadcrumb>
     <BreadcrumbList>
       <BreadcrumbItem
-        :active="currentState === 'mission'"
+        :active="missionStore.view.currentView === 'mission'"
         class="cursor-pointer text-secondary"
         @click="missionStore.view.setCurrentView('mission')"
       >
@@ -24,7 +20,7 @@ defineProps<{
       </BreadcrumbItem>
       <BreadcrumbSeparator class="text-secondary" />
       <BreadcrumbItem
-        :active="currentState === 'vehicle'"
+        :active="missionStore.view.currentView === 'vehicle'"
         class="cursor-pointer text-secondary"
         @click="missionStore.view.setCurrentView('vehicle')"
       >
@@ -32,7 +28,7 @@ defineProps<{
       </BreadcrumbItem>
       <BreadcrumbSeparator class="text-secondary" />
       <BreadcrumbItem
-        :active="currentState === 'stage'"
+        :active="missionStore.view.currentView === 'stage'"
         class="cursor-pointer text-secondary"
         @click="missionStore.view.setCurrentView('stage')"
       >
