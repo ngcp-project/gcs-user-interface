@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
-import DeployCard from './SidebarCards/CameraScreen/DeployCard.vue';
-import SidebarHeader from './ui/sidebar/SidebarHeader.vue';
-import EmergencyStopDialog from './VehicleStatus/EmergencyStopDialog.vue';
+import { Sidebar, SidebarContent } from "@/components/ui/sidebar";
+import DeployCard from "@/components/Sidebar/SidebarCards/CameraScreen/DeployCard.vue";
+import SidebarHeader from "@/components/ui/sidebar/SidebarHeader.vue";
+import EmergencyStopDialog from "@/components/VehicleStatus/EmergencyStopDialog.vue";
 
 defineProps<{
   vehicles: {
-    vehicleName: 'ERU' | 'MEA' | 'MRA';
+    vehicleName: "ERU" | "MEA" | "MRA";
     cameraID: number;
     batteryPct: number;
     connection: number;
     coordinates: {
       latitude: number;
       longitude: number;
-    }
+    };
   }[];
 }>();
 </script>
@@ -30,7 +30,7 @@ defineProps<{
           :vehicle-name="vehicle.vehicleName"
           :battery="vehicle.batteryPct"
           :connection="vehicle.connection"
-          :latitude="vehicle.coordinates.latitude" 
+          :latitude="vehicle.coordinates.latitude"
           :longitude="vehicle.coordinates.longitude"
         />
       </div>

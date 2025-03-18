@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import MissionCard from "@/components/SidebarCards/MissionCard.vue";
+import MissionCard from "@/components/Sidebar/SidebarCards/MissionCard.vue";
 import { missionStore } from "@/lib/MissionStore";
 import { computed } from "vue";
 

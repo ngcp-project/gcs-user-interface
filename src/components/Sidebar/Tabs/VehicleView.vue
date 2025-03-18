@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import VehicleCard from '@/components/SidebarCards/VehicleCard.vue';
+import VehicleCard from "@/components/Sidebar/SidebarCards/VehicleCard.vue";
 </script>
 
 <template>
