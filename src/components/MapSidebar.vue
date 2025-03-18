@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
-import BreadcrumbNav from "@/components/SidebarCards/BreadcrumbNav.vue";
-import MissionView from "@/views/MissionView.vue";
-import VehicleView from "@/views/VehicleView.vue";
-import StageView from "@/views/StageView.vue";
+import BreadcrumbNav from "@/components/Sidebar/SidebarCards/BreadcrumbNav.vue";
+import MissionView from "@/components/Sidebar/Tabs/MissionView.vue";
+import VehicleView from "@/components/Sidebar/Tabs/VehicleView.vue";
+import StageView from "@/components/Sidebar/Tabs/StageView.vue";
 // import ZoneView from '@/views/ZoneView.vue'
 import { Plus } from "lucide-vue-next";
 
