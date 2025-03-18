@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import StageCard from "@/components/Sidebar/SidebarCards/StageCard.vue";
-
+import { SidebarContent, SidebarFooter } from "@/components/ui/sidebar";
+import { Plus } from "lucide-vue-next";
 // Temporary stage data
 const stages = ref<
   {
@@ -46,17 +47,25 @@ const deleteStage = (stageIndex: number) => {
 </script>
 
 <template>
-  <div class="flex w-full flex-col items-center">
-    <div v-if="stages.length > 0" class="w-full space-y-4">
-      <StageCard
-        v-for="(stage, index) in stages"
-        :key="index"
-        :missionNumber="index"
-        :stageName="stage.StageName"
-        :status="stage.StageStatus"
-        :searchArea="stage.SearchArea"
-        @deleteStage="deleteStage(index)"
-      />
+  <SidebarContent class="bg-sidebar-background">
+    <div class="flex w-full flex-col items-center">
+      <div v-if="stages.length > 0" class="w-full space-y-4">
+        <StageCard
+          v-for="(stage, index) in stages"
+          :key="index"
+          :missionNumber="index"
+          :stageName="stage.StageName"
+          :status="stage.StageStatus"
+          :searchArea="stage.SearchArea"
+          @deleteStage="deleteStage(index)"
+        />
+      </div>
     </div>
-  </div>
+  </SidebarContent>
+  <SidebarFooter class="bg-sidebar-background">
+    <Button class="flex flex-col items-center bg-transparent text-background shadow-none">
+      <Plus class="h-5 w-5" />
+      Add Stage
+    </Button>
+  </SidebarFooter>
 </template>
