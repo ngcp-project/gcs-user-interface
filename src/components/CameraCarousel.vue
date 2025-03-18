@@ -16,9 +16,8 @@ const selectedIndex = ref(0);
 
 // NOTE: To run the cameras for development, run the flask server from https://github.com/ngcp-project/gcs-infrastructure-fpvtest/tree/josh
 const cameraFeeds = ref([
-  { id: 1, name: "ERU", src: "http://127.0.0.1:5000/video_feed" },
-  { id: 2, name: "MEA", src: "http://127.0.0.1:5000/video_feed" },
-  { id: 3, name: "MRU", src: "http://127.0.0.1:5000/video_feed" }
+  { id: 1, name: "UGC", src: "http://127.0.0.1:5000/video_feed" },
+  { id: 2, name: "UAV", src: "http://127.0.0.1:5000/video_feed" }
 ]);
 
 function onSelect() {
