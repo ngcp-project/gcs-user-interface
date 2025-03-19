@@ -6,6 +6,12 @@ import { SidebarContent, SidebarFooter } from "@/components/ui/sidebar";
 import { Plus } from "lucide-vue-next";
 
 const missions = computed(() => missionStore.view.getAllMissions());
+
+const handleClick = (missionId: number) => {
+  missionStore.view.setCurrentView("vehicle");
+  missionStore.view.tabState.currentMissionId = missionId;
+  console.log(missionId, missionStore.getMissionData(missionId));
+};
 </script>
 
 <template>
@@ -18,6 +24,7 @@ const missions = computed(() => missionStore.view.getAllMissions());
           :missionNumber="index"
           :missionName="mission.mission_name"
           :status="mission.mission_status"
+          @click="handleClick(mission.mission_id)"
         />
       </div>
     </div>
