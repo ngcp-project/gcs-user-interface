@@ -9,8 +9,7 @@ const missions = computed(() => missionStore.view.getAllMissions());
 
 const handleClick = (missionId: number) => {
   missionStore.view.setCurrentView("vehicle");
-  missionStore.view.tabState.currentMissionId = missionId;
-  console.log(missionId, missionStore.getMissionData(missionId));
+  missionStore.view.setCurrentMissionId(missionId);
 };
 </script>
 
@@ -21,9 +20,7 @@ const handleClick = (missionId: number) => {
         <MissionCard
           v-for="(mission, index) in missions"
           :key="index"
-          :missionNumber="index"
-          :missionName="mission.mission_name"
-          :status="mission.mission_status"
+          :missionId="mission.mission_id"
           @click="handleClick(mission.mission_id)"
         />
       </div>
