@@ -4,13 +4,14 @@ use std::collections::HashMap;
 #[derive(Debug)]
 pub struct MissionsStruct {
     pub current_mission: u32,
-    pub missions: HashMap<u32, MissionStruct>,
+    pub missions: Vec<MissionStruct>,
 }
 
 #[taurpc::ipc_type]
 #[derive(Debug)]
 pub struct MissionStruct {
     pub mission_name: String,
+    pub mission_id: u32,
     pub mission_status: MissionStageStatusEnum,
     pub vehicles: VehiclesStruct,
     pub zones: ZonesStruct,
@@ -30,7 +31,7 @@ pub struct VehicleStruct {
     pub vehicle_name: VehicleEnum,
     pub current_stage: u32,
     pub patient_status: Option<PatientStatusEnum>,
-    pub stages: HashMap<u32, StageStruct>,
+    pub stages: Vec<StageStruct>,
 }
 
 #[taurpc::ipc_type]
@@ -62,6 +63,7 @@ pub enum PatientStatusEnum {
 #[derive(Debug)]
 pub struct StageStruct {
     pub stage_name: String,
+    pub stage_id: u32,
     pub stage_status: MissionStageStatusEnum,
     pub search_area: GeofenceType,
 }

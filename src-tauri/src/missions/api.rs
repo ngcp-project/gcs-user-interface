@@ -17,96 +17,97 @@ impl Default for MissionApiImpl {
     fn default() -> Self {
         // Use long default state for now
         // Remove later
-        let stage = StageStruct {
-            stage_name: "Takeoff".to_string(),
-            stage_status: MissionStageStatusEnum::Complete,
-            search_area: vec![
-                GeoCoordinateStruct {
-                    lat: 0.0,
-                    long: 0.0,
-                },
-                GeoCoordinateStruct {
-                    lat: 0.0,
-                    long: 1.0,
-                },
-                GeoCoordinateStruct {
-                    lat: 1.0,
-                    long: 1.0,
-                },
-                GeoCoordinateStruct {
-                    lat: 1.0,
-                    long: 0.0,
-                },
-            ],
-        };
+        fn create_stage(id: u32) -> StageStruct {
+            StageStruct {
+                stage_name: "Takeoff".to_string(),
+                stage_id: id,
+                stage_status: MissionStageStatusEnum::Complete,
+                search_area: vec![
+                    GeoCoordinateStruct {
+                        lat: 0.0,
+                        long: 0.0,
+                    },
+                    GeoCoordinateStruct {
+                        lat: 0.0,
+                        long: 1.0,
+                    },
+                    GeoCoordinateStruct {
+                        lat: 1.0,
+                        long: 1.0,
+                    },
+                    GeoCoordinateStruct {
+                        lat: 1.0,
+                        long: 0.0,
+                    },
+                ],
+            }
+        }
 
         let initial_state = MissionsStruct {
             current_mission: 0,
-            missions: HashMap::from([(
-                0,
-                MissionStruct {
-                    mission_name: "Mission 1".to_string(),
-                    mission_status: MissionStageStatusEnum::Active,
-                    vehicles: VehiclesStruct {
-                        MEA: VehicleStruct {
-                            vehicle_name: VehicleEnum::MEA,
-                            current_stage: 0,
-                            patient_status: Some(PatientStatusEnum::Secured),
-                            stages: HashMap::from([(0, stage.clone()), (1, stage.clone())]),
-                        },
-                        ERU: VehicleStruct {
-                            vehicle_name: VehicleEnum::ERU,
-                            current_stage: 0,
-                            patient_status: Some(PatientStatusEnum::Unsecured),
-                            stages: HashMap::from([(0, stage.clone()), (1, stage.clone())]),
-                        },
-                        MRA: VehicleStruct {
-                            vehicle_name: VehicleEnum::MRA,
-                            current_stage: 0,
-                            patient_status: None,
-                            stages: HashMap::from([(0, stage.clone()), (1, stage.clone())]),
-                        },
+            missions: vec![MissionStruct {
+                mission_name: "Mission 1".to_string(),
+                mission_id: 0,
+                mission_status: MissionStageStatusEnum::Active,
+                vehicles: VehiclesStruct {
+                    MEA: VehicleStruct {
+                        vehicle_name: VehicleEnum::MEA,
+                        current_stage: 0,
+                        patient_status: Some(PatientStatusEnum::Secured),
+                        stages: vec![create_stage(0), create_stage(1)],
                     },
-                    zones: ZonesStruct {
-                        keep_in_zones: vec![
-                            GeoCoordinateStruct {
-                                lat: 0.0,
-                                long: 0.0,
-                            },
-                            GeoCoordinateStruct {
-                                lat: 0.0,
-                                long: 1.0,
-                            },
-                            GeoCoordinateStruct {
-                                lat: 1.0,
-                                long: 1.0,
-                            },
-                            GeoCoordinateStruct {
-                                lat: 1.0,
-                                long: 0.0,
-                            },
-                        ],
-                        keep_out_zones: vec![
-                            GeoCoordinateStruct {
-                                lat: 0.0,
-                                long: 0.0,
-                            },
-                            GeoCoordinateStruct {
-                                lat: 0.0,
-                                long: 1.0,
-                            },
-                            GeoCoordinateStruct {
-                                lat: 1.0,
-                                long: 1.0,
-                            },
-                            GeoCoordinateStruct {
-                                lat: 1.0,
-                                long: 0.0,
-                            },
-                        ],
+                    ERU: VehicleStruct {
+                        vehicle_name: VehicleEnum::ERU,
+                        current_stage: 0,
+                        patient_status: Some(PatientStatusEnum::Unsecured),
+                        stages: vec![create_stage(0), create_stage(1)],
+                    },
+                    MRA: VehicleStruct {
+                        vehicle_name: VehicleEnum::MRA,
+                        current_stage: 0,
+                        patient_status: None,
+                        stages: vec![create_stage(0), create_stage(1)],
                     },
                 },
-            )]),
+                zones: ZonesStruct {
+                    keep_in_zones: vec![
+                        GeoCoordinateStruct {
+                            lat: 0.0,
+                            long: 0.0,
+                        },
+                        GeoCoordinateStruct {
+                            lat: 0.0,
+                            long: 1.0,
+                        },
+                        GeoCoordinateStruct {
+                            lat: 1.0,
+                            long: 1.0,
+                        },
+                        GeoCoordinateStruct {
+                            lat: 1.0,
+                            long: 0.0,
+                        },
+                    ],
+                    keep_out_zones: vec![
+                        GeoCoordinateStruct {
+                            lat: 0.0,
+                            long: 0.0,
+                        },
+                        GeoCoordinateStruct {
+                            lat: 0.0,
+                            long: 1.0,
+                        },
+                        GeoCoordinateStruct {
+                            lat: 1.0,
+                            long: 1.0,
+                        },
+                        GeoCoordinateStruct {
+                            lat: 1.0,
+                            long: 0.0,
+                        },
+                    ],
+                },
+            }],
         };
 
         // Create a new instance of MissionApiImpl with the initial state
