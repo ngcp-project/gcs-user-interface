@@ -18,6 +18,11 @@ interface ClientMission extends MissionStruct {
 }
 interface ViewState {
   currentView: ViewType;
+  tabState: {
+    currentMissionId: number | null;
+    currentVehicleName: VehicleEnum | null;
+    currentStageId: number | null;
+  };
   clientMissions: Partial<{ [key in number]: ClientMission }>;
   getAllMissions: () => ClientMission[];
   setCurrentView: (view: ViewType) => void;
@@ -53,6 +58,11 @@ const missionZustandStore = createStore<MissionStore>((set, get) => ({
   //  Frontend State
   view: {
     currentView: "mission",
+    tabState: {
+      currentMissionId: null,
+      currentVehicleName: null,
+      currentStageId: null
+    },
     clientMissions: {},
     setCurrentView: (view: ViewType) =>
       set((state) => ({ view: { ...state.view, currentView: view } })),
@@ -70,6 +80,7 @@ const missionZustandStore = createStore<MissionStore>((set, get) => ({
       console.log("add mission");
       const newMission: ClientMission = {
         mission_name: "Mission 1",
+        mission_id: Math.random(),
         mission_status: "Active",
         isSubmitted: false,
         zones: {
@@ -81,19 +92,19 @@ const missionZustandStore = createStore<MissionStore>((set, get) => ({
             vehicle_name: "ERU",
             current_stage: 0,
             patient_status: null,
-            stages: {}
+            stages: []
           },
           MEA: {
             vehicle_name: "MEA",
             current_stage: 0,
             patient_status: null,
-            stages: {}
+            stages: []
           },
           MRA: {
             vehicle_name: "MRA",
             current_stage: 0,
             patient_status: null,
-            stages: {}
+            stages: []
           }
         }
       };
@@ -165,11 +176,19 @@ taurpc.mission.get_all_missions().then((data) => {
   // Sync clientMissions with backend missions
   // note that this will overwrite any existing clientMissions not submitted
   missionZustandStore.setState({ view: { ...missionStore.view, clientMissions: data.missions } });
-  console.log("asda", missionStore.view.clientMissions?.[0]?.mission_name);
+  // console.log("asda", missionStore.view.clientMissions?.[0]?.mission_name);
 });
 
 // On mission data update from backend, update the store
 taurpc.mission.on_updated.on((data: MissionsStruct) => {
   console.log("Mission data updated:", data);
   missionZustandStore.setState({ state: data });
+
+  // Receive any updates from rust state and merge them with the clientMissions
+  missionZustandStore.setState({
+    view: {
+      ...missionStore.view,
+      clientMissions: { ...data.missions, ...missionStore.view.clientMissions }
+    }
+  });
 });
