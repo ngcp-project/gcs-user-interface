@@ -22,15 +22,22 @@ import { missionStore } from "@/lib/MissionStore";
       <BreadcrumbItem
         :active="missionStore.view.currentView === 'vehicle'"
         class="cursor-pointer text-secondary"
-        @click="missionStore.view.setCurrentView('vehicle')"
+        @click="
+          missionStore.view.currentView !== 'mission' && missionStore.view.setCurrentView('vehicle')
+        "
       >
         Vehicle
       </BreadcrumbItem>
       <BreadcrumbSeparator class="text-secondary" />
+      <!-- Can only go up from hierarchy not down so add currentView checks -->
       <BreadcrumbItem
         :active="missionStore.view.currentView === 'stage'"
         class="cursor-pointer text-secondary"
-        @click="missionStore.view.setCurrentView('stage')"
+        @click="
+          missionStore.view.currentView !== 'mission' &&
+            missionStore.view.currentView !== 'vehicle' &&
+            missionStore.view.setCurrentView('stage')
+        "
       >
         Stage
       </BreadcrumbItem>
