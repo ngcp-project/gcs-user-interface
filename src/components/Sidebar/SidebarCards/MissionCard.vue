@@ -26,7 +26,7 @@ const statusStyles = computed(() => ({
     <!-- Trash Icon -->
     <div class="absolute right-2 top-2 cursor-pointer">
       <Trash2
-        @click="missionStore.view.deleteMission(missionNumber)"
+        @click.stop="missionStore.view.deleteMission(missionNumber)"
         class="h-5 w-5 text-foreground hover:text-destructive"
       />
     </div>
