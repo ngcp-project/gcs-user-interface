@@ -8,7 +8,7 @@ import {
   VehicleStruct,
   ZonesStruct
 } from "@/lib/bindings";
-import { DeepReadonly, reactive } from "vue";
+import { DeepReadonly, reactive, ref } from "vue";
 import { ClientMission, MissionStore, ViewType } from "@/lib/MissionStore.types";
 
 const taurpc = createTauRPCProxy();
@@ -36,17 +36,28 @@ const missionZustandStore = createStore<MissionStore>((set, get) => ({
       set((state) => ({
         view: { ...state.view, tabState: { ...state.view.tabState, currentMissionId: missionId } }
       })),
-    setCurrentVehicleName: (vehicleName: VehicleEnum) =>
+    setCurrentVehicleName: (vehicleName: VehicleEnum) => {
+      if (get().view.tabState.currentMissionId === null) {
+        throw new Error("No mission selected");
+      }
       set((state) => ({
         view: {
           ...state.view,
           tabState: { ...state.view.tabState, currentVehicleName: vehicleName }
         }
-      })),
-    setCurrentStageId: (stageId: number) =>
+      }));
+    },
+    setCurrentStageId: (stageId: number) => {
+      if (get().view.tabState.currentMissionId === null) {
+        throw new Error("No mission selected");
+      }
+      if (get().view.tabState.currentVehicleName === null) {
+        throw new Error("No vehicle selected");
+      }
       set((state) => ({
         view: { ...state.view, tabState: { ...state.view.tabState, currentStageId: stageId } }
-      })),
+      }));
+    },
     getAllMissions: () => {
       // convert missions object to array
       // get all keys and map them to mission data
@@ -135,6 +146,18 @@ const missionZustandStore = createStore<MissionStore>((set, get) => ({
     return mission?.zones;
   },
   // Set Methods
+  nextStage: (missionId: number, vehicleName: VehicleEnum) => {
+    const vehicle = get().getVehicleData(missionId, vehicleName);
+    if (vehicle === undefined || vehicle === null) {
+      throw new Error("Vehicle does not exist");
+    }
+    const currentStage = vehicle.current_stage;
+    if (currentStage === vehicle.stages.length - 1) {
+      throw new Error("Vehicle is already at last stage");
+    }
+    // TODO: add taurpc command
+    console.log(`added next stage in ${vehicleName} for mission id: ${missionId}`);
+  },
   // Submits a new mission
   submitMission: async (clientMissionId: number) => {
     console.log("Submitting mission", clientMissionId);
