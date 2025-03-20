@@ -45,5 +45,6 @@ export interface MissionStore {
     stage_id: number
   ) => StageStruct | undefined;
   getZoneData: (mission_id: number) => ZonesStruct | undefined;
+  nextStage: (missionId: number, vehicleName: VehicleEnum) => void;
   submitMission: (missionId: number) => void;
 }
