@@ -93,10 +93,14 @@ function handleTelemetryUpdate(event: any) {
   console.log("Received telemetry update:", event);
 
   // Handle both direct payload and event wrapper formats
-  const telemetryData = event.payload || event;
-  const vehicleKey = telemetryData.vehicle_id?.toLowerCase();
+  const payload = event.payload || event;
+  const vehicleKey = payload.vehicle_id?.toLowerCase();
+  const telemetryData = payload.telemetry;
   const vehicle = vehicleMap[vehicleKey];
-
+  if (!telemetryData) {
+    console.error("No telemetry data found in the payload:", payload);
+    return;
+  }
   console.log("Processing update for vehicle:", vehicleKey, "with data:", telemetryData);
 
   if (vehicle) {
@@ -104,13 +108,22 @@ function handleTelemetryUpdate(event: any) {
     vehicle.value = {
       ...vehicle.value,
       status: telemetryData.vehicleStatus || "Standby",
-      batteryPct: telemetryData.batteryLife || 0,
+      batteryPct: telemetryData.battery_life || vehicle.value.batteryPct,
       coordinates: {
-        latitude: telemetryData.currentPosition?.latitude || 0,
-        longitude: telemetryData.currentPosition?.longitude || 0
+        latitude:
+          telemetryData.currentPosition?.latitude ||
+          telemetryData.current_position?.latitude ||
+          telemetryData.coordinates?.latitude ||
+          vehicle.value.coordinates.latitude,
+        longitude:
+          telemetryData.currentPosition?.longitude ||
+          telemetryData.current_position?.longitude ||
+          telemetryData.coordinates?.longitude ||
+          vehicle.value.coordinates.longitude
       },
-      lastUpdated: telemetryData.lastUpdated || 0,
-      yaw: telemetryData.yaw || 0,
+      lastUpdated:
+        telemetryData.lastUpdated || telemetryData.last_updated || vehicle.value.lastUpdated,
+      yaw: telemetryData.yaw || vehicle.value.yaw,
       inKeepIn: vehicle.value.inKeepIn,
       inKeepOut: vehicle.value.inKeepOut
     };
@@ -132,8 +145,9 @@ function handleTelemetryUpdate(event: any) {
 // Modify the event listener setup
 async function initializeTelemetryListeners() {
   const unlisten = await listen("telemetry_update", (event: any) => {
-    console.log("Received telemetry event:", event);
+    console.log("Received telemetry event:", JSON.stringify(event));
     handleTelemetryUpdate(event.payload);
+    console.log(event.payload);
   });
 
   unlistenFunctions.push(unlisten);
@@ -141,9 +155,11 @@ async function initializeTelemetryListeners() {
   // Initial telemetry fetch for each vehicle
   for (const vehicleKey of Object.keys(vehicleMap)) {
     try {
-      const data = await invoke("get_telemetry", { vehicleId: vehicleKey });
-      console.log("Initial telemetry data:", data);
-      handleTelemetryUpdate(data);
+      console.log(`Initializing telemetry for ${vehicleKey}`);
+      await invoke("init_telemetry_consumer", { vehicleId: vehicleKey });
+      console.log(`Initial telemetry data: for ${vehicleKey}`);
+
+      // handleTelemetryUpdate(data);
     } catch (error) {
       console.error(`Failed to fetch initial telemetry for ${vehicleKey}:`, error);
     }
