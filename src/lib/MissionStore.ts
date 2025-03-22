@@ -9,7 +9,7 @@ import {
   ZonesStruct
 } from "@/lib/bindings";
 import { DeepReadonly, reactive } from "vue";
-import { MissionStore, ViewType } from "@/lib/MissionStore.types";
+import { ClientMission, MissionStore, ViewState, ViewType } from "@/lib/MissionStore.types";
 
 const taurpc = createTauRPCProxy();
 
@@ -23,42 +23,55 @@ const missionZustandStore = createStore<MissionStore>((set, get) => ({
 
   //  Frontend State
   view: {
-    currentView: "mission",
+    clientMission: null,
     tabState: {
+      currentView: "mission",
       currentMissionId: null,
       currentVehicleName: null,
-      currentStageId: null
-    },
-    clientMission: null,
-    setCurrentView: (view: ViewType) =>
-      set((state) => ({ view: { ...state.view, currentView: view } })),
+      currentStageId: null,
 
-    setCurrentMissionId: (missionId: number) =>
-      set((state) => ({
-        view: { ...state.view, tabState: { ...state.view.tabState, currentMissionId: missionId } }
-      })),
+      setCurrentView: (view: ViewType) => {
+        set((state) => ({
+          view: {
+            ...state.view,
+            tabState: { ...state.view.tabState, currentView: view }
+          } satisfies ViewState
+        }));
+      },
 
-    setCurrentVehicleName: (vehicleName: VehicleEnum) => {
-      if (get().view.tabState.currentMissionId === null) throw new Error("No mission selected");
+      setCurrentMissionId: (missionId: number) =>
+        set((state) => ({
+          view: {
+            ...state.view,
+            tabState: { ...state.view.tabState, currentMissionId: missionId }
+          } satisfies ViewState
+        })),
 
-      set((state) => ({
-        view: {
-          ...state.view,
-          tabState: { ...state.view.tabState, currentVehicleName: vehicleName }
+      setCurrentVehicleName: (vehicleName: VehicleEnum) => {
+        if (get().view.tabState.currentMissionId === null) throw new Error("No mission selected");
+
+        set((state) => ({
+          view: {
+            ...state.view,
+            tabState: { ...state.view.tabState, currentVehicleName: vehicleName }
+          } satisfies ViewState
+        }));
+      },
+
+      setCurrentStageId: (stageId: number) => {
+        if (get().view.tabState.currentMissionId === null) {
+          throw new Error("No mission selected");
         }
-      }));
-    },
-
-    setCurrentStageId: (stageId: number) => {
-      if (get().view.tabState.currentMissionId === null) {
-        throw new Error("No mission selected");
+        if (get().view.tabState.currentVehicleName === null) {
+          throw new Error("No vehicle selected");
+        }
+        set((state) => ({
+          view: {
+            ...state.view,
+            tabState: { ...state.view.tabState, currentStageId: stageId }
+          } satisfies ViewState
+        }));
       }
-      if (get().view.tabState.currentVehicleName === null) {
-        throw new Error("No vehicle selected");
-      }
-      set((state) => ({
-        view: { ...state.view, tabState: { ...state.view.tabState, currentStageId: stageId } }
-      }));
     },
 
     getAllMissions: () => {
@@ -71,11 +84,12 @@ const missionZustandStore = createStore<MissionStore>((set, get) => ({
       return [...get().state.missions, clientMission];
     },
 
-    addMission: () => {
+    addClientMission: () => {
       console.log("added mission");
-      const newMission: MissionStruct = {
+      const newMission: ClientMission = {
+        isClient: true,
         mission_name: "Mission",
-        mission_id: Math.random(),
+        mission_id: -1, // to avoid conflicts with rust backend we hardcode id to be a signed int
         mission_status: "Inactive",
         zones: {
           keep_in_zones: [],
@@ -103,13 +117,11 @@ const missionZustandStore = createStore<MissionStore>((set, get) => ({
         }
       };
       set((state) => ({
-        // TODO: id is random int, add some logic to add noncolluding ids
         view: {
           ...state.view,
           clientMission: newMission
         }
       }));
-      console.log(missionStore.view);
     },
 
     deleteClientMission: () => {
@@ -117,7 +129,7 @@ const missionZustandStore = createStore<MissionStore>((set, get) => ({
         view: {
           ...state.view,
           clientMission: null
-        }
+        } satisfies ViewState
       }));
     }
   },
@@ -165,12 +177,7 @@ const missionZustandStore = createStore<MissionStore>((set, get) => ({
     if (!missionData) throw new Error("Mission does not exist");
 
     // clear clientMission
-    set((state) => ({
-      view: {
-        ...state.view,
-        clientMission: null
-      }
-    }));
+    get().view.deleteClientMission();
 
     await taurpc.mission.submit_mission(missionData);
   }

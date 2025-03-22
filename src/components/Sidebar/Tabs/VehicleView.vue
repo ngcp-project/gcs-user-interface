@@ -10,8 +10,8 @@ const currentMission =
   currentMissionId !== null ? missionStore.getMissionData(currentMissionId) : null;
 
 const handleClick = (vehicleName: VehicleEnum) => {
-  missionStore.view.setCurrentView("stage");
-  missionStore.view.setCurrentVehicleName(vehicleName);
+  missionStore.view.tabState.setCurrentView("stage");
+  missionStore.view.tabState.setCurrentVehicleName(vehicleName);
 };
 </script>
 

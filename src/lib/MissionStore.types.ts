@@ -13,20 +13,26 @@ export type DeepReadonly<T> = {
 
 export type ViewType = "mission" | "vehicle" | "stage" | "zone";
 
+export interface ClientMission extends MissionStruct {
+  mission_id: -1;
+  isClient: true;
+}
+
 export interface ViewState {
-  currentView: ViewType;
+  clientMission: ClientMission | null;
   tabState: {
+    currentView: ViewType;
     currentMissionId: number | null;
     currentVehicleName: VehicleEnum | null;
     currentStageId: number | null;
+
+    setCurrentView: (view: ViewType) => void;
+    setCurrentMissionId: (missionId: number) => void;
+    setCurrentVehicleName: (vehicleName: VehicleEnum) => void;
+    setCurrentStageId: (stageId: number) => void;
   };
-  clientMission: MissionStruct | null;
-  setCurrentMissionId: (missionId: number) => void;
-  setCurrentVehicleName: (vehicleName: VehicleEnum) => void;
-  setCurrentStageId: (stageId: number) => void;
-  getAllMissions: () => MissionStruct[];
-  setCurrentView: (view: ViewType) => void;
-  addMission: () => void;
+  getAllMissions: () => Array<ClientMission | MissionStruct>;
+  addClientMission: () => void;
   deleteClientMission: () => void;
 }
 

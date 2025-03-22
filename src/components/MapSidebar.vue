@@ -9,10 +9,7 @@ import StageView from "@/components/Sidebar/Tabs/StageView.vue";
 
 import { missionStore } from "@/lib/MissionStore";
 
-const currentView = computed(() => missionStore.view.currentView);
-
-// Function to add a stage via StageView's exposed method
-const stageViewRef = ref<InstanceType<typeof StageView> | null>(null);
+const currentView = computed(() => missionStore.view.tabState.currentView);
 
 // change view based on currentView
 const renderView = {
