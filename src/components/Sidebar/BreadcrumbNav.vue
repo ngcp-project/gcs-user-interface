@@ -12,18 +12,19 @@ import { missionStore } from "@/lib/MissionStore";
   <Breadcrumb>
     <BreadcrumbList>
       <BreadcrumbItem
-        :active="missionStore.view.currentView === 'mission'"
+        :active="missionStore.view.tabState.currentView === 'mission'"
         class="cursor-pointer text-secondary"
-        @click="missionStore.view.setCurrentView('mission')"
+        @click="missionStore.view.tabState.setCurrentView('mission')"
       >
         Mission
       </BreadcrumbItem>
       <BreadcrumbSeparator class="text-secondary" />
       <BreadcrumbItem
-        :active="missionStore.view.currentView === 'vehicle'"
+        :active="missionStore.view.tabState.currentView === 'vehicle'"
         class="cursor-pointer text-secondary"
         @click="
-          missionStore.view.currentView !== 'mission' && missionStore.view.setCurrentView('vehicle')
+          missionStore.view.tabState.currentView !== 'mission' &&
+            missionStore.view.tabState.setCurrentView('vehicle')
         "
       >
         Vehicle
@@ -31,12 +32,12 @@ import { missionStore } from "@/lib/MissionStore";
       <BreadcrumbSeparator class="text-secondary" />
       <!-- Can only go up from hierarchy not down so add currentView checks -->
       <BreadcrumbItem
-        :active="missionStore.view.currentView === 'stage'"
+        :active="missionStore.view.tabState.currentView === 'stage'"
         class="cursor-pointer text-secondary"
         @click="
-          missionStore.view.currentView !== 'mission' &&
-            missionStore.view.currentView !== 'vehicle' &&
-            missionStore.view.setCurrentView('stage')
+          missionStore.view.tabState.currentView !== 'mission' &&
+            missionStore.view.tabState.currentView !== 'vehicle' &&
+            missionStore.view.tabState.setCurrentView('stage')
         "
       >
         Stage

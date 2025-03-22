@@ -8,8 +8,8 @@ import { Plus } from "lucide-vue-next";
 const missions = computed(() => missionStore.view.getAllMissions());
 
 const handleClick = (missionId: number) => {
-  missionStore.view.setCurrentView("vehicle");
-  missionStore.view.setCurrentMissionId(missionId);
+  missionStore.view.tabState.setCurrentView("vehicle");
+  missionStore.view.tabState.setCurrentMissionId(missionId);
 };
 </script>
 
@@ -28,7 +28,7 @@ const handleClick = (missionId: number) => {
   </SidebarContent>
   <SidebarFooter class="bg-sidebar-background">
     <Button
-      @click="missionStore.view.addMission"
+      @click="missionStore.view.addClientMission"
       class="flex flex-col items-center bg-transparent text-background shadow-none"
     >
       <Plus class="h-5 w-5" />
