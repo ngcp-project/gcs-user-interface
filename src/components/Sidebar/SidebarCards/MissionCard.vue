@@ -5,7 +5,6 @@ import { computed, defineEmits } from "vue";
 import { Trash2 } from "lucide-vue-next";
 import { missionStore } from "@/lib/MissionStore";
 import { MissionStruct } from "@/lib/bindings";
-import { ClientMission } from "@/lib/MissionStore.types";
 
 const props = defineProps<{
   missionId: number;
@@ -32,7 +31,7 @@ const statusStyles = computed(() => ({
       class="absolute right-2 top-2 cursor-pointer"
     >
       <Trash2
-        @click.stop="missionStore.view.deleteMission(mission.mission_id)"
+        @click.stop="missionStore.view.deleteClientMission()"
         class="h-5 w-5 text-foreground hover:text-destructive"
       />
     </div>
