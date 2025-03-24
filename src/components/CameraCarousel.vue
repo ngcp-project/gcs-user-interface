@@ -14,7 +14,7 @@ const emblaMainApi = ref<CarouselApi>();
 const emblaThumbnailApi = ref<CarouselApi>();
 const selectedIndex = ref(0);
 
-// NOTE: To run the cameras for development, run the flask server from https://github.com/ngcp-project/gcs-infrastructure-fpvtest/tree/josh
+// NOTE: To run the cameras for development, run the flask server from h>
 const cameraFeeds = ref([
   { id: 1, name: "UGC", src: "http://127.0.0.1:5000/video_feed" },
   { id: 2, name: "UAV", src: "http://127.0.0.1:5000/video_feed" }
@@ -97,8 +97,8 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
   align-items: center;
 }
 .focused-camera {
-  max-height: 70vh;
-  max-width: 60vw;
+  max-height: 60vh;
+  max-width: 50vw;
   margin: auto;
   display: flex;
   justify-content: center;
@@ -109,9 +109,9 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
   padding: 0 !important;
 }
 .image {
-  aspect-ratio: 5/3;
+  aspect-ratio: 4/3;
   border-radius: 0.5rem;
-  object-fit: fill;
+  object-fit: contain;
   width: 100%;
   height: 100%;
 }
