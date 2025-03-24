@@ -5,7 +5,7 @@
       ref="map"
       v-model:zoom="zoom"
       :use-global-leaflet="false"
-      :center="mapOrigin"
+      :center="[mapOrigin[0] as LatLng[0], mapOrigin[1] as LatLng[1]]"
       @click="addPoint"
     >
       <div class="absolute right-0 top-0 flex items-center gap-2 p-2" style="z-index: 1000">
@@ -59,7 +59,7 @@
         :icon="fire_icon"
         v-for="(point, index) in fireCoordsList"
         :key="index"
-        :lat-lng="[point.latitude, point.longitude]"
+        :lat-lng="[parseFloat(point.latitude || '0'), parseFloat(point.longitude || '0')]"
       ></l-marker>
 
       <!-- POLYGON TO SHOW CURRENTLY SELECTED AREA FOR KEEP IN/OUT -->
@@ -72,14 +72,14 @@
       <!-- POLYGON TO SHOW KEEP IN ZONES -->
       <l-polygon
         v-if="zoneInPolygons.length > 0"
-        :lat-lngs="zoneInPolygons"
+        :lat-lngs="zoneInPolygons[0]"
         :options="{ color: 'green', fillColor: 'green', fillOpacity: 0 }"
         :key="zoneInPolygons.length"
       ></l-polygon>
       <!-- POLYGON TO SHOW KEEP OUT ZONES -->
       <l-polygon
         v-if="zoneOutPolygons.length > 0"
-        :lat-lngs="zoneOutPolygons"
+        :lat-lngs="zoneOutPolygons[0]"
         :options="{ fillColor: 'red', fillOpacity: 0.3 }"
         :key="zoneOutPolygons.length"
       ></l-polygon>
@@ -94,7 +94,7 @@
       <l-marker
         v-if="selectingTarget && targetCoord[0] != null && targetCoord[1] != null"
         :icon="target_coord_icon"
-        :lat-lng="targetCoord"
+        :lat-lng="[parseFloat(targetCoord[0]), parseFloat(targetCoord[1])]"
       ></l-marker>
     </l-map>
   </div>
@@ -104,7 +104,7 @@
 import "leaflet/dist/leaflet.css";
 import { inject, ref } from "vue";
 import { LMap, LTileLayer, LPolygon, LMarker } from "@vue-leaflet/vue-leaflet";
-import { LeafletMouseEvent, LatLngExpression, icon } from "leaflet";
+import { LeafletMouseEvent, LatLngTuple as LatLng, icon } from "leaflet";
 
 import {
   pushZoneInPolygons,
@@ -121,10 +121,6 @@ import { Button } from "@/components/ui/button";
 import { SearchCoordsProvider } from "@/types/search-coords-provider";
 import { TargetCoordsProvider } from "@/types/target-coords.provider";
 import { MissionInfoProvider } from "@/types/mission-info-provider";
-interface Coordinates {
-  latitude: number;
-  longitude: number;
-}
 
 export default {
   setup() {
@@ -168,56 +164,56 @@ export default {
   },
   data() {
     return {
-      mapOrigin: [35.33004319829399, -120.75064544958856], // area of interest origin, CPP: 34.058, -117.819
+      mapOrigin: [35.33004319829399, -120.75064544958856] as LatLng,
       zoom: 16,
-      localTileURL: "http://localhost:8080/tile/{z}/{x}/{y}.png", // Update to local server URL
-      polygonPoints: [] as LatLngExpression[], // current selected polygons
-      zoneInPolygons: [] as LatLngExpression[], // all zone in polygons from backend
-      zoneOutPolygons: [] as LatLngExpression[], // all zone out polygons from backend
-      fireCoordsList: [] as Coordinates[],
-      searchPoints: [] as LatLngExpression[],
+      localTileURL: "http://localhost:8080/tile/{z}/{x}/{y}.png",
+      polygonPoints: [] as LatLng[], // current selected polygon (single)
+      zoneInPolygons: [] as LatLng[][], // all zone in polygons from backend (multiple)
+      zoneOutPolygons: [] as LatLng[][], // all zone out polygons from backend (multiple)
+      searchPoints: [] as LatLng[], // current selected search area (single)
+      fireCoordsList: [] as LatLng[],
       maxFireCoordsCount: 10,
       lastUpdate: 0,
-      updateInterval: 500, // Adjust as needed
+      updateInterval: 500,
 
       fire_icon: icon({
         iconUrl: "../src/assets/fire-icon.png",
         iconSize: [24, 34]
-      }),
-      ERU_position: [35.3308691455096, -120.74555890428901], // initial position
+      }) as any,
+      ERU_position: [35.3308691455096, -120.74555890428901] as LatLng,
       ERU_icon: icon({
         iconUrl: "../src/assets/ERU.png",
         iconSize: [38, 38]
-      }),
-      MEA_position: [35.32724060701405, -120.74394940698397], // initial position
+      }) as any,
+      MEA_position: [35.32724060701405, -120.74394940698397] as LatLng,
       MEA_icon: icon({
         iconUrl: "../src/assets/MEA.png",
         iconSize: [38, 38]
-      }),
-      MRA_position: [35.32682044954669, -120.74540868454052], // initial position
+      }) as any,
+      MRA_position: [35.32682044954669, -120.74540868454052] as LatLng,
       MRA_icon: icon({
         iconUrl: "../src/assets/MRA.png",
         iconSize: [38, 38]
-      }),
-      FRA_position: [35.3256474983931, -120.74015099334417], // initial position
+      }) as any,
+      FRA_position: [35.3256474983931, -120.74015099334417] as LatLng,
       FRA_icon: icon({
         iconUrl: "../src/assets/FRA.png",
         iconSize: [38, 38]
-      }),
+      }) as any,
       target_coord_icon: icon({
         iconUrl: "../src/assets/target-coord-icon.png",
         iconSize: [20, 20]
-      })
+      }) as any
     };
   },
   methods: {
     //creating the current selected polygon
     addPoint(event: LeafletMouseEvent) {
-      console.log("event", event);
       const lat = event.latlng.lat;
       const lng = event.latlng.lng;
       console.log("Clicked coordinates:", lat, lng);
-      const latLng: LatLngExpression = [event.latlng.lat, event.latlng.lng];
+      const latLng: LatLng = [lat, lng];
+      
       if (!this.selectingSearch && !this.selectingTarget) {
         this.polygonPoints.push(latLng);
       }
@@ -225,25 +221,18 @@ export default {
       if (this.selectingSearch) {
         console.log("searchPoints: ", this.searchPoints);
         this.searchPoints.push(latLng);
-        this.updateSearchCoords(this.searchPoints);
+        this.updateSearchCoords(this.searchPoints.map(point => `${point[0]},${point[1]}`));
       }
-      console.log("polygonPoints:", this.polygonPoints);
 
-      // if selectingTarget from App.vue is true, set targetCoord (also from App.vue) to the latest point you clicked on Map
       if (this.selectingTarget) {
-        this.targetCoord = latLng;
+        this.targetCoord = `${lat},${lng}`;
         console.log("last clicked/currently selecting coordinate for target: " + this.targetCoord);
+
       }
-      //testing fire pts list
-      // const coords: Coordinates = {
-      //   latitude: lat,
-      //   longitude: lng
-      // };
-      // this.updateFireCoords(coords)
     },
     //clear every polygons (selected and backend)
-    async clearPolygons(event: LeafletMouseEvent) {
-      event.stopPropagation(); // Stop event propagation
+    async clearPolygons(event: MouseEvent) {
+      event.stopPropagation();
       this.polygonPoints = [];
       this.zoneInPolygons = [];
       this.zoneOutPolygons = [];
@@ -284,33 +273,28 @@ export default {
       console.log("Cleared Selected zoneOutPolygons:", this.zoneInPolygons);
     },
     //clear current selected polygons
-    async clearSelection(event: LeafletMouseEvent) {
-      event.stopPropagation(); // Stop event propagation
-      console.log(this.searchCoords.value);
+    async clearSelection(event: MouseEvent) {
+      event.stopPropagation();
       this.polygonPoints = [];
       this.searchPoints = [];
-      console.log("Cleared Selected zoneInPolygonPoints:", this.polygonPoints);
-      this.updateSearchCoords(this.polygonPoints); // also clear currently selected coords for current vehicle's search area
-      this.targetCoord = []; // also clear currently selected coord for current vehicle's target
+      this.updateSearchCoords([]);
+      this.targetCoord = "";
     },
     //send current selected polygons as zone in polygons
-    async sendZoneInPolygonPoints(event: LeafletMouseEvent) {
-      event.stopPropagation(); // Stop event propagation
+    async sendZoneInPolygonPoints(event: MouseEvent) {
+      event.stopPropagation();
       if (this.polygonPoints.length < 3) {
         console.log("Please select at least 3 points");
         return;
       }
       try {
-        const coordinates = this.polygonPoints.map((proxyArray) => {
-          // Extract latitude and longitude from each Proxy object
-          const latitude = proxyArray[0];
-          const longitude = proxyArray[1];
-          return { latitude, longitude };
-        });
-
+        const coordinates = this.polygonPoints.map(([lat, lng]) => ({
+          lat: lat,
+          long: lng
+        }));
         const payload = {
           keepIn: true,
-          coordinates: coordinates
+          coordinates
         };
 
         const response = await fetch("http://localhost:5135/zones/in", {
@@ -329,45 +313,25 @@ export default {
         console.log("zone In PolygonPoints sent successfully:", res);
         await this.getZoneIn();
         await this.clearSelection(event);
-        // const multiPolygon = [
-        //   [ // First polygon
-        //     [ // Outer ring of the first polygon
-        //       [35.33165465225685, -120.75643812675729], [35.32603702617105, -120.75843434541602], [35.324846949352334, -120.74817421080436], [35.335119535355524, -120.74864643457312]
-        //     ],
-        //     [ // Hole of the first polygon
-        //       [35.334402071757125, -120.74561990950984], [35.32983465415885, -120.74881815230721], [35.32796211334611, -120.74018933616938],
-        //     ]
-        //   ],
-        //   [ // Second polygon
-        //     [ // Outer ring of the second polygon
-        //       [35.33167215203964, -120.75609469128912], [35.32671956232397, -120.75285351905823], [35.333002124445976, -120.7487108287234],
-        //     ]
-        //   ],
-        // ];
-        // this.zoneInPolygons = multiPolygon;
-        // console.log(this.zoneInPolygons);
       } catch (error) {
         console.error("Error sending zoneInPolygonPoints points:", error);
       }
     },
     //send current selected polygons as zone out polygons
-    async sendZoneOutPolygonPoints(event: LeafletMouseEvent) {
-      event.stopPropagation(); // Stop event propagation
+    async sendZoneOutPolygonPoints(event: MouseEvent) {
+      event.stopPropagation();
       if (this.polygonPoints.length < 3) {
         console.log("Please select at least 3 points");
         return;
       }
       try {
-        const coordinates = this.polygonPoints.map((proxyArray) => {
-          // Extract latitude and longitude from each Proxy object
-          const latitude = proxyArray[0];
-          const longitude = proxyArray[1];
-          return { latitude, longitude };
-        });
-
+        const coordinates = this.polygonPoints.map(([lat, lng]) => ({
+          lat: lat,
+          long: lng
+        }));
         const payload = {
           keepIn: true,
-          coordinates: coordinates
+          coordinates
         };
 
         const response = await fetch("http://localhost:5135/zones/out", {
@@ -400,22 +364,19 @@ export default {
           throw new Error("Network response was not ok");
         }
         const res = await response.json();
-        this.zoneInPolygons = []; //need to reset displayed zone in polygons
+        this.zoneInPolygons = [];
         clearZoneInPolygons();
         let zones = res.data.split("|").map((zone: any) => JSON.parse(zone));
-        //console.log("zoneIn prev", this.zoneInPolygons);
         zones.forEach((zone: any) => {
-          //console.log(zone.coordinates.map(coordinate => [coordinate.latitude, coordinate.longitude]));
           const coordinates = zone.coordinates.map((coordinate: any) => [
-            coordinate.latitude,
-            coordinate.longitude
-          ]);
-          this.zoneInPolygons.push([coordinates]);
+            coordinate.lat,
+            coordinate.long
+          ] as LatLng);
+          this.zoneInPolygons.push(coordinates);
           pushZoneInPolygons(coordinates);
         });
-        console.log("Updated Zone In Polygons", this.zoneInPolygons);
       } catch (error) {
-        console.error("Error sending sendZoneOutPolygonPoints points:", error);
+        console.error("Error getting zone in polygons:", error);
       }
     },
     //get all zone out polygons
@@ -428,34 +389,29 @@ export default {
           throw new Error("Network response was not ok");
         }
         const res = await response.json();
-        this.zoneOutPolygons = []; //need to reset displayed zone out polygons
+        this.zoneOutPolygons = [];
         clearZoneOutPolygons();
         let zones = res.data.split("|").map((zone: any) => JSON.parse(zone));
-        //console.log(zones);
-        //console.log("Zoneout prev", this.zoneOutPolygons);
         zones.forEach((zone: any) => {
-          //console.log(zone.coordinates);
           const coordinates = zone.coordinates.map((coordinate: any) => [
-            coordinate.latitude,
-            coordinate.longitude
-          ]);
-          this.zoneOutPolygons.push([coordinates]);
+            coordinate.lat,
+            coordinate.long
+          ] as LatLng);
+          this.zoneOutPolygons.push(coordinates);
           pushZoneOutPolygons(coordinates);
         });
-        console.log("Updated Zone Out Polygons", this.zoneOutPolygons);
       } catch (error) {
-        console.error("Error sending sendZoneOutPolygonPoints points:", error);
+        console.error("Error getting zone out polygons:", error);
       }
     },
-    updateFireCoords(coords: Coordinates) {
+    updateFireCoords(coords: { latitude: number, longitude: number}) {
       if (this.fireCoordsList.length > this.maxFireCoordsCount) {
         this.fireCoordsList.shift();
       }
-      //pass the fire coords here
-      this.fireCoordsList.push({ ...coords });
+      // Create new LatLng object
+      const latlng: LatLng = [coords.latitude, coords.longitude];
+      this.fireCoordsList.push(latlng);
       localStorage.setItem("fireCoordsList", JSON.stringify(this.fireCoordsList));
-      // this.fireCoordsList.push(firePoint);
-      // console.log("firstptslist:", this.fireCoordsList)
     }
   },
   mounted() {
@@ -465,7 +421,9 @@ export default {
     const storedFireCoords = localStorage.getItem("fireCoordsList");
     if (storedFireCoords) {
       try {
-        this.fireCoordsList = JSON.parse(storedFireCoords);
+        // Convert parsed coordinates to LatLng objects
+        const parsed = JSON.parse(storedFireCoords);
+        this.fireCoordsList = parsed.map((coord: { latitude: number, longitude: number }) => [coord.latitude, coord.longitude] as LatLng);
       } catch (e) {
         console.error("Error parsing fireCoordsList from localStorage", e);
       }
@@ -498,41 +456,33 @@ export default {
 
     ERU_coords: {
       handler(newERUcoords) {
-        this.ERU_position = [newERUcoords.latitude, newERUcoords.longitude];
-        // console.log("ERU IN KEEP IN ZONE: "+ isInKeepInZone(this.ERU_position));
-        this.$emit("keepIn", "ERU", isInKeepInZone(this.ERU_position));
-        this.$emit("keepOut", "ERU", isInKeepOutZone(this.ERU_position));
-        // console.log("IN KEEP OUT ZONE:  "+ isInKeepOutZone(this.ERU_position));
+        const ERU_position: LatLng = [newERUcoords.latitude, newERUcoords.longitude];
+        this.$emit("keepIn", "ERU", isInKeepInZone(ERU_position));
+        this.$emit("keepOut", "ERU", isInKeepOutZone(ERU_position));
       },
       deep: true
     },
     MEA_coords: {
       handler(newMEAcoords) {
-        this.MEA_position = [newMEAcoords.latitude, newMEAcoords.longitude];
-        this.$emit("keepIn", "MEA", isInKeepInZone(this.MEA_position));
-        this.$emit("keepOut", "MEA", isInKeepOutZone(this.MEA_position));
-        // console.log("IN KEEP IN ZONE: "+ isInKeepInZone(this.MEA_position));
-        // console.log("IN KEEP OUT ZONE:  "+ isInKeepOutZone(this.MEA_position));
+        const MEA_position: LatLng = [newMEAcoords.latitude, newMEAcoords.longitude];
+        this.$emit("keepIn", "MEA", isInKeepInZone(MEA_position));
+        this.$emit("keepOut", "MEA", isInKeepOutZone(MEA_position));
       },
       deep: true
     },
     MRA_coords: {
       handler(newMRAcoords) {
-        this.MRA_position = [newMRAcoords.latitude, newMRAcoords.longitude];
-        this.$emit("keepIn", "MRA", isInKeepInZone(this.MRA_position));
-        this.$emit("keepOut", "MRA", isInKeepOutZone(this.MRA_position));
-        // console.log("IN KEEP IN ZONE: "+ isInKeepInZone(this.MRA_position));
-        // console.log("IN KEEP OUT ZONE:  "+ isInKeepOutZone(this.MRA_position));
+        const MRA_position: LatLng = [newMRAcoords.latitude, newMRAcoords.longitude];
+        this.$emit("keepIn", "MRA", isInKeepInZone(MRA_position));
+        this.$emit("keepOut", "MRA", isInKeepOutZone(MRA_position));
       },
       deep: true
     },
     FRA_coords: {
       handler(newFRAcoords) {
-        this.FRA_position = [newFRAcoords.latitude, newFRAcoords.longitude];
-        this.$emit("keepIn", "FRA", isInKeepInZone(this.FRA_position));
-        this.$emit("keepOut", "FRA", isInKeepOutZone(this.FRA_position));
-        // console.log("IN KEEP IN ZONE: "+ isInKeepInZone(this.FRA_position));
-        // console.log("IN KEEP OUT ZONE:  "+ isInKeepOutZone(this.FRA_position));
+        const FRA_position: LatLng = [newFRAcoords.latitude, newFRAcoords.longitude];
+        this.$emit("keepIn", "FRA", isInKeepInZone(FRA_position));
+        this.$emit("keepOut", "FRA", isInKeepOutZone(FRA_position));
       },
       deep: true
     }

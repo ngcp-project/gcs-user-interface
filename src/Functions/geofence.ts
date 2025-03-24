@@ -1,18 +1,16 @@
-import { LatLngExpression } from "leaflet";
+import { LatLngTuple as LatLng } from "leaflet";
 
-interface Coordinates {
-  latitude: number;
-  longitude: number;
-}
+// Define polygon type as array of LatLng obj
+type Polygon = LatLng[];
 
-let zoneInPolygons = [] as LatLngExpression[];
-let zoneOutPolygons = [] as LatLngExpression[];
-let ERU_coords: number[];
-let MEA_coords: number[];
-let MRA_coords: number[];
-let FRA_coords: number[];
+let zoneInPolygons: Polygon[] = [];
+let zoneOutPolygons: Polygon[] = [];
+let ERU_coords: LatLng;
+let MEA_coords: LatLng;
+let MRA_coords: LatLng;
+let FRA_coords: LatLng;
 
-export function updateVehicleCords(vehicle: string, coordinate: number[]) {
+export function updateVehicleCords(vehicle: string, coordinate: LatLng) {
   switch (vehicle) {
     case "ERU":
       ERU_coords = coordinate;
@@ -29,13 +27,12 @@ export function updateVehicleCords(vehicle: string, coordinate: number[]) {
   }
 }
 
-export function pushZoneInPolygons(coordinate: Coordinates) {
-  zoneInPolygons.push([coordinate]);
-  // console.log("FROM GEOFENCE.TS: " + zoneInPolygons);
+export function pushZoneInPolygons(coordinates: LatLng[]) {
+  zoneInPolygons.push(coordinates);
 }
 
-export function pushZoneOutPolygons(coordinate: Coordinates) {
-  zoneOutPolygons.push([coordinate]);
+export function pushZoneOutPolygons(coordinates: LatLng[]) {
+  zoneOutPolygons.push(coordinates);
 }
 
 export function clearZoneInPolygons() {
@@ -52,76 +49,73 @@ export function clearPolygons() {
 }
 
 // Want this to return true
-export function isInKeepInZone(coordinate: number[]) {
-  // console.log("ZONE COORDS: " + zoneInPolygons)
+export function isInKeepInZone(coordinate: LatLng) {
   let isInZone = false;
-  // console.log("ZONE IN LENGTH: " + zoneInPolygons.length);
   for (let i = 0; i < zoneInPolygons.length; i++) {
     if (isPointInPolygon(coordinate, zoneInPolygons[i])) {
       isInZone = true;
       break;
     }
   }
-  // console.log("IS IN KEEP IN ZONE: " + isInZone);
   return isInZone;
 }
 
 // Want this to return false
-export function isInKeepOutZone(coordinate: number[]) {
+export function isInKeepOutZone(coordinate: LatLng) {
   let isInZone = false;
-  // console.log("ZONE OUT LENGTH: " + zoneOutPolygons.length);
   for (let i = 0; i < zoneOutPolygons.length; i++) {
-    // co/nsole.log("ZONE OUT COORDS: " + zoneOutPolygons[i]);
     if (isPointInPolygon(coordinate, zoneOutPolygons[i])) {
       isInZone = true;
       break;
     }
   }
-  // console.log("IS IN KEEP OUT ZONE: " + isInZone);
   return isInZone;
 }
 
-function isPointInPolygon(point: number[], polygons: LatLngExpression) {
-  let isInside = false;
-  const polygon = polygons[0];
-  let minX = polygon[0][0],
-    maxX = polygon[0][0];
-  let minY = polygon[0][0],
-    maxY = polygon[0][0];
-  // console.log(polygon[0]);
-  // console.log(minX + " " + maxX + " " + minY + " " + maxY);
-  for (let n = 1; n < polygon.length; n++) {
-    const q = polygon[n];
-    minX = Math.min(q[0], minX);
-    maxX = Math.max(q[0], maxX);
-    minY = Math.min(q[1], minY);
-    maxY = Math.max(q[1], maxY);
+function isPointInPolygon(point: LatLng, polygon: Polygon) {
+  if (!polygon.length) {
+    return false;
   }
 
-  if (point[0] < minX || point[0] > maxX || point[1] < minY || point[1] > maxY) {
-    // console.log("1111111111111111111");
+  let isInside = false;
+  const [firstLat, firstLng] = polygon[0];
+  
+  let minLat = firstLat,
+      maxLat = firstLat;
+  let minLng = firstLng,
+      maxLng = firstLng;
+
+  for (let n = 1; n < polygon.length; n++) {
+    const [lat, lng] = polygon[n];
+    minLat = Math.min(lat, minLat);
+    maxLat = Math.max(lat, maxLat);
+    minLng = Math.min(lng, minLng);
+    maxLng = Math.max(lng, maxLng);
+  }
+
+  const [pointLat, pointLng] = point;
+
+  if (pointLat < minLat || pointLat > maxLat || pointLng < minLng || pointLng > maxLng) {
     return false;
   }
 
   let i = 0,
     j = polygon.length - 1;
-  // console.log(polygon);
-  // console.log("000000");
+
   for (; i < polygon.length; j = i++) {
-    // console.log("1111111111");
-    if (
-      polygon[i][1] > point[1] != polygon[j][1] > point[1] &&
-      point[0] <
-        ((polygon[j][0] - polygon[i][0]) * (point[1] - polygon[i][1])) /
-          (polygon[j][1] - polygon[i][1]) +
-          polygon[i][0]
-    ) {
+    const [iLat, iLng] = polygon[i];
+    const [jLat, jLng] = polygon[j];
+    
+    if  (
+      iLng > pointLng != jLng > pointLng &&
+      pointLat <
+        ((jLat - iLat) * (pointLng - iLng)) /
+          (jLng - iLng) +
+          iLat
+    )  {
       isInside = !isInside;
-      // console.log("123123123123123123");
-      // console.log(isInside + " ");
     }
   }
-  // console.log("222222");
 
   return isInside;
 }
