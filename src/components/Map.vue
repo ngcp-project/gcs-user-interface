@@ -55,12 +55,6 @@
       <l-marker :lat-lng="MEA_position" :icon="MEA_icon"></l-marker>
       <l-marker :lat-lng="MRA_position" :icon="MRA_icon"></l-marker>
       <l-marker :lat-lng="FRA_position" :icon="FRA_icon"></l-marker> -->
-      <l-marker
-        :icon="fire_icon"
-        v-for="(point, index) in fireCoordsList"
-        :key="index"
-        :lat-lng="[parseFloat(point.latitude || '0'), parseFloat(point.longitude || '0')]"
-      ></l-marker>
 
       <!-- POLYGON TO SHOW CURRENTLY SELECTED AREA FOR KEEP IN/OUT -->
       <l-polygon
@@ -149,9 +143,6 @@ export default {
     Button
   },
   props: {
-    //import fire prop from telemetry
-    firePoint: { required: false, type: Object },
-
     // vehicle coordinate and yaw props to pass into vehicle markers
     ERU_coords: { required: true, type: Object },
     ERU_yaw: { required: true, type: Number },
@@ -171,15 +162,7 @@ export default {
       zoneInPolygons: [] as LatLng[][], // all zone in polygons from backend (multiple)
       zoneOutPolygons: [] as LatLng[][], // all zone out polygons from backend (multiple)
       searchPoints: [] as LatLng[], // current selected search area (single)
-      fireCoordsList: [] as LatLng[],
-      maxFireCoordsCount: 10,
-      lastUpdate: 0,
-      updateInterval: 500,
 
-      fire_icon: icon({
-        iconUrl: "../src/assets/fire-icon.png",
-        iconSize: [24, 34]
-      }) as any,
       ERU_position: [35.3308691455096, -120.74555890428901] as LatLng,
       ERU_icon: icon({
         iconUrl: "../src/assets/ERU.png",
@@ -404,56 +387,13 @@ export default {
         console.error("Error getting zone out polygons:", error);
       }
     },
-    updateFireCoords(coords: { latitude: number, longitude: number}) {
-      if (this.fireCoordsList.length > this.maxFireCoordsCount) {
-        this.fireCoordsList.shift();
-      }
-      // Create new LatLng object
-      const latlng: LatLng = [coords.latitude, coords.longitude];
-      this.fireCoordsList.push(latlng);
-      localStorage.setItem("fireCoordsList", JSON.stringify(this.fireCoordsList));
-    }
   },
   mounted() {
     this.load_MISSION_INFO();
     this.getZoneIn();
     this.getZoneOut();
-    const storedFireCoords = localStorage.getItem("fireCoordsList");
-    if (storedFireCoords) {
-      try {
-        // Convert parsed coordinates to LatLng objects
-        const parsed = JSON.parse(storedFireCoords);
-        this.fireCoordsList = parsed.map((coord: { latitude: number, longitude: number }) => [coord.latitude, coord.longitude] as LatLng);
-      } catch (e) {
-        console.error("Error parsing fireCoordsList from localStorage", e);
-      }
-    } else {
-      // Initialize localStorage with an empty list if it doesn't exist
-      localStorage.setItem("fireCoordsList", JSON.stringify(this.fireCoordsList));
-    }
   },
   watch: {
-    // uses deep watch to watch for changes in longitude and latitude properties in firePoint
-    firePoint: {
-      handler(newFireCoords) {
-        // console.log("From watcher function in Map.vue: " + newFireCoords.latitude + " | " + newFireCoords.longitude);
-        const currentTime = Date.now();
-        if (currentTime - this.lastUpdate >= this.updateInterval) {
-          this.updateFireCoords(newFireCoords);
-          this.lastUpdate = currentTime;
-        }
-      },
-      deep: true
-    },
-
-    // firePoints(newFireCoords) {
-    //   const currentTime = Date.now();
-    //   if (currentTime - this.lastUpdate >= this.updateInterval) {
-    //     this.updateFireCoords(newFireCoords);
-    //     this.lastUpdate = currentTime;
-    //   }
-    // },
-
     ERU_coords: {
       handler(newERUcoords) {
         const ERU_position: LatLng = [newERUcoords.latitude, newERUcoords.longitude];
