@@ -94,338 +94,317 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import "leaflet/dist/leaflet.css";
-import { inject, ref } from "vue";
+import { ref, watch, onMounted, inject } from "vue";
 import { LMap, LTileLayer, LPolygon, LMarker } from "@vue-leaflet/vue-leaflet";
 import { LeafletMouseEvent, LatLngTuple as LatLng, icon } from "leaflet";
-
-import {
-  pushZoneInPolygons,
-  pushZoneOutPolygons,
-  clearZoneInPolygons,
-  clearZoneOutPolygons,
-  clearPolygons,
-  isInKeepInZone,
-  isInKeepOutZone
-} from "../Functions/geofence";
-
 import { LMarkerRotate } from "vue-leaflet-rotate-marker";
 import { Button } from "@/components/ui/button";
 import { SearchCoordsProvider } from "@/types/search-coords-provider";
 import { TargetCoordsProvider } from "@/types/target-coords.provider";
 import { MissionInfoProvider } from "@/types/mission-info-provider";
+import {
+  pushZoneInPolygons,
+  pushZoneOutPolygons,
+  clearZoneInPolygons,
+  clearZoneOutPolygons,
+  clearPolygons as clearGeofencePolygons,
+  isInKeepInZone,
+  isInKeepOutZone
+} from "../Functions/geofence";
 
-export default {
-  setup() {
-    const { searchCoords, selectingSearch, updateSearchCoords } =
-      inject<SearchCoordsProvider>("search-coords-provider")!;
-    const { targetCoord, selectingTarget } =
-      inject<TargetCoordsProvider>("target-coords-provider")!;
-    const { load_MISSION_INFO } = inject<MissionInfoProvider>("mission-info-provider")!;
+// Define Props
+const props = defineProps<{
+  ERU_coords: { latitude: number; longitude: number };
+  ERU_yaw: number;
+  MEA_coords: { latitude: number; longitude: number };
+  MEA_yaw: number;
+  MRA_coords: { latitude: number; longitude: number };
+  MRA_yaw: number;
+  FRA_coords: { latitude: number; longitude: number };
+  FRA_yaw: number;
+}>();
 
-    return {
-      searchCoords,
-      selectingSearch,
-      updateSearchCoords,
-      targetCoord,
-      selectingTarget,
-      load_MISSION_INFO
-    };
-  },
-  components: {
-    LMap,
-    LTileLayer,
-    LPolygon,
-    LMarker,
-    LMarkerRotate,
-    // eslint-disable-next-line vue/no-reserved-component-names
-    Button
-  },
-  props: {
-    // vehicle coordinate and yaw props to pass into vehicle markers
-    ERU_coords: { required: true, type: Object },
-    ERU_yaw: { required: true, type: Number },
-    MEA_coords: { required: true, type: Object },
-    MEA_yaw: { required: true, type: Number },
-    MRA_coords: { required: true, type: Object },
-    MRA_yaw: { required: true, type: Number },
-    FRA_coords: { required: true, type: Object },
-    FRA_yaw: { required: true, type: Number }
-  },
-  data() {
-    return {
-      mapOrigin: [35.33004319829399, -120.75064544958856] as LatLng,
-      zoom: 16,
-      localTileURL: "http://localhost:8080/tile/{z}/{x}/{y}.png",
-      polygonPoints: [] as LatLng[], // current selected polygon (single)
-      zoneInPolygons: [] as LatLng[][], // all zone in polygons from backend (multiple)
-      zoneOutPolygons: [] as LatLng[][], // all zone out polygons from backend (multiple)
-      searchPoints: [] as LatLng[], // current selected search area (single)
+// Define Emits
+const emit = defineEmits<{
+  (e: "keepIn", vehicle: string, isIn: boolean): void;
+  (e: "keepOut", vehicle: string, isOut: boolean): void;
+}>();
 
-      ERU_position: [35.3308691455096, -120.74555890428901] as LatLng,
-      ERU_icon: icon({
-        iconUrl: "../src/assets/ERU.png",
-        iconSize: [38, 38]
-      }) as any,
-      MEA_position: [35.32724060701405, -120.74394940698397] as LatLng,
-      MEA_icon: icon({
-        iconUrl: "../src/assets/MEA.png",
-        iconSize: [38, 38]
-      }) as any,
-      MRA_position: [35.32682044954669, -120.74540868454052] as LatLng,
-      MRA_icon: icon({
-        iconUrl: "../src/assets/MRA.png",
-        iconSize: [38, 38]
-      }) as any,
-      FRA_position: [35.3256474983931, -120.74015099334417] as LatLng,
-      FRA_icon: icon({
-        iconUrl: "../src/assets/FRA.png",
-        iconSize: [38, 38]
-      }) as any,
-      target_coord_icon: icon({
-        iconUrl: "../src/assets/target-coord-icon.png",
-        iconSize: [20, 20]
-      }) as any
-    };
-  },
-  methods: {
-    //creating the current selected polygon
-    addPoint(event: LeafletMouseEvent) {
-      const lat = event.latlng.lat;
-      const lng = event.latlng.lng;
-      console.log("Clicked coordinates:", lat, lng);
-      const latLng: LatLng = [lat, lng];
-      
-      if (!this.selectingSearch && !this.selectingTarget) {
-        this.polygonPoints.push(latLng);
-      }
+// Inject providers
+const { searchCoords, selectingSearch, updateSearchCoords } =
+  inject<SearchCoordsProvider>("search-coords-provider")!;
+const { targetCoord, selectingTarget } =
+  inject<TargetCoordsProvider>("target-coords-provider")!;
+const { load_MISSION_INFO } = inject<MissionInfoProvider>("mission-info-provider")!;
 
-      if (this.selectingSearch) {
-        console.log("searchPoints: ", this.searchPoints);
-        this.searchPoints.push(latLng);
-        this.updateSearchCoords(this.searchPoints.map(point => `${point[0]},${point[1]}`));
-      }
+// State
+const mapOrigin = ref<LatLng>([35.33004319829399, -120.75064544958856]);
+const zoom = ref(16);
+const localTileURL = ref("http://localhost:8080/tile/{z}/{x}/{y}.png");
+const polygonPoints = ref<LatLng[]>([]); // current selected polygon (single)
+const zoneInPolygons = ref<LatLng[][]>([]); // all zone in polygons from backend (multiple)
+const zoneOutPolygons = ref<LatLng[][]>([]); // all zone out polygons from backend (multiple)
+const searchPoints = ref<LatLng[]>([]); // current selected search area (single)
 
-      if (this.selectingTarget) {
-        this.targetCoord = `${lat},${lng}`;
-        console.log("last clicked/currently selecting coordinate for target: " + this.targetCoord);
+// Vehicle positions + icons
+const ERU_position = ref<LatLng>([35.3308691455096, -120.74555890428901]);
+const ERU_icon = icon({
+  iconUrl: "../src/assets/ERU.png",
+  iconSize: [38, 38]
+});
 
-      }
-    },
-    //clear every polygons (selected and backend)
-    async clearPolygons(event: MouseEvent) {
-      event.stopPropagation();
-      this.polygonPoints = [];
-      this.zoneInPolygons = [];
-      this.zoneOutPolygons = [];
-      clearPolygons();
-      try {
-        const response = await fetch("http://localhost:5135/zones/in", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json"
-          }
-        });
-        if (!response) {
-          throw new Error("Network response was not ok");
-        }
+const MEA_position = ref<LatLng>([35.32724060701405, -120.74394940698397]);
+const MEA_icon = icon({
+  iconUrl: "../src/assets/MEA.png",
+  iconSize: [38, 38]
+});
 
-        const res = await response.json();
-        console.error("Cleared zoneInPolygonPoints points:", res);
-      } catch (error) {
-        console.error("Error sending zoneInPolygonPoints points:", error);
-      }
-      try {
-        const response = await fetch("http://localhost:5135/zones/out", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json"
-          }
-        });
-        if (!response) {
-          throw new Error("Network response was not ok");
-        }
+const MRA_position = ref<LatLng>([35.32682044954669, -120.74540868454052]);
+const MRA_icon = icon({
+  iconUrl: "../src/assets/MRA.png",
+  iconSize: [38, 38]
+});
 
-        const res = await response.json();
-        console.error("Cleared zoneOutPolygonPoints points:", res);
-      } catch (error) {
-        console.error("Error sending zoneOutPolygonPoints points:", error);
-      }
-      console.log("zoneOutnPolygonPoints:", this.polygonPoints);
-      console.log("Cleared Selected zoneOutPolygons:", this.zoneInPolygons);
-    },
-    //clear current selected polygons
-    async clearSelection(event: MouseEvent) {
-      event.stopPropagation();
-      this.polygonPoints = [];
-      this.searchPoints = [];
-      this.updateSearchCoords([]);
-      this.targetCoord = "";
-    },
-    //send current selected polygons as zone in polygons
-    async sendZoneInPolygonPoints(event: MouseEvent) {
-      event.stopPropagation();
-      if (this.polygonPoints.length < 3) {
-        console.log("Please select at least 3 points");
-        return;
-      }
-      try {
-        const coordinates = this.polygonPoints.map(([lat, lng]) => ({
-          lat: lat,
-          long: lng
-        }));
-        const payload = {
-          keepIn: true,
-          coordinates
-        };
+const FRA_position = ref<LatLng>([35.3256474983931, -120.74015099334417]);
+const FRA_icon = icon({
+  iconUrl: "../src/assets/FRA.png",
+  iconSize: [38, 38]
+});
 
-        const response = await fetch("http://localhost:5135/zones/in", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
+const target_coord_icon = icon({
+  iconUrl: "../src/assets/target-coord-icon.png",
+  iconSize: [20, 20]
+});
 
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
+// Methods
+// creating current selected polygon
+const addPoint = (event: LeafletMouseEvent) => {
+  const lat = event.latlng.lat;
+  const lng = event.latlng.lng;
+  console.log("Clicked coordinates:", lat, lng);
+  const latLng: LatLng = [lat, lng];
+  
+  if (!selectingSearch.value && !selectingTarget.value) {
+    polygonPoints.value.push(latLng);
+  }
 
-        const res = await response.json();
-        console.log("zone In PolygonPoints sent successfully:", res);
-        await this.getZoneIn();
-        await this.clearSelection(event);
-      } catch (error) {
-        console.error("Error sending zoneInPolygonPoints points:", error);
-      }
-    },
-    //send current selected polygons as zone out polygons
-    async sendZoneOutPolygonPoints(event: MouseEvent) {
-      event.stopPropagation();
-      if (this.polygonPoints.length < 3) {
-        console.log("Please select at least 3 points");
-        return;
-      }
-      try {
-        const coordinates = this.polygonPoints.map(([lat, lng]) => ({
-          lat: lat,
-          long: lng
-        }));
-        const payload = {
-          keepIn: true,
-          coordinates
-        };
+  if (selectingSearch.value) {
+    console.log("searchPoints: ", searchPoints.value);
+    searchPoints.value.push(latLng);
+    updateSearchCoords(searchPoints.value.map(point => `${point[0]},${point[1]}`));
+  }
 
-        const response = await fetch("http://localhost:5135/zones/out", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-
-        const res = await response.json();
-        console.log("zone out PolygonPoints sent successfully:", res);
-        await this.getZoneOut();
-        await this.clearSelection(event);
-      } catch (error) {
-        console.error("Error sending sendZoneOutPolygonPoints points:", error);
-      }
-    },
-    //get all zone in polygons
-    async getZoneIn() {
-      try {
-        const response = await fetch("http://localhost:5135/zones/in", {
-          method: "GET"
-        });
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const res = await response.json();
-        this.zoneInPolygons = [];
-        clearZoneInPolygons();
-        let zones = res.data.split("|").map((zone: any) => JSON.parse(zone));
-        zones.forEach((zone: any) => {
-          const coordinates = zone.coordinates.map((coordinate: any) => [
-            coordinate.lat,
-            coordinate.long
-          ] as LatLng);
-          this.zoneInPolygons.push(coordinates);
-          pushZoneInPolygons(coordinates);
-        });
-      } catch (error) {
-        console.error("Error getting zone in polygons:", error);
-      }
-    },
-    //get all zone out polygons
-    async getZoneOut() {
-      try {
-        const response = await fetch("http://localhost:5135/zones/out", {
-          method: "GET"
-        });
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const res = await response.json();
-        this.zoneOutPolygons = [];
-        clearZoneOutPolygons();
-        let zones = res.data.split("|").map((zone: any) => JSON.parse(zone));
-        zones.forEach((zone: any) => {
-          const coordinates = zone.coordinates.map((coordinate: any) => [
-            coordinate.lat,
-            coordinate.long
-          ] as LatLng);
-          this.zoneOutPolygons.push(coordinates);
-          pushZoneOutPolygons(coordinates);
-        });
-      } catch (error) {
-        console.error("Error getting zone out polygons:", error);
-      }
-    },
-  },
-  mounted() {
-    this.load_MISSION_INFO();
-    this.getZoneIn();
-    this.getZoneOut();
-  },
-  watch: {
-    ERU_coords: {
-      handler(newERUcoords) {
-        const ERU_position: LatLng = [newERUcoords.latitude, newERUcoords.longitude];
-        this.$emit("keepIn", "ERU", isInKeepInZone(ERU_position));
-        this.$emit("keepOut", "ERU", isInKeepOutZone(ERU_position));
-      },
-      deep: true
-    },
-    MEA_coords: {
-      handler(newMEAcoords) {
-        const MEA_position: LatLng = [newMEAcoords.latitude, newMEAcoords.longitude];
-        this.$emit("keepIn", "MEA", isInKeepInZone(MEA_position));
-        this.$emit("keepOut", "MEA", isInKeepOutZone(MEA_position));
-      },
-      deep: true
-    },
-    MRA_coords: {
-      handler(newMRAcoords) {
-        const MRA_position: LatLng = [newMRAcoords.latitude, newMRAcoords.longitude];
-        this.$emit("keepIn", "MRA", isInKeepInZone(MRA_position));
-        this.$emit("keepOut", "MRA", isInKeepOutZone(MRA_position));
-      },
-      deep: true
-    },
-    FRA_coords: {
-      handler(newFRAcoords) {
-        const FRA_position: LatLng = [newFRAcoords.latitude, newFRAcoords.longitude];
-        this.$emit("keepIn", "FRA", isInKeepInZone(FRA_position));
-        this.$emit("keepOut", "FRA", isInKeepOutZone(FRA_position));
-      },
-      deep: true
-    }
+  if (selectingTarget.value) {
+    targetCoord.value = `${lat},${lng}`;
+    console.log("last clicked/currently selecting coordinate for target: " + targetCoord.value);
   }
 };
+
+// clear every polygon (selected and backend)
+const clearPolygons = async (event: MouseEvent) => {
+  event.stopPropagation();
+  polygonPoints.value = [];
+  zoneInPolygons.value = [];
+  zoneOutPolygons.value = [];
+  clearGeofencePolygons();
+  try {
+    const response = await fetch("http://localhost:5135/zones/in", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!response) {
+      throw new Error("Network response was not ok");
+    }
+    const res = await response.json();
+    console.error("Cleared zoneInPolygonPoints points:", res);
+  } catch (error) {
+    console.error("Error sending zoneInPolygonPoints points:", error);
+  }
+  try {
+    const response = await fetch("http://localhost:5135/zones/out", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!response) {
+      throw new Error("Network response was not ok");
+    }
+    const res = await response.json();
+    console.error("Cleared zoneOutPolygonPoints points:", res);
+  } catch (error) {
+    console.error("Error sending zoneOutPolygonPoints points:", error);
+  }
+  console.log("zoneOutnPolygonPoints:", polygonPoints.value);
+  console.log("Cleared Selected zoneOutPolygons:", zoneInPolygons.value);
+};
+
+// clear current selected polygons
+const clearSelection = async (event: MouseEvent) => {
+  event.stopPropagation();
+  polygonPoints.value = [];
+  searchPoints.value = [];
+  updateSearchCoords([]);
+  targetCoord.value = "";
+};
+
+// sned current selected polygons as zone in polygons
+const sendZoneInPolygonPoints = async (event: MouseEvent) => {
+  event.stopPropagation();
+  if (polygonPoints.value.length < 3) {
+    console.log("Please select at least 3 points");
+    return;
+  }
+  try {
+    const coordinates = polygonPoints.value.map(([lat, lng]) => ({
+      lat: lat,
+      long: lng
+    }));
+    const payload = {
+      keepIn: true,
+      coordinates
+    };
+
+    const response = await fetch("http://localhost:5135/zones/in", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const res = await response.json();
+    console.log("zone In PolygonPoints sent successfully:", res);
+    await getZoneIn();
+    await clearSelection(event);
+  } catch (error) {
+    console.error("Error sending zoneInPolygonPoints points:", error);
+  }
+};
+
+// send current selected polygons as zone out polygons
+const sendZoneOutPolygonPoints = async (event: MouseEvent) => {
+  event.stopPropagation();
+  if (polygonPoints.value.length < 3) {
+    console.log("Please select at least 3 points");
+    return;
+  }
+  try {
+    const coordinates = polygonPoints.value.map(([lat, lng]) => ({
+      lat: lat,
+      long: lng
+    }));
+    const payload = {
+      keepIn: true,
+      coordinates
+    };
+
+    const response = await fetch("http://localhost:5135/zones/out", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const res = await response.json();
+    console.log("zone out PolygonPoints sent successfully:", res);
+    await getZoneOut();
+    await clearSelection(event);
+  } catch (error) {
+    console.error("Error sending sendZoneOutPolygonPoints points:", error);
+  }
+};
+
+// get all zone in polygons
+const getZoneIn = async () => {
+  try {
+    const response = await fetch("http://localhost:5135/zones/in", {
+      method: "GET"
+    });
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const res = await response.json();
+    zoneInPolygons.value = [];
+    clearZoneInPolygons();
+    let zones = res.data.split("|").map((zone: any) => JSON.parse(zone));
+    zones.forEach((zone: any) => {
+      const coordinates = zone.coordinates.map((coordinate: any) => [
+        coordinate.lat,
+        coordinate.long
+      ] as LatLng);
+      zoneInPolygons.value.push(coordinates);
+      pushZoneInPolygons(coordinates);
+    });
+  } catch (error) {
+    console.error("Error getting zone in polygons:", error);
+  }
+};
+
+// get all zone out polygons
+const getZoneOut = async () => {
+  try {
+    const response = await fetch("http://localhost:5135/zones/out", {
+      method: "GET"
+    });
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const res = await response.json();
+    zoneOutPolygons.value = [];
+    clearZoneOutPolygons();
+    let zones = res.data.split("|").map((zone: any) => JSON.parse(zone));
+    zones.forEach((zone: any) => {
+      const coordinates = zone.coordinates.map((coordinate: any) => [
+        coordinate.lat,
+        coordinate.long
+      ] as LatLng);
+      zoneOutPolygons.value.push(coordinates);
+      pushZoneOutPolygons(coordinates);
+    });
+  } catch (error) {
+    console.error("Error getting zone out polygons:", error);
+  }
+};
+
+// Watchers
+watch(() => props.ERU_coords, (newERUcoords) => {
+  const position: LatLng = [newERUcoords.latitude, newERUcoords.longitude];
+  ERU_position.value = position;
+  emit("keepIn", "ERU", isInKeepInZone(position));
+  emit("keepOut", "ERU", isInKeepOutZone(position));
+}, { deep: true });
+
+watch(() => props.MEA_coords, (newMEAcoords) => {
+  const position: LatLng = [newMEAcoords.latitude, newMEAcoords.longitude];
+  MEA_position.value = position;
+  emit("keepIn", "MEA", isInKeepInZone(position));
+  emit("keepOut", "MEA", isInKeepOutZone(position));
+}, { deep: true });
+
+watch(() => props.MRA_coords, (newMRAcoords) => {
+  const position: LatLng = [newMRAcoords.latitude, newMRAcoords.longitude];
+  MRA_position.value = position;
+  emit("keepIn", "MRA", isInKeepInZone(position));
+  emit("keepOut", "MRA", isInKeepOutZone(position));
+}, { deep: true });
+
+watch(() => props.FRA_coords, (newFRAcoords) => {
+  const position: LatLng = [newFRAcoords.latitude, newFRAcoords.longitude];
+  FRA_position.value = position;
+  emit("keepIn", "FRA", isInKeepInZone(position));
+  emit("keepOut", "FRA", isInKeepOutZone(position));
+}, { deep: true });
+
+// Lifecycle hooks
+onMounted(() => {
+  load_MISSION_INFO();
+  getZoneIn();
+  getZoneOut();
+});
 </script>
