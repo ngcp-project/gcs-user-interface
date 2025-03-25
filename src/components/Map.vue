@@ -2,18 +2,17 @@
 <template>
   <div class="h-full w-full">
     <l-map
-      ref="map"
+      ref="mapRef"
       v-model:zoom="zoom"
-      :use-global-leaflet="false"
+      :use-global-leaflet="true"
       :center="[mapOrigin[0] as LatLng[0], mapOrigin[1] as LatLng[1]]"
-      @click="addPoint"
+      @ready="onMapReady"
     >
       <div class="absolute right-0 top-0 flex items-center gap-2 p-2" style="z-index: 1000">
         <Button @click="sendZoneInPolygonPoints">Zone In</Button>
         <Button @click="sendZoneOutPolygonPoints">Zone Out</Button>
         <!-- <button class="send-button" @click="FetchZones" >Get In/Out</button> -->
         <Button @click="clearPolygons">Clear All</Button>
-        <Button @click="clearSelection">Clear Selected</Button>
         <!-- <div class="fire-info" v-if="fire">
           <h3>Fire Information</h3>
           <p>coords:{{ fire.longitude.toFixed(6) }} {{ fire.latitude.toFixed(6) }}</p>
@@ -60,22 +59,36 @@
       <l-polygon
         v-if="polygonPoints.length > 0"
         :lat-lngs="polygonPoints"
-        :options="{ fillColor: 'blue', fillOpacity: 0.2 }"
-        :key="polygonPoints.length"
+        :options="{
+          fillColor: 'blue',
+          fillOpacity: 0.2,
+          color: 'blue',
+          pmIgnore: false,
+          draggable: true
+        }"
+        @pm:edit="handlePolygonEdit"
       ></l-polygon>
       <!-- POLYGON TO SHOW KEEP IN ZONES -->
       <l-polygon
         v-if="zoneInPolygons.length > 0"
         :lat-lngs="zoneInPolygons[0]"
-        :options="{ color: 'green', fillColor: 'green', fillOpacity: 0 }"
-        :key="zoneInPolygons.length"
+        :options="{
+          color: 'green',
+          fillColor: 'green',
+          fillOpacity: 0.2,
+          pmIgnore: false
+        }"
       ></l-polygon>
       <!-- POLYGON TO SHOW KEEP OUT ZONES -->
       <l-polygon
         v-if="zoneOutPolygons.length > 0"
         :lat-lngs="zoneOutPolygons[0]"
-        :options="{ fillColor: 'red', fillOpacity: 0.3 }"
-        :key="zoneOutPolygons.length"
+        :options="{
+          fillColor: 'red',
+          fillOpacity: 0.3,
+          color: 'red',
+          pmIgnore: false
+        }"
       ></l-polygon>
 
       <!-- POLYGON TO SHOW SEARCH AREA -->
@@ -96,7 +109,13 @@
 
 <script setup lang="ts">
 import "leaflet/dist/leaflet.css";
-import { ref, watch, onMounted, inject } from "vue";
+import * as L from "leaflet";
+// IMPORTANT: Set L globally BEFORE importing geoman
+(window as any).L = L;
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
+import '@geoman-io/leaflet-geoman-free';
+
+import { ref, watch, onMounted, inject, nextTick } from "vue";
 import { LMap, LTileLayer, LPolygon, LMarker } from "@vue-leaflet/vue-leaflet";
 import { LeafletMouseEvent, LatLngTuple as LatLng, icon } from "leaflet";
 import { LMarkerRotate } from "vue-leaflet-rotate-marker";
@@ -178,7 +197,11 @@ const target_coord_icon = icon({
   iconSize: [20, 20]
 });
 
+// Change map ref type
+const mapRef = ref<any>(null);
+
 // Methods
+/**
 // creating current selected polygon
 const addPoint = (event: LeafletMouseEvent) => {
   const lat = event.latlng.lat;
@@ -201,14 +224,29 @@ const addPoint = (event: LeafletMouseEvent) => {
     console.log("last clicked/currently selecting coordinate for target: " + targetCoord.value);
   }
 };
+*/
 
 // clear every polygon (selected and backend)
 const clearPolygons = async (event: MouseEvent) => {
   event.stopPropagation();
+    // Clear the local state
   polygonPoints.value = [];
   zoneInPolygons.value = [];
   zoneOutPolygons.value = [];
   clearGeofencePolygons();
+
+  // clear all geoman layers from the map
+  const map = mapRef.value?.leafletObject;
+  if (map) {
+    // remove all layers created by geoman
+    map.eachLayer((layer: any) => {
+      if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
+        map.removeLayer(layer);
+      }
+    });
+  }
+
+  // clear from backend
   try {
     const response = await fetch("http://localhost:5135/zones/in", {
       method: "DELETE",
@@ -218,10 +256,11 @@ const clearPolygons = async (event: MouseEvent) => {
       throw new Error("Network response was not ok");
     }
     const res = await response.json();
-    console.error("Cleared zoneInPolygonPoints points:", res);
+    console.log("Cleared zone in points:", res);
   } catch (error) {
-    console.error("Error sending zoneInPolygonPoints points:", error);
+    console.error("Error clearing zone in points:", error);
   }
+
   try {
     const response = await fetch("http://localhost:5135/zones/out", {
       method: "DELETE",
@@ -231,24 +270,32 @@ const clearPolygons = async (event: MouseEvent) => {
       throw new Error("Network response was not ok");
     }
     const res = await response.json();
-    console.error("Cleared zoneOutPolygonPoints points:", res);
+    console.log("Cleared zone out points:", res);
   } catch (error) {
-    console.error("Error sending zoneOutPolygonPoints points:", error);
+    console.error("Error clearing zone out points:", error);
   }
-  console.log("zoneOutnPolygonPoints:", polygonPoints.value);
-  console.log("Cleared Selected zoneOutPolygons:", zoneInPolygons.value);
 };
 
 // clear current selected polygons
-const clearSelection = async (event: MouseEvent) => {
-  event.stopPropagation();
+const clearSelection = () => {
+  // clear local state variables
   polygonPoints.value = [];
   searchPoints.value = [];
   updateSearchCoords([]);
   targetCoord.value = "";
+
+  // get map instance
+  const map = mapRef.value?.leafletObject;
+  if (!map) return;
+
+  // get all geoman layers and remove them
+  const layers = map.pm.getGeomanDrawLayers();
+  layers.forEach((layer: any) => {
+    map.pm.removeLayer(layer);
+  });
 };
 
-// sned current selected polygons as zone in polygons
+// send current selected polygons as zone in polygons
 const sendZoneInPolygonPoints = async (event: MouseEvent) => {
   event.stopPropagation();
   if (polygonPoints.value.length < 3) {
@@ -278,7 +325,7 @@ const sendZoneInPolygonPoints = async (event: MouseEvent) => {
     const res = await response.json();
     console.log("zone In PolygonPoints sent successfully:", res);
     await getZoneIn();
-    await clearSelection(event);
+    await clearSelection();
   } catch (error) {
     console.error("Error sending zoneInPolygonPoints points:", error);
   }
@@ -314,7 +361,7 @@ const sendZoneOutPolygonPoints = async (event: MouseEvent) => {
     const res = await response.json();
     console.log("zone out PolygonPoints sent successfully:", res);
     await getZoneOut();
-    await clearSelection(event);
+    await clearSelection();
   } catch (error) {
     console.error("Error sending sendZoneOutPolygonPoints points:", error);
   }
@@ -372,6 +419,93 @@ const getZoneOut = async () => {
   }
 };
 
+const updatePolygonPoints = (layer: any) => {
+  const latLngs = layer.getLatLngs()[0];
+  // update points
+  polygonPoints.value = latLngs.map((ll: any) => [ll.lat, ll.lng] as LatLng);
+  console.log("Updated polygon points:", polygonPoints.value);
+}
+
+// initialize geoman controls
+const initGeomanControls = () => {
+  console.log("Initializing Geoman controls");
+  
+  const mapEl = mapRef.value;
+  if (!mapEl) {
+    console.error("Map ref not found");
+    return;
+  }
+
+  const map = mapEl.leafletObject;
+  if (!map) {
+    console.error("Leaflet map instance not found");
+    return;
+  }
+
+  try {
+    map.pm.addControls({
+      position: 'topleft',
+      drawCircle: false,
+      drawCircleMarker: false,
+      drawPolyline: false,
+      drawRectangle: false,
+      drawPolygon: true,
+      editMode: true,
+      dragMode: true,
+      cutPolygon: false,
+      removalMode: true,
+    });
+
+    // handle polygon creation
+    // Add the create event listener to the map
+    map.on('pm:create', (e: any) => {
+      console.log('Polygon create event', e);
+      if (polygonPoints.value.length === 0) {
+        polygonPoints.value = e.layer.getLatLngs()[0].map((ll: any) => [ll.lat, ll.lng] as LatLng);
+
+        // clear all extra geoman layers from map except one just created
+        const map = mapRef.value?.leafletObject;
+        if (map) {
+          map.eachLayer((layer: any) => {
+            if (map.pm.getGeomanDrawLayers()[0] !== layer) {
+              map.removeLayer(layer);
+            }
+          });
+        }
+      } else {
+        polygonPoints.value.push(e.layer.getLatLngs()[0].map((ll: any) => [ll.lat, ll.lng] as LatLng));
+      }
+    });
+
+    console.log("Geoman controls initialized successfully");
+  } catch (error) {
+    console.error("Error initializing Geoman controls:", error);
+  }
+};
+
+// polygon component handlers
+const handlePolygonEdit = (e: any) => {
+  console.log("Polygon edited", e);
+  const map = mapRef.value?.leafletObject;
+  if (!map) return;
+  updatePolygonPoints(e.target);
+}
+
+// handle map ready event
+const onMapReady = (e: any) => {
+  console.log("Map ready event fired", e);
+  initGeomanControls();
+  console.log("polygonPoints: ", polygonPoints.value);
+
+};
+
+// update onMounted hook
+onMounted(() => {
+  load_MISSION_INFO();
+  getZoneIn();
+  getZoneOut();
+});
+
 // Watchers
 watch(() => props.ERU_coords, (newERUcoords) => {
   const position: LatLng = [newERUcoords.latitude, newERUcoords.longitude];
@@ -400,11 +534,14 @@ watch(() => props.FRA_coords, (newFRAcoords) => {
   emit("keepIn", "FRA", isInKeepInZone(position));
   emit("keepOut", "FRA", isInKeepOutZone(position));
 }, { deep: true });
-
-// Lifecycle hooks
-onMounted(() => {
-  load_MISSION_INFO();
-  getZoneIn();
-  getZoneOut();
-});
 </script>
+
+<style>
+.leaflet-pm-toolbar {
+  z-index: 9999 !important;
+}
+
+.leaflet-pm-draw {
+  display: block !important;
+}
+</style>
