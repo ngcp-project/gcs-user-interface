@@ -73,7 +73,7 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
 
     <!-- Carousel Thumbnails -->
     <Carousel
-      class="relative max-w-md items-center justify-center"
+      class="relative max-w-md"
       :opts="{ watchDrag: false }" 
       @init-api="(val) => (emblaThumbnailApi = val)"
     >
@@ -81,7 +81,7 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
         <CarouselItem
           v-for="(feed, index) in cameraFeeds"
           :key="feed.id"
-          class="cursor-pointer pl-0"
+          class="cursor-pointer"
           v-show="index !== selectedIndex"
           @click="onThumbClick(index)"
         >
