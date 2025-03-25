@@ -6,11 +6,13 @@ use lapin::{
     Result as LapinResult,
 };
 use serde_json::json;
+use serde_json::Value;
+use chrono::{DateTime, Utc};
 use std::sync::Arc;
 use tauri::Window;
 use tokio::sync::Mutex;
 use tokio_amqp::*;
-
+use std::time::{SystemTime, UNIX_EPOCH};
 //creating the structure of the rabbitMQ Consumer
 #[derive(Clone)]
 pub struct RabbitMQConsumer {
@@ -28,7 +30,7 @@ impl RabbitMQConsumer {
         let connection = Connection::connect(
             // let connection = Arc::new(Mutex::new(Connection::connect(
             addr, // certain address
-            ConnectionProperties::default().with_tokio(),
+            ConnectionProperties::default().into(),
         )
         .await?;
         let connection = Arc::new(Mutex::new(connection));
@@ -60,7 +62,7 @@ impl RabbitMQConsumer {
         self.channel
             .basic_consume(
                 queue_name,
-                "telemetry_consumer",
+                "telemetry",
                 BasicConsumeOptions::default(),
                 FieldTable::default(),
             )
@@ -80,30 +82,79 @@ impl RabbitMQConsumer {
     //In this part we should emit to the frontend, ads
 
     pub async fn process_telemetry(&self, mut consumer: Consumer) -> LapinResult<()> {
-        use futures_util::StreamExt;
         while let Some(delivery) = consumer.next().await {
             if let Ok(delivery) = delivery {
-                if let Ok(data) = serde_json::from_slice::<TelemetryData>(&delivery.data) {
-                    let payload = json!({
-                        // map according to the structure key | val
-                        "vehicle_id": data.vehicle_id,
-                        "telemetry": data
-                    });
-                    //we have different structure: consumer and publisher
-                    if let Err(e) = self.window.emit("telemetry_update", payload.clone()) {
-                        println!("Failed to emit telemetry update: {}", e);
-                        // You might want to return the error or handle it appropriately
+                let raw_message = String::from_utf8_lossy(&delivery.data);
+                println!("Raw received message: {}", raw_message);
+
+                // Step 1: Deserialize into a generic JSON object first
+                let parsed_json: Result<Value, _> = serde_json::from_str(&raw_message);
+                
+                match parsed_json {
+                    Ok(mut json_data) => {
+                        // Step 2: Transform JSON to match `TelemetryData`
+                        let transformed_data = json!({
+                            "vehicle_id": "eru",  // Add vehicle ID if missing
+                            "pitch": json_data["pitch"].as_f64().unwrap_or(0.0) as f32,
+                            "yaw": json_data["yaw"].as_f64().unwrap_or(0.0) as f32,
+                            "roll": json_data["roll"].as_f64().unwrap_or(0.0) as f32,
+                            "speed": json_data["speed"].as_f64().unwrap_or(0.0) as f32,
+                            "altitude": json_data["alt"].as_f64().unwrap_or(0.0) as f32,
+                            "battery_life": json_data["battery_life"].as_f64().unwrap_or(0.0) as f32,
+                            "current_position": {
+                                "latitude": json_data["current_latitude"].as_f64().unwrap_or(0.0),
+                                "longitude": json_data["current_longitude"].as_f64().unwrap_or(0.0)
+                            },
+                            "last_updated": json_data["lastUpdated"].as_str()
+                                .map(|s| {
+                                    // Convert ISO 8601 timestamp to SystemTime
+                                    s.parse::<DateTime<Utc>>()
+    .map(|dt| SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(dt.timestamp() as u64))
+    .unwrap_or(SystemTime::UNIX_EPOCH)
+                                }).unwrap_or(SystemTime::UNIX_EPOCH),
+                            "vehicle_status": json_data["vehicle_status"].as_i64().unwrap_or(0) as i8,
+                            "request_coordinate": {
+                                "message_flag": json_data["message_flag"].as_i64().unwrap_or(0) as i32,
+                                "request_location": {
+                                    "latitude": json_data["message_lat"].as_f64().unwrap_or(0.0),
+                                    "longitude": json_data["message_lon"].as_f64().unwrap_or(0.0)
+                                },
+                                "patient_secured": Option::<bool>::None
+
+                            }
+                        });
+
+                        // Step 3: Deserialize into `TelemetryData`
+                        match serde_json::from_value::<TelemetryData>(transformed_data.clone()) {
+                            Ok(data) => {
+                                let payload = json!({
+                                    "vehicle_id": data.vehicle_id,
+                                    "telemetry": data
+                                });
+
+                                if let Err(e) = self.window.emit("telemetry_update", payload.clone()) {
+                                    println!("Failed to emit telemetry update: {}", e);
+                                }
+
+                                println!("✅ Successfully received and parsed telemetry: {:?}", payload);
+                                delivery.ack(BasicAckOptions::default()).await?;
+                            }
+                            Err(e) => {
+                                println!("❌ Failed to deserialize into TelemetryData: {}. Transformed JSON: {:?}", e, transformed_data);
+                                delivery.reject(BasicRejectOptions::default()).await?;
+                            }
+                        }
                     }
-                    println!("Received telemetry data: {:?}", payload);
-                    delivery.ack(BasicAckOptions::default()).await?;
-                } else {
-                    delivery.reject(BasicRejectOptions::default()).await?;
-                    println!("Failed to parse Telemetry data")
+                    Err(e) => {
+                        println!("❌ Failed to parse raw JSON: {}. Raw message: {}", e, raw_message);
+                        delivery.reject(BasicRejectOptions::default()).await?;
+                    }
                 }
             }
         }
         Ok(())
     }
+
 }
 
 #[tauri::command]
