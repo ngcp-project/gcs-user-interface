@@ -42,10 +42,10 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
 
 <template>
   <!-- Main Carousel -->
-  <div class="carousel-container">
+  <div class="carousel-container overflow-hidden">
     <!-- Plugin adds fade transition -->
     <Carousel
-      class="overflow-hidden p-5"
+      class="p-5"
       @init-api="(val) => (emblaMainApi = val)"
       :plugins="[Fade()]"
     >
@@ -65,7 +65,7 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
 
     <!-- Carousel Thumbnails -->
     <Carousel
-      class="relative max-w-lg items-center justify-center"
+      class="relative max-w-md items-center justify-center"
       @init-api="(val) => (emblaThumbnailApi = val)"
     >
       <CarouselContent class="flex justify-center gap-5">
@@ -81,7 +81,6 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
             <span class="text-center text-xl font-semibold">{{ feed.name }}</span>
             <Card>
               <CardContent class="flex p-0">
-                <!-- <span class="text-4xl font-semibold">{{ cameras[index] }}</span> -->
                 <img class="image" :src="feed.src" :alt="feed.name" />
               </CardContent>
             </Card>
