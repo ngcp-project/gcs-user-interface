@@ -14,6 +14,8 @@ const emblaMainApi = ref<CarouselApi>();
 const emblaThumbnailApi = ref<CarouselApi>();
 const selectedIndex = ref(0);
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 // NOTE: To run the cameras for development, run the flask server from h>
 const cameraFeeds = ref([
   { id: 1, name: "UGC", src: "http://127.0.0.1:5000/video_feed" },
@@ -38,24 +40,30 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
   emblaMainApi.on("select", onSelect);
   emblaMainApi.on("reInit", onSelect);
 });
+
 </script>
 
 <template>
   <!-- Main Carousel -->
   <div class="carousel-container overflow-hidden">
     <!-- Plugin adds fade transition -->
-    <Carousel
-      class="p-5"
-      @init-api="(val) => (emblaMainApi = val)"
-      :plugins="[Fade()]"
-    >
+    <Carousel class="p-5" @init-api="(val) => (emblaMainApi = val)" :plugins="[Fade()]">
       <CarouselContent>
-        <CarouselItem v-for="(feed) in cameraFeeds" :key="feed.id">
+        <CarouselItem v-for="feed in cameraFeeds" :key="feed.id">
           <div class="focused-camera">
             <span class="text-center text-xl font-semibold">{{ feed.name }}</span>
             <Card>
               <CardContent class="flex p-0">
-                <img class="image" :src="feed.src" :alt="feed.name" />
+                <Skeleton class="aspect-[4/3] w-full" />
+                <!-- If there is a camera feed, it will automatically cover the skeleton. -->
+                <!-- Image returns an error if the camera feed is not running. -->
+                <img
+                  class="image"
+                  :src="feed.src"
+                  :alt="feed.name"
+                  @error="feed.src = ''"
+                  v-if="feed.src"
+                />
               </CardContent>
             </Card>
           </div>
@@ -66,24 +74,36 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
     <!-- Carousel Thumbnails -->
     <Carousel
       class="relative max-w-md items-center justify-center"
+      :opts="{ watchDrag: false }" 
       @init-api="(val) => (emblaThumbnailApi = val)"
     >
       <CarouselContent class="flex justify-center gap-5">
         <CarouselItem
           v-for="(feed, index) in cameraFeeds"
           :key="feed.id"
-          class="basis-1/2 cursor-pointer pl-0"
+          class="cursor-pointer pl-0"
           v-show="index !== selectedIndex"
           @click="onThumbClick(index)"
         >
           <!-- NOTE: You can click and drag around the thumbnails. This is meant for multiple thumbnails that don't fit the carousel. I do not know how to disable this feature.-->
           <div v-if="index !== selectedIndex">
-            <span class="text-center text-xl font-semibold">{{ feed.name }}</span>
-            <Card>
-              <CardContent class="flex p-0">
-                <img class="image" :src="feed.src" :alt="feed.name" />
-              </CardContent>
-            </Card>
+            <div class="thumbnail-camera">
+              <span class="text-center text-xl font-semibold">{{ feed.name }}</span>
+              <Card>
+                <CardContent class="flex p-0">
+                  <Skeleton class="aspect-[4/3] w-full" />
+                  <!-- If there is a camera feed, it will automatically cover the skeleton. -->
+                  <!-- Image returns an error if the camera feed is not running. -->
+                  <img
+                    class="image"
+                    :src="feed.src"
+                    :alt="feed.name"
+                    @error="feed.src = ''"
+                    v-if="feed.src"
+                  />
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </CarouselItem>
       </CarouselContent>
@@ -101,6 +121,9 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
   width: 50vw;
   margin: auto;
 }
+.thumbnail-camera {
+  width: 15vw;
+}
 .p-0 {
   /* Removes card padding inherited from CardContent UI */
   padding: 0 !important;
@@ -110,6 +133,5 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
   border-radius: 0.5rem;
   object-fit: contain;
   width: 100%;
-  height: 100%;
 }
 </style>
