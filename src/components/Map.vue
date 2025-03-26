@@ -48,11 +48,6 @@
         :icon="MRA_icon"
         :rotationAngle="MRA_yaw"
       ></l-marker-rotate>
-      <l-marker-rotate
-        :lat-lng="FRA_position"
-        :icon="FRA_icon"
-        :rotationAngle="FRA_yaw"
-      ></l-marker-rotate>
 
       <!---- UNCOMENT BELOW TO USE REGULAR MARKERS IF ROTATED MARKERS BUG OUT ---->
       <!-- <l-marker :lat-lng="ERU_position" :icon="ERU_icon"></l-marker>
