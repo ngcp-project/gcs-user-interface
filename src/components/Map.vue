@@ -18,13 +18,18 @@
           <p>coords:{{ fire.longitude.toFixed(6) }} {{ fire.latitude.toFixed(6) }}</p>
         </div> -->
       </div>
-      <l-tile-layer
-        :url="localTileURL"
-        :minZoom="14"
-        :maxZoom="16"
-        layer-type="base"
-        name="CustomTiles"
-      ></l-tile-layer>
+      <!-- Wrap tile layer KeepAlive to re-render once -->
+      <!-- Use key to manually trigger tile layer render on polygon creation -->
+      <KeepAlive>
+        <l-tile-layer
+          :key="tileLayerKey"
+          :url="localTileURL"
+          :minZoom="14"
+          :maxZoom="16"
+          layer-type="base"
+          name="CustomTiles"
+        />
+      </KeepAlive>
 
       <!------- VEHICLE + FIRE MARKERS -------->
       <l-marker-rotate
@@ -112,8 +117,8 @@ import "leaflet/dist/leaflet.css";
 import * as L from "leaflet";
 // IMPORTANT: Set L globally BEFORE importing geoman
 (window as any).L = L;
-import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
-import '@geoman-io/leaflet-geoman-free';
+import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
+import "@geoman-io/leaflet-geoman-free";
 
 import { ref, watch, onMounted, inject, nextTick } from "vue";
 import { LMap, LTileLayer, LPolygon, LMarker } from "@vue-leaflet/vue-leaflet";
@@ -154,8 +159,7 @@ const emit = defineEmits<{
 // Inject providers
 const { searchCoords, selectingSearch, updateSearchCoords } =
   inject<SearchCoordsProvider>("search-coords-provider")!;
-const { targetCoord, selectingTarget } =
-  inject<TargetCoordsProvider>("target-coords-provider")!;
+const { targetCoord, selectingTarget } = inject<TargetCoordsProvider>("target-coords-provider")!;
 const { load_MISSION_INFO } = inject<MissionInfoProvider>("mission-info-provider")!;
 
 // State
@@ -198,7 +202,8 @@ const target_coord_icon = icon({
 });
 
 // Change map ref type
-const mapRef = ref<any>(null);
+const mapRef = ref<any>();
+const tileLayerKey = ref(0);
 
 // Methods
 /**
@@ -229,7 +234,7 @@ const addPoint = (event: LeafletMouseEvent) => {
 // clear every polygon (selected and backend)
 const clearPolygons = async (event: MouseEvent) => {
   event.stopPropagation();
-    // Clear the local state
+  // Clear the local state
   polygonPoints.value = [];
   zoneInPolygons.value = [];
   zoneOutPolygons.value = [];
@@ -381,10 +386,9 @@ const getZoneIn = async () => {
     clearZoneInPolygons();
     let zones = res.data.split("|").map((zone: any) => JSON.parse(zone));
     zones.forEach((zone: any) => {
-      const coordinates = zone.coordinates.map((coordinate: any) => [
-        coordinate.lat,
-        coordinate.long
-      ] as LatLng);
+      const coordinates = zone.coordinates.map(
+        (coordinate: any) => [coordinate.lat, coordinate.long] as LatLng
+      );
       zoneInPolygons.value.push(coordinates);
       pushZoneInPolygons(coordinates);
     });
@@ -407,10 +411,9 @@ const getZoneOut = async () => {
     clearZoneOutPolygons();
     let zones = res.data.split("|").map((zone: any) => JSON.parse(zone));
     zones.forEach((zone: any) => {
-      const coordinates = zone.coordinates.map((coordinate: any) => [
-        coordinate.lat,
-        coordinate.long
-      ] as LatLng);
+      const coordinates = zone.coordinates.map(
+        (coordinate: any) => [coordinate.lat, coordinate.long] as LatLng
+      );
       zoneOutPolygons.value.push(coordinates);
       pushZoneOutPolygons(coordinates);
     });
@@ -424,12 +427,12 @@ const updatePolygonPoints = (layer: any) => {
   // update points
   polygonPoints.value = latLngs.map((ll: any) => [ll.lat, ll.lng] as LatLng);
   console.log("Updated polygon points:", polygonPoints.value);
-}
+};
 
 // initialize geoman controls
 const initGeomanControls = () => {
   console.log("Initializing Geoman controls");
-  
+
   const mapEl = mapRef.value;
   if (!mapEl) {
     console.error("Map ref not found");
@@ -444,7 +447,7 @@ const initGeomanControls = () => {
 
   try {
     map.pm.addControls({
-      position: 'topleft',
+      position: "topleft",
       drawCircle: false,
       drawCircleMarker: false,
       drawPolyline: false,
@@ -453,13 +456,15 @@ const initGeomanControls = () => {
       editMode: true,
       dragMode: true,
       cutPolygon: false,
-      removalMode: true,
+      removalMode: true
     });
-
     // handle polygon creation
     // Add the create event listener to the map
-    map.on('pm:create', (e: any) => {
-      console.log('Polygon create event', e);
+    map.on("pm:create", (e: any) => {
+      // manually trigger a tile layer update
+      tileLayerKey.value++;
+
+      console.log("Polygon create event", e);
       if (polygonPoints.value.length === 0) {
         polygonPoints.value = e.layer.getLatLngs()[0].map((ll: any) => [ll.lat, ll.lng] as LatLng);
 
@@ -473,7 +478,9 @@ const initGeomanControls = () => {
           });
         }
       } else {
-        polygonPoints.value.push(e.layer.getLatLngs()[0].map((ll: any) => [ll.lat, ll.lng] as LatLng));
+        polygonPoints.value.push(
+          e.layer.getLatLngs()[0].map((ll: any) => [ll.lat, ll.lng] as LatLng)
+        );
       }
     });
 
@@ -489,14 +496,14 @@ const handlePolygonEdit = (e: any) => {
   const map = mapRef.value?.leafletObject;
   if (!map) return;
   updatePolygonPoints(e.target);
-}
+};
 
 // handle map ready event
 const onMapReady = (e: any) => {
   console.log("Map ready event fired", e);
   initGeomanControls();
+  tileLayerKey.value++;
   console.log("polygonPoints: ", polygonPoints.value);
-
 };
 
 // update onMounted hook
@@ -507,33 +514,49 @@ onMounted(() => {
 });
 
 // Watchers
-watch(() => props.ERU_coords, (newERUcoords) => {
-  const position: LatLng = [newERUcoords.latitude, newERUcoords.longitude];
-  ERU_position.value = position;
-  emit("keepIn", "ERU", isInKeepInZone(position));
-  emit("keepOut", "ERU", isInKeepOutZone(position));
-}, { deep: true });
+watch(
+  () => props.ERU_coords,
+  (newERUcoords) => {
+    const position: LatLng = [newERUcoords.latitude, newERUcoords.longitude];
+    ERU_position.value = position;
+    emit("keepIn", "ERU", isInKeepInZone(position));
+    emit("keepOut", "ERU", isInKeepOutZone(position));
+  },
+  { deep: true }
+);
 
-watch(() => props.MEA_coords, (newMEAcoords) => {
-  const position: LatLng = [newMEAcoords.latitude, newMEAcoords.longitude];
-  MEA_position.value = position;
-  emit("keepIn", "MEA", isInKeepInZone(position));
-  emit("keepOut", "MEA", isInKeepOutZone(position));
-}, { deep: true });
+watch(
+  () => props.MEA_coords,
+  (newMEAcoords) => {
+    const position: LatLng = [newMEAcoords.latitude, newMEAcoords.longitude];
+    MEA_position.value = position;
+    emit("keepIn", "MEA", isInKeepInZone(position));
+    emit("keepOut", "MEA", isInKeepOutZone(position));
+  },
+  { deep: true }
+);
 
-watch(() => props.MRA_coords, (newMRAcoords) => {
-  const position: LatLng = [newMRAcoords.latitude, newMRAcoords.longitude];
-  MRA_position.value = position;
-  emit("keepIn", "MRA", isInKeepInZone(position));
-  emit("keepOut", "MRA", isInKeepOutZone(position));
-}, { deep: true });
+watch(
+  () => props.MRA_coords,
+  (newMRAcoords) => {
+    const position: LatLng = [newMRAcoords.latitude, newMRAcoords.longitude];
+    MRA_position.value = position;
+    emit("keepIn", "MRA", isInKeepInZone(position));
+    emit("keepOut", "MRA", isInKeepOutZone(position));
+  },
+  { deep: true }
+);
 
-watch(() => props.FRA_coords, (newFRAcoords) => {
-  const position: LatLng = [newFRAcoords.latitude, newFRAcoords.longitude];
-  FRA_position.value = position;
-  emit("keepIn", "FRA", isInKeepInZone(position));
-  emit("keepOut", "FRA", isInKeepOutZone(position));
-}, { deep: true });
+watch(
+  () => props.FRA_coords,
+  (newFRAcoords) => {
+    const position: LatLng = [newFRAcoords.latitude, newFRAcoords.longitude];
+    FRA_position.value = position;
+    emit("keepIn", "FRA", isInKeepInZone(position));
+    emit("keepOut", "FRA", isInKeepOutZone(position));
+  },
+  { deep: true }
+);
 </script>
 
 <style>
