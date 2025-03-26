@@ -20,89 +20,90 @@
       </div>
       <!-- Wrap tile layer KeepAlive to re-render once -->
       <!-- Use key to manually trigger tile layer render on polygon creation -->
-      <KeepAlive>
-        <l-tile-layer
-          :key="tileLayerKey"
-          :url="localTileURL"
-          :minZoom="14"
-          :maxZoom="16"
-          layer-type="base"
-          name="CustomTiles"
-        />
-      </KeepAlive>
+      <div :key="tileLayerKey">
+        <KeepAlive>
+          <l-tile-layer
+            :url="localTileURL"
+            :minZoom="14"
+            :maxZoom="16"
+            layer-type="base"
+            name="CustomTiles"
+          />
+        </KeepAlive>
 
-      <!------- VEHICLE + FIRE MARKERS -------->
-      <l-marker-rotate
-        :lat-lng="ERU_position"
-        :icon="ERU_icon"
-        :rotationAngle="ERU_yaw"
-        class="-z-10"
-      ></l-marker-rotate>
-      <l-marker-rotate
-        :lat-lng="MEA_position"
-        :icon="MEA_icon"
-        :rotationAngle="MEA_yaw"
-      ></l-marker-rotate>
-      <l-marker-rotate
-        :lat-lng="MRA_position"
-        :icon="MRA_icon"
-        :rotationAngle="MRA_yaw"
-      ></l-marker-rotate>
+        <!------- VEHICLE + FIRE MARKERS -------->
+        <l-marker-rotate
+          :lat-lng="ERU_position"
+          :icon="ERU_icon"
+          :rotationAngle="ERU_yaw"
+          class="-z-10"
+        ></l-marker-rotate>
+        <l-marker-rotate
+          :lat-lng="MEA_position"
+          :icon="MEA_icon"
+          :rotationAngle="MEA_yaw"
+        ></l-marker-rotate>
+        <l-marker-rotate
+          :lat-lng="MRA_position"
+          :icon="MRA_icon"
+          :rotationAngle="MRA_yaw"
+        ></l-marker-rotate>
 
-      <!---- UNCOMENT BELOW TO USE REGULAR MARKERS IF ROTATED MARKERS BUG OUT ---->
-      <!-- <l-marker :lat-lng="ERU_position" :icon="ERU_icon"></l-marker>
+        <!---- UNCOMENT BELOW TO USE REGULAR MARKERS IF ROTATED MARKERS BUG OUT ---->
+        <!-- <l-marker :lat-lng="ERU_position" :icon="ERU_icon"></l-marker>
       <l-marker :lat-lng="MEA_position" :icon="MEA_icon"></l-marker>
       <l-marker :lat-lng="MRA_position" :icon="MRA_icon"></l-marker>
-      <l-marker :lat-lng="FRA_position" :icon="FRA_icon"></l-marker> -->
+      <l-marker :lat-lng="FRA_position" :icon="FRA_icon"></l-marker>-->
 
-      <!-- POLYGON TO SHOW CURRENTLY SELECTED AREA FOR KEEP IN/OUT -->
-      <l-polygon
-        v-if="polygonPoints.length > 0"
-        :lat-lngs="polygonPoints"
-        :options="{
-          fillColor: 'blue',
-          fillOpacity: 0.2,
-          color: 'blue',
-          pmIgnore: false,
-          draggable: true
-        }"
-        @pm:edit="handlePolygonEdit"
-      ></l-polygon>
-      <!-- POLYGON TO SHOW KEEP IN ZONES -->
-      <l-polygon
-        v-if="zoneInPolygons.length > 0"
-        :lat-lngs="zoneInPolygons[0]"
-        :options="{
-          color: 'green',
-          fillColor: 'green',
-          fillOpacity: 0.2,
-          pmIgnore: false
-        }"
-      ></l-polygon>
-      <!-- POLYGON TO SHOW KEEP OUT ZONES -->
-      <l-polygon
-        v-if="zoneOutPolygons.length > 0"
-        :lat-lngs="zoneOutPolygons[0]"
-        :options="{
-          fillColor: 'red',
-          fillOpacity: 0.3,
-          color: 'red',
-          pmIgnore: false
-        }"
-      ></l-polygon>
+        <!-- POLYGON TO SHOW CURRENTLY SELECTED AREA FOR KEEP IN/OUT -->
+        <l-polygon
+          v-if="polygonPoints.length > 0"
+          :lat-lngs="polygonPoints"
+          :options="{
+            fillColor: 'blue',
+            fillOpacity: 0.2,
+            color: 'blue',
+            pmIgnore: false,
+            draggable: true
+          }"
+          @pm:edit="handlePolygonEdit"
+        ></l-polygon>
+        <!-- POLYGON TO SHOW KEEP IN ZONES -->
+        <l-polygon
+          v-if="zoneInPolygons.length > 0"
+          :lat-lngs="zoneInPolygons[0]"
+          :options="{
+            color: 'green',
+            fillColor: 'green',
+            fillOpacity: 0.2,
+            pmIgnore: false
+          }"
+        ></l-polygon>
+        <!-- POLYGON TO SHOW KEEP OUT ZONES -->
+        <l-polygon
+          v-if="zoneOutPolygons.length > 0"
+          :lat-lngs="zoneOutPolygons[0]"
+          :options="{
+            fillColor: 'red',
+            fillOpacity: 0.3,
+            color: 'red',
+            pmIgnore: false
+          }"
+        ></l-polygon>
 
-      <!-- POLYGON TO SHOW SEARCH AREA -->
-      <l-polygon
-        v-if="searchPoints.length > 0"
-        :lat-lngs="searchPoints"
-        :options="{ color: 'purple', fillColor: '#CB59ED', fillOpacity: 0.2 }"
-        :key="searchPoints.length"
-      ></l-polygon>
-      <l-marker
-        v-if="selectingTarget && targetCoord[0] != null && targetCoord[1] != null"
-        :icon="target_coord_icon"
-        :lat-lng="[parseFloat(targetCoord[0]), parseFloat(targetCoord[1])]"
-      ></l-marker>
+        <!-- POLYGON TO SHOW SEARCH AREA -->
+        <l-polygon
+          v-if="searchPoints.length > 0"
+          :lat-lngs="searchPoints"
+          :options="{ color: 'purple', fillColor: '#CB59ED', fillOpacity: 0.2 }"
+          :key="searchPoints.length"
+        ></l-polygon>
+        <l-marker
+          v-if="selectingTarget && targetCoord[0] != null && targetCoord[1] != null"
+          :icon="target_coord_icon"
+          :lat-lng="[parseFloat(targetCoord[0]), parseFloat(targetCoord[1])]"
+        ></l-marker>
+      </div>
     </l-map>
   </div>
 </template>
