@@ -13,14 +13,14 @@ const props = defineProps<{
 const mission = computed(() => missionStore.getMissionData(props.missionId));
 
 // Status Styles
-const statusStyles = computed(() => ({
+const statusStyles = {
   statusColor: {
     Inactive: "text-muted-foreground font-semibold",
     Failed: "text-destructive font-semibold",
     Active: "text-chart-4 font-semibold",
     Complete: "text-chart-2 font-semibold"
   }
-}));
+};
 </script>
 
 <template>
@@ -30,10 +30,7 @@ const statusStyles = computed(() => ({
       v-if="'isSubmitted' in mission && mission.isSubmitted === false"
       class="absolute right-2 top-2 cursor-pointer"
     >
-      <Trash2
-        @click.stop="missionStore.view.deleteClientMission()"
-        class="h-5 w-5 text-foreground hover:text-destructive"
-      />
+      <Trash2 @click.stop="" class="h-5 w-5 text-foreground hover:text-destructive" />
     </div>
 
     <!-- Mission Title -->
@@ -58,7 +55,7 @@ const statusStyles = computed(() => ({
           mission.mission_status === 'Complete' ||
           mission.mission_status === 'Failed'
         "
-        @click.stop="missionStore.submitMission(mission.mission_id)"
+        @click.stop=""
       >
         Submit
       </Button>
