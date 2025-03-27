@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, defineComponent } from "vue";
-import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
+import { computed } from "vue";
+import { Sidebar, SidebarHeader } from "@/components/ui/sidebar";
 import BreadcrumbNav from "@/components/Sidebar/BreadcrumbNav.vue";
 import MissionView from "@/components/Sidebar/Tabs/MissionView.vue";
 import VehicleView from "@/components/Sidebar/Tabs/VehicleView.vue";
@@ -9,7 +9,15 @@ import StageView from "@/components/Sidebar/Tabs/StageView.vue";
 
 import { missionStore } from "@/lib/MissionStore";
 
-const currentView = computed(() => missionStore.view.tabState.currentView);
+const currentView = computed(() => missionStore.view.currentView);
+
+// Whenever missionStore.state changes trigger a rerender fo the sidebar
+const stateUpdate = computed((prev: boolean | undefined) => {
+  // read from missionStore.state as a dependency
+  missionStore.state;
+  // return a boolean value that switches between true and false
+  return !prev;
+});
 
 // change view based on currentView
 const renderView = {
@@ -21,11 +29,11 @@ const renderView = {
 </script>
 
 <template>
-  <!-- Mission View -->
   <Sidebar side="right">
     <SidebarHeader class="bg-sidebar-background items-center">
       <BreadcrumbNav :currentState="currentView" />
     </SidebarHeader>
-    <component :is="renderView[currentView]" />
+    <!-- Stringify boolean since keys cant be booleans -->
+    <component :key="String(stateUpdate)" :is="renderView[currentView]" />
   </Sidebar>
 </template>
