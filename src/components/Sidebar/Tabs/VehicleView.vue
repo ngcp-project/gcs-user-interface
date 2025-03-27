@@ -4,14 +4,9 @@ import { SidebarContent, SidebarGroup } from "@/components/ui/sidebar";
 import { VehicleEnum } from "@/lib/bindings";
 import { missionStore } from "@/lib/MissionStore";
 
-const currentMissionId = missionStore.view.tabState.currentMissionId;
-
-const currentMission =
-  currentMissionId !== null ? missionStore.getMissionData(currentMissionId) : null;
-
 const handleClick = (vehicleName: VehicleEnum) => {
-  missionStore.view.tabState.setCurrentView("stage");
-  missionStore.view.tabState.setCurrentVehicleName(vehicleName);
+  missionStore.setCurrentView("stage");
+  missionStore.setCurrentVehicleName(vehicleName);
 };
 </script>
 

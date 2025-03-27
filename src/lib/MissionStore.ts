@@ -1,4 +1,4 @@
-import { createStore } from "zustand/vanilla";
+import { createStore, StoreApi } from "zustand/vanilla";
 import {
   createTauRPCProxy,
   MissionsStruct,
@@ -8,196 +8,170 @@ import {
   VehicleStruct,
   ZonesStruct
 } from "@/lib/bindings";
-import { DeepReadonly, reactive } from "vue";
-import { ClientMission, MissionStore, ViewState, ViewType } from "@/lib/MissionStore.types";
+import { DeepReadonly, reactive, watch } from "vue";
 
 const taurpc = createTauRPCProxy();
+
+type ViewType = "mission" | "vehicle" | "stage" | "zone";
+interface ViewState {
+  currentView: ViewType;
+  currentMissionId: number | null;
+  currentVehicleName: VehicleEnum | null;
+  currentStageId: number | null;
+}
+
+interface MissionStore {
+  state: MissionsStruct;
+  view: ViewState;
+
+  setCurrentView: (view: ViewType) => void;
+  setCurrentMissionID: (missionId: number) => void;
+  setCurrentVehicleName: (vehicleName: VehicleEnum) => void;
+  setCurrentStageID: (stageId: number) => void;
+
+  getAllMissions: () => MissionStruct[];
+
+  getMissionData: (missionId: number) => MissionStruct | undefined;
+  setMissionData: (missionData: MissionStruct) => Promise<null>;
+  createNewMission: (missionName: string) => Promise<null>;
+
+  getVehicleData: (missionId: number, vehicleName: VehicleEnum) => VehicleStruct | undefined;
+  // TODO:
+  setVehicleStatus: (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    vehicleStatus: string
+  ) => Promise<null>;
+
+  getStageData: (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    stageId: number
+  ) => StageStruct | undefined;
+  setStageData: (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    stageId: number,
+    stageData: StageStruct
+  ) => Promise<null>;
+  transitionStage: (missionId: number, vehicleName: VehicleEnum) => Promise<null>;
+}
 
 // Fetch initial state from backend
 const initialState: MissionsStruct = await taurpc.mission.get_all_missions();
 
-const missionZustandStore = createStore<MissionStore>((set, get) => ({
+export const missionZustandStore = createStore<MissionStore>((set, get) => ({
   // Since we use missionsStruct as basis of store, we need to populate it
   // the backend state of the values
   state: initialState,
-
   //  Frontend State
   view: {
-    clientMission: null,
-    tabState: {
-      currentView: "mission",
-      currentMissionId: null,
-      currentVehicleName: null,
-      currentStageId: null,
+    currentView: "mission",
+    currentMissionId: null,
+    currentVehicleName: null,
+    currentStageId: null
+  },
+  setCurrentView: (view: ViewType) => {
+    set((state) => ({
+      view: {
+        ...state.view,
+        currentView: view
+      } satisfies ViewState
+    }));
+  },
+  setVehicleStatus: async (missionId: number, vehicleName: VehicleEnum, vehicleStatus: string) => {
+    return undefined as Promise<null>;
+  },
+  setStageData: async (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    stageId: number,
+    stageData: StageStruct
+  ) => {
+    return undefined as Promise<null>;
+  },
+  transitionStage: async (missionId: number, vehicleName: VehicleEnum) => {
+    return await taurpc.mission.transition_stage(missionId, vehicleName);
+  },
 
-      setCurrentView: (view: ViewType) => {
-        set((state) => ({
-          view: {
-            ...state.view,
-            tabState: { ...state.view.tabState, currentView: view }
-          } satisfies ViewState
-        }));
-      },
+  getAllMissions: () => get().state.missions,
+  getMissionData: (missionId: number) =>
+    get().state.missions.find((mission) => mission.mission_id === missionId),
 
-      setCurrentMissionId: (missionId: number) =>
-        set((state) => ({
-          view: {
-            ...state.view,
-            tabState: { ...state.view.tabState, currentMissionId: missionId }
-          } satisfies ViewState
-        })),
+  getVehicleData: (missionId: number, vehicleName: VehicleEnum) =>
+    get().state.missions.find((mission) => mission.mission_id === missionId)?.vehicles[vehicleName],
+  getStageData: (missionId: number, vehicleName: VehicleEnum, stageId: number) =>
+    get()
+      .state.missions.find((mission) => mission.mission_id === missionId)
+      ?.vehicles[vehicleName].stages.find((stage) => stage.stage_id === stageId),
+  createNewMission: async (missionName: string) => {
+    // TODO: Uses random integer id, change when database is done
+    const mission_id = Math.floor(Math.random() * 1000);
+    return await taurpc.mission.create_mission(missionName, mission_id);
+  },
 
-      setCurrentVehicleName: (vehicleName: VehicleEnum) => {
-        if (get().view.tabState.currentMissionId === null) throw new Error("No mission selected");
+  setMissionData: async (missionData: MissionStruct) =>
+    await taurpc.mission.set_mission_data(missionData),
 
-        set((state) => ({
-          view: {
-            ...state.view,
-            tabState: { ...state.view.tabState, currentVehicleName: vehicleName }
-          } satisfies ViewState
-        }));
-      },
+  setCurrentMissionID: (missionId: number) =>
+    set((state) => ({
+      view: {
+        ...state.view,
+        currentMissionId: missionId
+      } satisfies ViewState
+    })),
 
-      setCurrentStageId: (stageId: number) => {
-        if (get().view.tabState.currentMissionId === null) {
-          throw new Error("No mission selected");
-        }
-        if (get().view.tabState.currentVehicleName === null) {
-          throw new Error("No vehicle selected");
-        }
-        set((state) => ({
-          view: {
-            ...state.view,
-            tabState: { ...state.view.tabState, currentStageId: stageId }
-          } satisfies ViewState
-        }));
-      }
-    },
+  setCurrentVehicleName: (vehicleName: VehicleEnum) => {
+    if (get().view.currentMissionId === null) throw new Error("No mission selected");
 
-    getAllMissions: () => {
-      // return backend missions with clientMission at end
-      const clientMission = get().view.clientMission;
-      // if there is no clientMission
-      if (clientMission === null) {
-        return get().state.missions;
-      }
-      return [...get().state.missions, clientMission];
-    },
+    set((state) => ({
+      view: {
+        ...state.view,
+        currentVehicleName: vehicleName
+      } satisfies ViewState
+    }));
+  },
 
-    addClientMission: () => {
-      console.log("added mission");
-      const newMission: ClientMission = {
-        isClient: true,
-        mission_name: "Mission",
-        mission_id: -1, // to avoid conflicts with rust backend we hardcode id to be a signed int
-        mission_status: "Inactive",
-        zones: {
-          keep_in_zones: [],
-          keep_out_zones: []
-        },
-        vehicles: {
-          ERU: {
-            vehicle_name: "ERU",
-            current_stage: 0,
-            patient_status: null,
-            stages: []
-          },
-          MEA: {
-            vehicle_name: "MEA",
-            current_stage: 0,
-            patient_status: null,
-            stages: []
-          },
-          MRA: {
-            vehicle_name: "MRA",
-            current_stage: 0,
-            patient_status: null,
-            stages: []
-          }
-        }
-      };
-      set((state) => ({
-        view: {
-          ...state.view,
-          clientMission: newMission
-        }
-      }));
-    },
-
-    deleteClientMission: () => {
-      set((state) => ({
-        view: {
-          ...state.view,
-          clientMission: null
-        } satisfies ViewState
-      }));
+  setCurrentStageID: (stageId: number) => {
+    if (get().view.currentMissionId === null) {
+      throw new Error("No mission selected");
     }
-  },
-
-  // Get Methods
-  getMissionData: (mission_id: number) => {
-    const missions = get().view.getAllMissions();
-    return missions.find((mission) => mission.mission_id === mission_id);
-  },
-
-  getVehicleData: (mission_id: number, vehicle_name: VehicleEnum) => {
-    const mission = get().getMissionData(mission_id);
-
-    return mission?.vehicles[vehicle_name];
-  },
-
-  getStageData: (mission_id: number, vehicle_name: VehicleEnum, stage_id: number) => {
-    const vehicle = get().getVehicleData(mission_id, vehicle_name);
-
-    return vehicle?.stages[stage_id];
-  },
-
-  getZoneData: (mission_id: number) => {
-    const mission = get().getMissionData(mission_id);
-    return mission?.zones;
-  },
-
-  // Set Methods
-  nextStage: (missionId: number, vehicleName: VehicleEnum) => {
-    const vehicle = get().getVehicleData(missionId, vehicleName);
-    if (!vehicle) throw new Error("Vehicle does not exist");
-
-    const currentStage = vehicle.current_stage;
-    if (currentStage === vehicle.stages.length - 1) {
-      throw new Error("Vehicle is already at last stage");
+    if (get().view.currentVehicleName === null) {
+      throw new Error("No vehicle selected");
     }
-
-    // TODO: add taurpc command
-    console.log(`added next stage in ${vehicleName} for mission id: ${missionId}`);
-  },
-  // Submits a new mission
-  submitMission: async (clientMissionId: number) => {
-    console.log("Submitting mission", clientMissionId);
-    const missionData = get().getMissionData(clientMissionId);
-    if (!missionData) throw new Error("Mission does not exist");
-
-    // clear clientMission
-    get().view.deleteClientMission();
-
-    await taurpc.mission.submit_mission(missionData);
+    set((state) => ({
+      view: {
+        ...state.view,
+        currentStageId: stageId
+      } satisfies ViewState
+    }));
   }
 }));
 
 // listen to zustandStore changes and update the reactive object
 missionZustandStore.subscribe((newState) => {
-  Object.assign(missionStore, newState);
+  const clone = structuredClone(newState);
+  Object.assign(missionStore, clone);
+  console.log("zustand change");
 });
+
+// use replace to true to replace the state instead of shallow merging to allow vue to detect nested changes
+
+// SetState expects the entire state object, but spreading the state object does a shallow merge even with replace set to true
+// so we define MissionStore as a partial as a bandaid fix
+// I have no idea why this happens or if theres a better alternative
+// If you're reading this in the future and have a better solution please let me know
 
 // On initial page load, fetch the mission data from the backend
 taurpc.mission.get_all_missions().then((data) => {
   console.log("Mission data fetched:", data);
-  missionZustandStore.setState({ state: data });
+  (missionZustandStore as StoreApi<Partial<MissionStore>>).setState({ state: data }, true);
 });
 
 // On mission data update from backend, update the store
 taurpc.mission.on_updated.on((data: MissionsStruct) => {
   console.log("Mission data updated:", data);
-  missionZustandStore.setState({ state: data });
+  (missionZustandStore as StoreApi<Partial<MissionStore>>).setState({ state: data }, true);
 });
 
 // convert zustandStore to a reactive object that triggers rerenders
