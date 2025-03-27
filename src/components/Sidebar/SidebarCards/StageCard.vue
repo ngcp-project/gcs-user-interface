@@ -48,7 +48,9 @@ const stage = computed(() => {
     </div>
 
     <!-- Mission Title -->
-    <CardTitle class="text-x2 font-bold">{{ stage.stage_name }}</CardTitle>
+    <CardTitle>
+      <Input v-model="stage.stage_name"/>
+    </CardTitle>
 
     <!-- Status Section -->
     <CardContent class="mt-2 flex flex-col items-start">

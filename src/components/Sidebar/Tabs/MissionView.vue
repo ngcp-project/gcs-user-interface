@@ -26,7 +26,7 @@ const handleClick = (missionId: number) => {
   </SidebarContent>
   <SidebarFooter class="bg-sidebar-background">
     <Button @click="missionStore.createNewMission('new mission')"
-      class="flex flex-col items-center bg-transparent text-background shadow-none">
+      class="flex flex-col items-center bg-transparent text-background shadow-none hover:bg-transparent">
       <Plus class="h-5 w-5" />
       Add Mission
     </Button>

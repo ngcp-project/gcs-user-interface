@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Card, CardContent, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { computed, defineEmits } from "vue";
 import { Trash2 } from "lucide-vue-next";
 import { missionStore } from "@/lib/MissionStore";
@@ -34,7 +35,9 @@ const statusStyles = {
     </div>
 
     <!-- Mission Title -->
-    <CardTitle class="text-x2 font-bold">{{ mission.mission_name }}</CardTitle>
+    <CardTitle>
+      <Input v-model="mission.mission_name"/>
+    </CardTitle>
 
     <!-- Status Section -->
     <CardContent class="mt-2 flex flex-col items-start">
@@ -57,7 +60,7 @@ const statusStyles = {
         "
         @click.stop=""
       >
-        Submit
+        Start
       </Button>
       <Button @click.stop> Zones </Button>
     </CardFooter>
