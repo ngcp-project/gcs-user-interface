@@ -19,21 +19,28 @@ const stateUpdate = computed((prev: boolean | undefined) => {
   return !prev;
 });
 
-// change view based on currentView
+// change view and title based on currentView
 const renderView = {
-  mission: MissionView,
-  vehicle: VehicleView,
-  stage: StageView,
-  zone: MissionView
+  mission: { component: MissionView, title: "Missions" },
+  vehicle: { component: VehicleView, title: "Vehicles" },
+  stage: { component: StageView, title: "Stages" },
+  zone: { component: MissionView, title: "Zones" },
 };
+
+// current title based on currentView
+const currentTitle = computed(() => renderView[currentView.value]?.title || "Title");
+
 </script>
 
 <template>
   <Sidebar side="right">
     <SidebarHeader class="bg-sidebar-background items-center">
+      <span class="text-xl font-semibold">
+        {{ currentTitle }}
+      </span>
       <BreadcrumbNav :currentState="currentView" />
     </SidebarHeader>
-    <!-- Stringify boolean since keys cant be booleans -->
-    <component :key="String(stateUpdate)" :is="renderView[currentView]" />
+    <!-- Access the component from renderView -->
+    <component :key="String(stateUpdate)" :is="renderView[currentView].component" />
   </Sidebar>
 </template>
