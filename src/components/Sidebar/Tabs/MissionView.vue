@@ -22,6 +22,9 @@ const handleClick = (missionId: number) => {
         <MissionCard v-for="(mission, index) in missions" :key="index" :missionId="mission.mission_id"
           @click="handleClick(mission.mission_id)" />
       </div>
+      <div v-else class="w-full text-center">
+        <span>No Mission Created</span>
+      </div>
     </div>
   </SidebarContent>
   <SidebarFooter class="bg-sidebar-background">
