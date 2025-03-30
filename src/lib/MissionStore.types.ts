@@ -1,53 +1,53 @@
-import {
-  MissionStruct,
-  VehicleEnum,
-  MissionsStruct,
-  VehicleStruct,
-  StageStruct,
-  ZonesStruct
-} from "@/lib/bindings";
-
-export type DeepReadonly<T> = {
-  readonly [P in keyof T]: DeepReadonly<T[P]>;
-};
+import { MissionsStruct, MissionStruct, StageStruct, VehicleEnum, VehicleStruct } from "@/lib/bindings";
 
 export type ViewType = "mission" | "vehicle" | "stage" | "zone";
-
-export interface ClientMission extends MissionStruct {
-  mission_id: -1;
-  isClient: true;
-}
-
 export interface ViewState {
-  clientMission: ClientMission | null;
-  tabState: {
-    currentView: ViewType;
-    currentMissionId: number | null;
-    currentVehicleName: VehicleEnum | null;
-    currentStageId: number | null;
-
-    setCurrentView: (view: ViewType) => void;
-    setCurrentMissionId: (missionId: number) => void;
-    setCurrentVehicleName: (vehicleName: VehicleEnum) => void;
-    setCurrentStageId: (stageId: number) => void;
-  };
-  getAllMissions: () => Array<ClientMission | MissionStruct>;
-  addClientMission: () => void;
-  deleteClientMission: () => void;
+  currentView: ViewType;
+  currentMissionId: number | null;
+  currentVehicleName: VehicleEnum | null;
+  currentStageId: number | null;
 }
 
 export interface MissionStore {
   state: MissionsStruct;
+  syncRustState: (state: MissionsStruct) => void;
   view: ViewState;
 
-  getMissionData: (mission_id: number) => MissionStruct | undefined;
-  getVehicleData: (mission_id: number, vehicle_name: VehicleEnum) => VehicleStruct | undefined;
+  setCurrentView: (view: ViewType) => void;
+  setCurrentMissionID: (missionId: number | null) => void;
+  setCurrentVehicleName: (vehicleName: VehicleEnum | null) => void;
+  setCurrentStageID: (stageId: number | null) => void;
+
+  getAllMissions: () => MissionStruct[];
+
+  getMissionData: (missionId: number) => MissionStruct | undefined;
+  setMissionData: (missionData: MissionStruct) => Promise<null>;
+  createNewMission: (missionName: string) => Promise<null>;
+
+  getVehicleData: (missionId: number, vehicleName: VehicleEnum) => VehicleStruct | undefined;
+  // TODO:
+  setVehicleStatus: (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    vehicleStatus: string
+  ) => Promise<null>;
+
+
+  addStage: (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    stageName: string
+  ) => Promise<null>;
   getStageData: (
-    mission_id: number,
-    vehicle_name: VehicleEnum,
-    stage_id: number
+    missionId: number,
+    vehicleName: VehicleEnum,
+    stageId: number
   ) => StageStruct | undefined;
-  getZoneData: (mission_id: number) => ZonesStruct | undefined;
-  nextStage: (missionId: number, vehicleName: VehicleEnum) => void;
-  submitMission: (missionId: number) => void;
+  setStageData: (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    stageId: number,
+    stageData: StageStruct
+  ) => Promise<null>;
+  transitionStage: (missionId: number, vehicleName: VehicleEnum) => Promise<null>;
 }
