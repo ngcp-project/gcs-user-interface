@@ -183,40 +183,42 @@ impl MissionApiImpl {
 
 // Define the MissionApi trait with the required methods
 pub trait MissionApi {
+    #[taurpc(event)]
+    async fn on_updated(new_data: MissionsStruct);
     async fn get_default_data() -> MissionsStruct;
+
+    // State initialization
     async fn get_all_missions() -> MissionsStruct;
+
+    // Mission Data
     async fn set_mission_data(
         app_handle: AppHandle<impl Runtime>,
         mission_data: MissionStruct,
     ) -> Result<(), String>;
-
     async fn get_mission_data(mission_id: u32) -> MissionStruct;
-    // async fn get_vehicle_data(mission_id: u32, vehicle_name: VehicleEnum) -> VehicleStruct;
-
-    // async fn get_stage_data(
-    //     mission_id: u32,
-    //     vehicle_name: VehicleEnum,
-    //     stage_id: u32,
-    // ) -> StageStruct;
-    // async fn get_zones_data(mission_id: u32) -> ZonesStruct;
     async fn create_mission(
         app_handle: AppHandle<impl Runtime>,
         mission_name: String,
         mission_id: u32,
+    ) -> Result<(), String>;
+
+    // Stage Data
+    async fn add_stage(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        vehicle_name: VehicleEnum,
     ) -> Result<(), String>;
     async fn transition_stage(
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
         vehicle_name: VehicleEnum,
     ) -> Result<(), String>;
-
-    #[taurpc(event)]
-    async fn on_updated(new_data: MissionsStruct);
 }
 
 // Implement the MissionApi trait methods
 #[taurpc::resolvers]
 impl MissionApi for MissionApiImpl {
+    // State initialization
     async fn get_mission_data(self, mission_id: u32) -> MissionStruct {
         // search for mission_id field in missions array
         let state = self.state.lock().await;
@@ -228,6 +230,8 @@ impl MissionApi for MissionApiImpl {
         }
         panic!("Mission not found");
     }
+
+    // Mission Data
     async fn set_mission_data(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -239,6 +243,7 @@ impl MissionApi for MissionApiImpl {
         println!("Mission data set: {:?}", state);
         self.emit_state_update(&app_handle, &state)
     }
+
     async fn create_mission(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -252,6 +257,32 @@ impl MissionApi for MissionApiImpl {
 
         state.missions.push(new_mission_data);
         println!("Mission length: {:?}", state.missions.len());
+        self.emit_state_update(&app_handle, &state)
+    }
+
+    // Stage Data
+    async fn add_stage(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        vehicle_name: VehicleEnum,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found".to_string())?;
+
+        let vehicle = match vehicle_name {
+            VehicleEnum::MEA => &mut mission.vehicles.MEA,
+            VehicleEnum::ERU => &mut mission.vehicles.ERU,
+            VehicleEnum::MRA => &mut mission.vehicles.MRA,
+        };
+
+        vehicle
+            .stages
+            .push(Self::create_default_stage("New Stage", 4));
         self.emit_state_update(&app_handle, &state)
     }
     async fn transition_stage(
@@ -281,38 +312,6 @@ impl MissionApi for MissionApiImpl {
         println!("Vehicle data set: {:?}", vehicle);
         self.emit_state_update(&app_handle, &state)
     }
-
-    // async fn get_mission_data(self, mission_id: u32) -> MissionStruct {
-    //     self.state.lock().await.missions[mission_id as usize].clone()
-    // }
-
-    // async fn get_vehicle_data(self, mission_id: u32, vehicle_name: VehicleEnum) -> VehicleStruct {
-    //     let vehicles = self.state.lock().await.missions[mission_id as usize]
-    //         .vehicles
-    //         .clone();
-
-    //     match vehicle_name {
-    //         VehicleEnum::MEA => vehicles.MEA,
-    //         VehicleEnum::ERU => vehicles.ERU,
-    //         VehicleEnum::MRA => vehicles.MRA,
-    //     }
-    // }
-
-    // async fn get_stage_data(
-    //     self,
-    //     mission_id: u32,
-    //     vehicle_name: VehicleEnum,
-    //     stage_id: u32,
-    // ) -> StageStruct {
-    //     let vehicle = self.get_vehicle_data(mission_id, vehicle_name).await;
-    //     vehicle.stages[stage_id as usize].clone()
-    // }
-
-    // async fn get_zones_data(self, mission_id: u32) -> ZonesStruct {
-    //     self.state.lock().await.missions[mission_id as usize]
-    //         .zones
-    //         .clone()
-    // }
 
     // Return the default state of the mission
     // used by frontend to first initialize the mission
