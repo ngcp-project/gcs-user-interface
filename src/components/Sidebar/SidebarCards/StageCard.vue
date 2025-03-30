@@ -3,6 +3,7 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { computed, ref } from "vue";
 import { Trash2, Eye, EyeOff, Pencil } from "lucide-vue-next";
 import { missionStore } from "@/lib/MissionStore";
+import { Input } from "@/components/ui/input";
 
 const props = defineProps<{
   stageID: number;
@@ -49,7 +50,7 @@ const stage = computed(() => {
 
     <!-- Mission Title -->
     <CardTitle>
-      <Input v-model="stage.stage_name"/>
+      <Input v-model="stage.stage_name" />
     </CardTitle>
 
     <!-- Status Section -->

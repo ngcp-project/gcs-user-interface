@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,30 +7,38 @@ import {
   BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 import { missionStore } from "@/lib/MissionStore";
+
+
+
+const currentView = computed(() => missionStore.view.currentView);
+
+const handleClick = (targetView: "mission" | "vehicle" | "stage") => {
+  if (targetView === "mission") {
+    missionStore.setCurrentView("mission");
+  } else if (targetView === "vehicle" && currentView.value == "stage") {
+    missionStore.setCurrentVehicleName(null);
+    missionStore.setCurrentView("vehicle");
+  } else {
+    console.error("Invalid targetView")
+  }
+  return;
+}
+
 </script>
 
 <template>
   <Breadcrumb>
     <BreadcrumbList>
-      <BreadcrumbItem :active="missionStore.view.currentView === 'mission'" class="cursor-pointer text-secondary"
-        @click="missionStore.setCurrentView('mission')">
+      <BreadcrumbItem class="cursor-pointer text-secondary" @click="handleClick('mission')">
         Mission
       </BreadcrumbItem>
       <BreadcrumbSeparator class="text-secondary" />
-      <BreadcrumbItem :active="missionStore.view.currentView === 'vehicle'" class="cursor-pointer text-secondary"
-        @click="
-          missionStore.view.currentView !== 'mission' &&
-          missionStore.setCurrentView('vehicle')
-          ">
+      <BreadcrumbItem class="cursor-pointer text-secondary" @click="handleClick('vehicle')">
         Vehicle
       </BreadcrumbItem>
       <BreadcrumbSeparator class="text-secondary" />
       <!-- Can only go up from hierarchy not down so add currentView checks -->
-      <BreadcrumbItem :active="missionStore.view.currentView === 'stage'" class="cursor-pointer text-secondary" @click="
-        missionStore.view.currentView !== 'mission' &&
-        missionStore.view.currentView !== 'vehicle' &&
-        missionStore.setCurrentView('stage')
-        ">
+      <BreadcrumbItem class="cursor-pointer text-secondary" @click="handleClick('stage')">
         Stage
       </BreadcrumbItem>
     </BreadcrumbList>
