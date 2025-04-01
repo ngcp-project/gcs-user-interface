@@ -17,32 +17,6 @@ impl Default for MissionApiImpl {
     fn default() -> Self {
         // Use long default state for now
         // Remove later
-        fn create_stage(name: &str, id: u32) -> StageStruct {
-            StageStruct {
-                stage_name: name.to_string(),
-                stage_id: id,
-                stage_status: MissionStageStatusEnum::Inactive,
-                search_area: vec![
-                    GeoCoordinateStruct {
-                        lat: 0.0,
-                        long: 0.0,
-                    },
-                    GeoCoordinateStruct {
-                        lat: 0.0,
-                        long: 1.0,
-                    },
-                    GeoCoordinateStruct {
-                        lat: 1.0,
-                        long: 1.0,
-                    },
-                    GeoCoordinateStruct {
-                        lat: 1.0,
-                        long: 0.0,
-                    },
-                ],
-            }
-        }
-
         let initial_state = MissionsStruct {
             current_mission: 0,
             missions: vec![MissionStruct {
@@ -54,7 +28,10 @@ impl Default for MissionApiImpl {
                         vehicle_name: VehicleEnum::MEA,
                         current_stage: 0,
                         patient_status: Some(PatientStatusEnum::Secured),
-                        stages: vec![create_stage("test", 0), create_stage("test1", 1)],
+                        stages: vec![
+                            Self::create_default_stage("test", 0),
+                            Self::create_default_stage("test1", 1),
+                        ],
                     },
                     ERU: VehicleStruct {
                         vehicle_name: VehicleEnum::ERU,
@@ -347,11 +324,17 @@ impl MissionApi for MissionApiImpl {
             VehicleEnum::MRA => &mut mission.vehicles.MRA,
         };
 
-        if (vehicle.current_stage as usize) >= vehicle.stages.len() - 1 {
-            return Err("Vehicle is already at last stage".to_string());
+        vehicle.stages[vehicle.current_stage as usize].stage_status =
+            MissionStageStatusEnum::Complete;
+
+        if (vehicle.current_stage as usize) < vehicle.stages.len() {
+        vehicle.current_stage += 1;
+            vehicle.stages[vehicle.current_stage as usize].stage_status =
+                MissionStageStatusEnum::Active;
+
+            println!("Vehicle is at last stage");
         }
 
-        vehicle.current_stage += 1;
         println!("Vehicle data set: {:?}", vehicle);
         self.emit_state_update(&app_handle, &state)
     }
