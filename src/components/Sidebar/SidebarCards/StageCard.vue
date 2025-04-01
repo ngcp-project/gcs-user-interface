@@ -28,6 +28,7 @@ const toggleVisibility = () => {
 };
 
 const deleteStage = () => {
+
   console.log("Deleted stage");
 };
 
@@ -46,7 +47,8 @@ const stage = computed(() => {
   <Card v-if="stage" class="relative m-2 p-2">
     <!-- Trash Icon -->
     <div class="absolute right-2 top-2 cursor-pointer">
-      <Trash2 @click="deleteStage" class="h-5 w-5 text-foreground hover:text-destructive" />
+      <Trash2 @click="missionStore.deleteStage(currentMissionId, currentVehicleName, props.stageID)"
+        class="h-5 w-5 text-foreground hover:text-destructive" />
     </div>
 
     <!-- Mission Title -->

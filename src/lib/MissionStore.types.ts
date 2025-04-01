@@ -38,6 +38,11 @@ export interface MissionStore {
     vehicleName: VehicleEnum,
     stageName: string
   ) => Promise<null>;
+  deleteStage: (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    stageId: number
+  ) => Promise<null>;
   getStageData: (
     missionId: number,
     vehicleName: VehicleEnum,
