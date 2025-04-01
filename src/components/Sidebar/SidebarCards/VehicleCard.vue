@@ -2,6 +2,7 @@
 import { ref, watch, computed } from "vue";
 import { Card, CardContent, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/toggle";
 import { VehicleEnum } from "@/lib/bindings";
 import { missionStore } from "@/lib/MissionStore";
 import { set } from "@vueuse/core";
@@ -62,6 +63,10 @@ const patientStatusStyles = {
         @click.stop="missionStore.transitionStage(missionId, props.vehicleName)">
         Next Stage
       </Button>
+      <!-- TODO: Add logic to disable if vehicle is at last stage or if mission is not submitted or not started-->
+      <!-- <span v-if="vehicle.is_auto !== null" class="font-semibold">
+        <Toggle> Auto </Toggle>
+      </span> -->
     </CardFooter>
   </Card>
 </template>
