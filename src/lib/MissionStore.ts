@@ -45,8 +45,9 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
 
   addStage: async (missionId: number, vehicleName: VehicleEnum, stageName: string) => {
     await taurpc.mission.add_stage(missionId, vehicleName);
-    console.log(missionStore.view);
-
+  },
+  deleteStage: async (missionId: number, vehicleName: VehicleEnum, stageId: number) => {
+    await taurpc.mission.delete_stage(missionId, vehicleName, stageId);
   },
   setStageData: async (
     missionId: number,
