@@ -18,7 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const cameraFeeds = ref([
   { id: 1, name: "UGC", src: "http://127.0.0.1:5000/video_feed" },
-  { id: 2, name: "UAV", src: "" }
+  { id: 2, name: "UAV", src: "http://127.0.0.1:5000/video_feed" }
 ]);
 
 const layout = ref("grid");
