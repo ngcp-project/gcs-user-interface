@@ -22,6 +22,16 @@ const cameraFeeds = ref([
   { id: 2, name: "UAV", src: "http://127.0.0.1:5000/video_feed" }
 ]);
 
+const layout = ref("grid");
+
+const toggleLayout = () => {
+  if (layout.value == "grid") {
+    layout.value = "carousel";
+  } else {
+    layout.value = "grid";
+  }
+}
+
 function onSelect() {
   if (!emblaMainApi.value || !emblaThumbnailApi.value) return;
   selectedIndex.value = emblaMainApi.value.selectedScrollSnap();
@@ -44,15 +54,20 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
 </script>
 
 <template>
-  <!-- Main Carousel -->
-  <div class="carousel-container overflow-hidden">
+  <!-- Side-by-Side Layout -->
+  <div class="overflow-hidden cursor-pointer" v-if="layout === 'grid'">
+    <div @click="toggleLayout">test</div>
+  </div>
+
+  <!-- Carousel Layout -->
+  <div class="carousel-container overflow-hidden" v-else-if="layout === 'carousel'">
     <!-- Plugin adds fade transition -->
     <Carousel class="p-5" @init-api="(val) => (emblaMainApi = val)" :plugins="[Fade()]">
       <CarouselContent>
         <CarouselItem v-for="feed in cameraFeeds" :key="feed.id">
           <div class="focused-camera">
             <p class="text-center text-xl font-semibold">{{ feed.name }}</p>
-            <Card>
+            <Card class="cursor-pointer" @click="toggleLayout">
               <CardContent class="flex p-0">
                 <Skeleton class="aspect-[4/3] w-full" />
                 <!-- If there is a camera feed, it will automatically cover the skeleton. -->
