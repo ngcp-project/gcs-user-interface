@@ -4,13 +4,12 @@ import {
   MissionsStruct,
   MissionStruct,
   StageStruct,
-  VehicleEnum,
+  VehicleEnum
 } from "@/lib/bindings";
 import { DeepReadonly, reactive } from "vue";
 import { MissionStore, ViewState, ViewType } from "@/lib/MissionStore.types";
 
 const taurpc = createTauRPCProxy();
-
 
 // Fetch initial state from backend
 const initialState: MissionsStruct = await taurpc.mission.get_all_missions();
@@ -20,9 +19,12 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
   state: initialState, // Synced with rust state
   // method to update the store state with rust state
   syncRustState: (rustState: MissionsStruct) => {
-    set(() => ({
-      state: rustState,
-    } satisfies Partial<MissionStore>));
+    set(
+      () =>
+        ({
+          state: rustState
+        }) satisfies Partial<MissionStore>
+    );
   },
   //  Frontend State
   view: {
@@ -43,12 +45,10 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
     return undefined as Promise<null>;
   },
 
-  addStage: async (missionId: number, vehicleName: VehicleEnum, stageName: string) => {
-    await taurpc.mission.add_stage(missionId, vehicleName);
-  },
-  deleteStage: async (missionId: number, vehicleName: VehicleEnum, stageId: number) => {
-    await taurpc.mission.delete_stage(missionId, vehicleName, stageId);
-  },
+  addStage: async (missionId: number, vehicleName: VehicleEnum) =>
+    await taurpc.mission.add_stage(missionId, vehicleName, "New Stage"),
+  deleteStage: async (missionId: number, vehicleName: VehicleEnum, stageId: number) =>
+    await taurpc.mission.delete_stage(missionId, vehicleName, stageId),
   setStageData: async (
     missionId: number,
     vehicleName: VehicleEnum,
@@ -89,8 +89,8 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
     })),
 
   setCurrentVehicleName: (vehicleName: VehicleEnum | null) => {
-    console.log(get())
-    if (get().view.currentMissionId == undefined || get().view.currentMissionId === null) throw new Error("No mission selected");
+    if (get().view.currentMissionId == undefined || get().view.currentMissionId === null)
+      throw new Error("No mission selected");
 
     set((state) => ({
       view: {
@@ -116,7 +116,6 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
   }
 }));
 
-
 // listen to zustandStore changes and update the reactive object
 missionZustandStore.subscribe((newState) => {
   // overwrite the reactive vue object and replace it with
@@ -124,7 +123,6 @@ missionZustandStore.subscribe((newState) => {
   Object.assign(missionStore, newState);
   console.log("zustand change");
 });
-
 
 // ok so this will probably get lost to time but ive been working on this for a week straight
 // we HAVE to use a setRustState within the store and we cant utilize a setState() otherwise
@@ -147,7 +145,7 @@ taurpc.mission.on_updated.on((data: MissionsStruct) => {
 });
 
 // convert zustandStore to a reactive vue object that triggers rerenders
-// to avoid frontend from modifying "private" properties (causes desync in state property) 
+// to avoid frontend from modifying "private" properties (causes desync in state property)
 // make reactive state readonlyi
 // also use .getState() since we only ever read properties
 export const missionStore: DeepReadonly<MissionStore> = reactive(missionZustandStore.getState());

@@ -207,6 +207,7 @@ pub trait MissionApi {
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
         vehicle_name: VehicleEnum,
+        stage_name: String,
     ) -> Result<(), String>;
     async fn delete_stage(
         app_handle: AppHandle<impl Runtime>,
@@ -272,6 +273,7 @@ impl MissionApi for MissionApiImpl {
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
         vehicle_name: VehicleEnum,
+        stage_name: String,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
         let mission = state
@@ -288,7 +290,7 @@ impl MissionApi for MissionApiImpl {
 
         vehicle
             .stages
-            .push(Self::create_default_stage("New Stage", 4));
+            .push(Self::create_default_stage(&stage_name, 4));
         self.emit_state_update(&app_handle, &state)
     }
     async fn delete_stage(
