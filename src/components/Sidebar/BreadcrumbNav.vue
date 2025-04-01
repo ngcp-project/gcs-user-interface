@@ -24,22 +24,52 @@ const handleClick = (targetView: "mission" | "vehicle" | "stage") => {
   return;
 }
 
+const currentMissionId = computed(() => missionStore.view.currentMissionId);
+const currentVehicleName = computed(() => missionStore.view.currentVehicleName);
+
+const breadcrumbMissionName = computed(() => {
+  if (currentMissionId.value !== null && currentView.value !== "mission") {
+    return missionStore.getMissionData(currentMissionId.value)?.mission_name;
+  } else {
+    return "Missions";
+  }
+});
+
+const breadcrumbVehicleName = computed(() => {
+  if (currentVehicleName.value !== null && currentView.value === "stage") {
+    return currentVehicleName.value;
+  } else {
+    return "Vehicles";
+  }
+});
+
 </script>
 
 <template>
   <Breadcrumb>
     <BreadcrumbList>
-      <BreadcrumbItem class="cursor-pointer text-secondary" @click="handleClick('mission')">
-        Mission
+      <BreadcrumbItem 
+        class="cursor-pointer text-secondary" 
+        :class="{ 'underline': currentView === 'mission' }"
+        @click="handleClick('mission')"
+      >
+        {{ breadcrumbMissionName }}
       </BreadcrumbItem>
       <BreadcrumbSeparator class="text-secondary" />
-      <BreadcrumbItem class="cursor-pointer text-secondary" @click="handleClick('vehicle')">
-        Vehicle
+      <BreadcrumbItem 
+        class="cursor-pointer text-secondary" 
+        :class="{ 'underline': currentView === 'vehicle' }"
+        @click="handleClick('vehicle')"
+      >
+        {{ breadcrumbVehicleName }}
       </BreadcrumbItem>
       <BreadcrumbSeparator class="text-secondary" />
-      <!-- Can only go up from hierarchy not down so add currentView checks -->
-      <BreadcrumbItem class="cursor-pointer text-secondary" @click="handleClick('stage')">
-        Stage
+      <BreadcrumbItem 
+        class="cursor-pointer text-secondary" 
+        :class="{ 'underline': currentView === 'stage' }"
+        @click="handleClick('stage')"
+      >
+        Stages
       </BreadcrumbItem>
     </BreadcrumbList>
   </Breadcrumb>
