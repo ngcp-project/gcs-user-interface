@@ -26,17 +26,14 @@ const statusStyles = {
 
 <template>
   <Card v-if="mission" class="relative m-2 bg-sidebar-foreground p-2 text-foreground">
-    <!-- Trash Icon -->
-    <div
-      v-if="'isSubmitted' in mission && mission.isSubmitted === false"
-      class="absolute right-2 top-2 cursor-pointer"
-    >
-      <Trash2 @click.stop="" class="h-5 w-5 text-foreground hover:text-destructive" />
-    </div>
 
     <!-- Mission Title -->
-    <CardTitle>
-      <Input class="w-flex" v-model="mission.mission_name" />
+    <CardTitle class="flex items-center gap-2">
+      <Input class="flex-1" v-model="mission.mission_name" />
+      <!-- Trash Icon -->
+      <div v-if="mission.mission_status == 'Inactive' "class="cursor-pointer">
+        <Trash2 @click.stop="" class="h-5 w-5 text-foreground hover:text-destructive" />
+      </div>
     </CardTitle>
 
     <!-- Status Section -->
