@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { computed, ref } from "vue";
 import { Trash2, Eye, EyeOff, Pencil } from "lucide-vue-next";
 import { missionStore } from "@/lib/MissionStore";
