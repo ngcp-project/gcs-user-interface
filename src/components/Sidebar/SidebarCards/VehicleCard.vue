@@ -19,7 +19,7 @@ const vehicle =
 const currentVehicleStage =
   vehicle === undefined || vehicle === null || missionId === null
     ? null
-    : missionStore.getStageData(missionId, props.vehicleName, vehicle.current_stage);
+    : vehicle.stages[vehicle.current_stage];
 
 const patientStatusStyles = {
   statusColor: {
@@ -27,22 +27,25 @@ const patientStatusStyles = {
     Unsecured: "text-destructive font-semibold"
   }
 };
-
-
 </script>
 
 <template>
-  <Card v-if="vehicle && missionId !== null" class="relative m-2 bg-sidebar-foreground p-2 text-foreground">
+  <Card
+    v-if="vehicle && missionId !== null"
+    class="relative m-2 bg-sidebar-foreground p-2 text-foreground"
+  >
     <!-- Vehicle Name -->
     <CardTitle class="text-xl font-bold">{{ vehicleName }}</CardTitle>
 
     <!-- Vehicle Stage & Patient Status -->
     <CardContent class="mt-2 flex flex-col items-start">
-
-      <span v-if="
-        vehicle.stages.length > 0 &&
-        (currentVehicleStage !== null || currentVehicleStage !== undefined)
-      " class="font-semibold">
+      <span
+        v-if="
+          vehicle.stages.length > 0 &&
+          (currentVehicleStage !== null || currentVehicleStage !== undefined)
+        "
+        class="font-semibold"
+      >
         Stage: {{ currentVehicleStage?.stage_name }}
       </span>
       <span v-else class="font-semibold">No Stages Available</span>
@@ -59,8 +62,10 @@ const patientStatusStyles = {
     <!-- Next Stage Button -->
     <CardFooter class="mt-4 justify-start">
       <!-- TODO: Add logic to disable if vehicle is at last stage or if mission is not submitted or not started-->
-      <Button :disabled="vehicle.stages.length < 1 || vehicle.current_stage === vehicle.stages.length - 1"
-        @click.stop="missionStore.transitionStage(missionId, props.vehicleName)">
+      <Button
+        :disabled="vehicle.stages.length < 1 || vehicle.current_stage === vehicle.stages.length - 1"
+        @click.stop="missionStore.transitionStage(missionId, props.vehicleName)"
+      >
         Next Stage
       </Button>
       <!-- TODO: Add logic to disable if vehicle is at last stage or if mission is not submitted or not started-->
