@@ -1,5 +1,4 @@
 use super::types::*;
-use rand::Rng;
 use std::sync::Arc;
 use tauri::{AppHandle, Runtime};
 use taurpc;
@@ -27,6 +26,7 @@ impl Default for MissionApiImpl {
                     MEA: VehicleStruct {
                         vehicle_name: VehicleEnum::MEA,
                         current_stage: 0,
+                        is_auto: Some(false),
                         patient_status: Some(PatientStatusEnum::Secured),
                         stages: vec![
                             Self::create_default_stage("test", 0),
@@ -36,53 +36,21 @@ impl Default for MissionApiImpl {
                     ERU: VehicleStruct {
                         vehicle_name: VehicleEnum::ERU,
                         current_stage: 0,
+                        is_auto: Some(false),
                         patient_status: Some(PatientStatusEnum::Unsecured),
                         stages: vec![],
                     },
                     MRA: VehicleStruct {
                         vehicle_name: VehicleEnum::MRA,
                         current_stage: 0,
+                        is_auto: None,
                         patient_status: None,
                         stages: vec![],
                     },
                 },
                 zones: ZonesStruct {
-                    keep_in_zones: vec![
-                        GeoCoordinateStruct {
-                            lat: 0.0,
-                            long: 0.0,
-                        },
-                        GeoCoordinateStruct {
-                            lat: 0.0,
-                            long: 1.0,
-                        },
-                        GeoCoordinateStruct {
-                            lat: 1.0,
-                            long: 1.0,
-                        },
-                        GeoCoordinateStruct {
-                            lat: 1.0,
-                            long: 0.0,
-                        },
-                    ],
-                    keep_out_zones: vec![
-                        GeoCoordinateStruct {
-                            lat: 0.0,
-                            long: 0.0,
-                        },
-                        GeoCoordinateStruct {
-                            lat: 0.0,
-                            long: 1.0,
-                        },
-                        GeoCoordinateStruct {
-                            lat: 1.0,
-                            long: 1.0,
-                        },
-                        GeoCoordinateStruct {
-                            lat: 1.0,
-                            long: 0.0,
-                        },
-                    ],
+                    keep_in_zones: vec![],
+                    keep_out_zones: vec![],
                 },
             }],
         };
@@ -117,18 +85,21 @@ impl MissionApiImpl {
                 MEA: VehicleStruct {
                     vehicle_name: VehicleEnum::MEA,
                     current_stage: 0,
+                    is_auto: Some(false),
                     patient_status: Some(PatientStatusEnum::Secured),
                     stages: vec![],
                 },
                 ERU: VehicleStruct {
                     vehicle_name: VehicleEnum::ERU,
                     current_stage: 0,
+                    is_auto: Some(false),
                     patient_status: Some(PatientStatusEnum::Unsecured),
                     stages: vec![],
                 },
                 MRA: VehicleStruct {
                     vehicle_name: VehicleEnum::MRA,
                     current_stage: 0,
+                    is_auto: None,
                     patient_status: None,
                     stages: vec![],
                 },
@@ -176,6 +147,14 @@ pub trait MissionApi {
     async fn create_mission(
         app_handle: AppHandle<impl Runtime>,
         mission_name: String,
+    ) -> Result<(), String>;
+
+    // Vehicle Data
+    async fn set_auto_mode(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        vehicle_name: VehicleEnum,
+        is_auto: bool,
     ) -> Result<(), String>;
 
     // Stage Data
@@ -239,6 +218,34 @@ impl MissionApi for MissionApiImpl {
 
         state.missions.push(new_mission_data);
         println!("Mission length: {:?}", state.missions.len());
+        self.emit_state_update(&app_handle, &state)
+    }
+
+    // Vehicle Data
+    async fn set_auto_mode(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        vehicle_name: VehicleEnum,
+        is_auto: bool,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found".to_string())?;
+
+        let vehicle = match vehicle_name {
+            VehicleEnum::MEA => &mut mission.vehicles.MEA,
+            VehicleEnum::ERU => &mut mission.vehicles.ERU,
+            VehicleEnum::MRA => &mut mission.vehicles.MRA,
+        };
+        if matches!(vehicle_name, VehicleEnum::MRA) {
+            return Err("Auto mode is not supported for MRA".to_string());
+        }
+
+        vehicle.is_auto = Some(is_auto);
         self.emit_state_update(&app_handle, &state)
     }
 
@@ -328,7 +335,7 @@ impl MissionApi for MissionApiImpl {
             MissionStageStatusEnum::Complete;
 
         if (vehicle.current_stage as usize) < vehicle.stages.len() {
-        vehicle.current_stage += 1;
+            vehicle.current_stage += 1;
             vehicle.stages[vehicle.current_stage as usize].stage_status =
                 MissionStageStatusEnum::Active;
 
