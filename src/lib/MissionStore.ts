@@ -1,69 +1,31 @@
-import { createStore, StoreApi } from "zustand/vanilla";
+import { createStore } from "zustand/vanilla";
 import {
   createTauRPCProxy,
   MissionsStruct,
   MissionStruct,
   StageStruct,
-  VehicleEnum,
-  VehicleStruct,
-  ZonesStruct
+  VehicleEnum
 } from "@/lib/bindings";
-import { DeepReadonly, reactive, watch } from "vue";
+import { DeepReadonly, reactive } from "vue";
+import { MissionStore, ViewState, ViewType } from "@/lib/MissionStore.types";
 
 const taurpc = createTauRPCProxy();
-
-type ViewType = "mission" | "vehicle" | "stage" | "zone";
-interface ViewState {
-  currentView: ViewType;
-  currentMissionId: number | null;
-  currentVehicleName: VehicleEnum | null;
-  currentStageId: number | null;
-}
-
-interface MissionStore {
-  state: MissionsStruct;
-  view: ViewState;
-
-  setCurrentView: (view: ViewType) => void;
-  setCurrentMissionID: (missionId: number) => void;
-  setCurrentVehicleName: (vehicleName: VehicleEnum) => void;
-  setCurrentStageID: (stageId: number) => void;
-
-  getAllMissions: () => MissionStruct[];
-
-  getMissionData: (missionId: number) => MissionStruct | undefined;
-  setMissionData: (missionData: MissionStruct) => Promise<null>;
-  createNewMission: (missionName: string) => Promise<null>;
-
-  getVehicleData: (missionId: number, vehicleName: VehicleEnum) => VehicleStruct | undefined;
-  // TODO:
-  setVehicleStatus: (
-    missionId: number,
-    vehicleName: VehicleEnum,
-    vehicleStatus: string
-  ) => Promise<null>;
-
-  getStageData: (
-    missionId: number,
-    vehicleName: VehicleEnum,
-    stageId: number
-  ) => StageStruct | undefined;
-  setStageData: (
-    missionId: number,
-    vehicleName: VehicleEnum,
-    stageId: number,
-    stageData: StageStruct
-  ) => Promise<null>;
-  transitionStage: (missionId: number, vehicleName: VehicleEnum) => Promise<null>;
-}
 
 // Fetch initial state from backend
 const initialState: MissionsStruct = await taurpc.mission.get_all_missions();
 
 export const missionZustandStore = createStore<MissionStore>((set, get) => ({
-  // Since we use missionsStruct as basis of store, we need to populate it
-  // the backend state of the values
-  state: initialState,
+  // Backend States
+  state: initialState, // Synced with rust state
+  // method to update the store state with rust state
+  syncRustState: (rustState: MissionsStruct) => {
+    set(
+      () =>
+        ({
+          state: rustState
+        }) satisfies Partial<MissionStore>
+    );
+  },
   //  Frontend State
   view: {
     currentView: "mission",
@@ -82,6 +44,11 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
   setVehicleStatus: async (missionId: number, vehicleName: VehicleEnum, vehicleStatus: string) => {
     return undefined as Promise<null>;
   },
+
+  addStage: async (missionId: number, vehicleName: VehicleEnum) =>
+    await taurpc.mission.add_stage(missionId, vehicleName, "New Stage"),
+  deleteStage: async (missionId: number, vehicleName: VehicleEnum, stageId: number) =>
+    await taurpc.mission.delete_stage(missionId, vehicleName, stageId),
   setStageData: async (
     missionId: number,
     vehicleName: VehicleEnum,
@@ -113,7 +80,7 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
   setMissionData: async (missionData: MissionStruct) =>
     await taurpc.mission.set_mission_data(missionData),
 
-  setCurrentMissionID: (missionId: number) =>
+  setCurrentMissionID: (missionId: number | null) =>
     set((state) => ({
       view: {
         ...state.view,
@@ -121,8 +88,9 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
       } satisfies ViewState
     })),
 
-  setCurrentVehicleName: (vehicleName: VehicleEnum) => {
-    if (get().view.currentMissionId === null) throw new Error("No mission selected");
+  setCurrentVehicleName: (vehicleName: VehicleEnum | null) => {
+    if (get().view.currentMissionId == undefined || get().view.currentMissionId === null)
+      throw new Error("No mission selected");
 
     set((state) => ({
       view: {
@@ -132,7 +100,7 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
     }));
   },
 
-  setCurrentStageID: (stageId: number) => {
+  setCurrentStageID: (stageId: number | null) => {
     if (get().view.currentMissionId === null) {
       throw new Error("No mission selected");
     }
@@ -150,30 +118,34 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
 
 // listen to zustandStore changes and update the reactive object
 missionZustandStore.subscribe((newState) => {
-  const clone = structuredClone(newState);
-  Object.assign(missionStore, clone);
+  // overwrite the reactive vue object and replace it with
+  // the new store from zustand
+  Object.assign(missionStore, newState);
   console.log("zustand change");
 });
 
-// use replace to true to replace the state instead of shallow merging to allow vue to detect nested changes
+// ok so this will probably get lost to time but ive been working on this for a week straight
+// we HAVE to use a setRustState within the store and we cant utilize a setState() otherwise
+// it runs into weird issues with shallow merging, object overwriting, and issues triggering
+// rerenders for dependencies in components
 
-// SetState expects the entire state object, but spreading the state object does a shallow merge even with replace set to true
-// so we define MissionStore as a partial as a bandaid fix
-// I have no idea why this happens or if theres a better alternative
-// If you're reading this in the future and have a better solution please let me know
+// Never EVER use missionZustandStore.setState() or else
+// view properties both exist and dont exist, rust and frontend desync, etc.
 
 // On initial page load, fetch the mission data from the backend
 taurpc.mission.get_all_missions().then((data) => {
   console.log("Mission data fetched:", data);
-  (missionZustandStore as StoreApi<Partial<MissionStore>>).setState({ state: data }, true);
+  missionZustandStore.getState().syncRustState(data);
 });
 
 // On mission data update from backend, update the store
 taurpc.mission.on_updated.on((data: MissionsStruct) => {
   console.log("Mission data updated:", data);
-  (missionZustandStore as StoreApi<Partial<MissionStore>>).setState({ state: data }, true);
+  missionZustandStore.getState().syncRustState(data);
 });
 
-// convert zustandStore to a reactive object that triggers rerenders
-// to avoid desync make reactive state readonly
+// convert zustandStore to a reactive vue object that triggers rerenders
+// to avoid frontend from modifying "private" properties (causes desync in state property)
+// make reactive state readonlyi
+// also use .getState() since we only ever read properties
 export const missionStore: DeepReadonly<MissionStore> = reactive(missionZustandStore.getState());

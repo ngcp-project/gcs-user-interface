@@ -33,7 +33,7 @@ const currentTitle = computed(() => renderView[currentView.value]?.title || "Tit
 </script>
 
 <template>
-  <Sidebar side="right">
+  <Sidebar :key="String(stateUpdate)" side="right">
     <SidebarHeader class="bg-sidebar-background items-center">
       <span class="text-xl font-semibold">
         {{ currentTitle }}
@@ -41,6 +41,6 @@ const currentTitle = computed(() => renderView[currentView.value]?.title || "Tit
       <BreadcrumbNav :currentState="currentView" />
     </SidebarHeader>
     <!-- Access the component from renderView -->
-    <component :key="String(stateUpdate)" :is="renderView[currentView].component" />
+    <component :is="renderView[currentView].component" />
   </Sidebar>
 </template>
