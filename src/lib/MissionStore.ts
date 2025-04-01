@@ -41,24 +41,16 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
       } satisfies ViewState
     }));
   },
-  setVehicleStatus: async (missionId: number, vehicleName: VehicleEnum, vehicleStatus: string) => {
-    return undefined as Promise<null>;
-  },
 
   addStage: async (missionId: number, vehicleName: VehicleEnum) =>
     await taurpc.mission.add_stage(missionId, vehicleName, "New Stage"),
   deleteStage: async (missionId: number, vehicleName: VehicleEnum, stageId: number) =>
     await taurpc.mission.delete_stage(missionId, vehicleName, stageId),
-  setStageData: async (
-    missionId: number,
-    vehicleName: VehicleEnum,
-    stageId: number,
-    stageData: StageStruct
-  ) => {
-    return undefined as Promise<null>;
-  },
   transitionStage: async (missionId: number, vehicleName: VehicleEnum) => {
     return await taurpc.mission.transition_stage(missionId, vehicleName);
+  },
+  setAutoMode: async (missionId: number, vehicleName: VehicleEnum, isAuto: boolean) => {
+    return await taurpc.mission.set_auto_mode(missionId, vehicleName, isAuto);
   },
 
   getAllMissions: () => get().state.missions,
@@ -73,8 +65,7 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
       ?.vehicles[vehicleName].stages.find((stage) => stage.stage_id === stageId),
   createNewMission: async (missionName: string) => {
     // TODO: Uses random integer id, change when database is done
-    const mission_id = Math.floor(Math.random() * 1000);
-    return await taurpc.mission.create_mission(missionName, mission_id);
+    return await taurpc.mission.create_mission(missionName);
   },
 
   setMissionData: async (missionData: MissionStruct) =>

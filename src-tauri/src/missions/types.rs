@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 #[taurpc::ipc_type]
 #[derive(Debug)]
 pub struct MissionsStruct {
@@ -30,6 +28,7 @@ pub enum MissionStageStatusEnum {
 pub struct VehicleStruct {
     pub vehicle_name: VehicleEnum,
     pub current_stage: u32,
+    pub is_auto: Option<bool>,
     pub patient_status: Option<PatientStatusEnum>,
     pub stages: Vec<StageStruct>,
 }
