@@ -51,7 +51,7 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
       <CarouselContent>
         <CarouselItem v-for="feed in cameraFeeds" :key="feed.id">
           <div class="focused-camera">
-            <span class="text-center text-xl font-semibold">{{ feed.name }}</span>
+            <p class="text-center text-xl font-semibold">{{ feed.name }}</p>
             <Card>
               <CardContent class="flex p-0">
                 <Skeleton class="aspect-[4/3] w-full" />
@@ -88,7 +88,7 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
           <!-- NOTE: You can click and drag around the thumbnails. This is meant for multiple thumbnails that don't fit the carousel. I do not know how to disable this feature.-->
           <div v-if="index !== selectedIndex">
             <div class="thumbnail-camera">
-              <span class="text-center text-xl font-semibold">{{ feed.name }}</span>
+              <p class="text-center text-xl font-semibold">{{ feed.name }}</p>
               <Card>
                 <CardContent class="flex p-0">
                   <Skeleton class="aspect-[4/3] w-full" />
@@ -118,11 +118,11 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
   align-items: center;
 }
 .focused-camera {
-  width: 50vw;
+  width: 45vw;
   margin: auto;
 }
 .thumbnail-camera {
-  width: 15vw;
+  width: 10vw;
 }
 .p-0 {
   /* Removes card padding inherited from CardContent UI */
