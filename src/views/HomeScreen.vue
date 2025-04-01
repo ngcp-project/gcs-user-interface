@@ -2,7 +2,7 @@
 import Battery from "../components/VehicleStatus/VehicleBattery.vue";
 import Connection from "../components/VehicleStatus/VehicleConnection.vue";
 import Camera from "../components/CameraFeed.vue";
-import CameraCarousel from "../components/CameraCarousel.vue";
+import Cameras from "../components/Cameras.vue";
 
 const vehicleDataExample = [
   {
@@ -24,7 +24,7 @@ const vehicleDataExample = [
 </script>
 
 <template>
-  <CameraCarousel />
+  <Cameras />
   <!-- <div class="grid h-full w-full gap-1 p-1">
     <div
       v-for="(vehicle, index) in vehicleDataExample"
