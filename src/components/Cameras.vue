@@ -6,7 +6,7 @@ import {
   CarouselContent,
   CarouselItem
 } from "@/components/ui/carousel";
-import { watchOnce } from "@vueuse/core";
+import { whenever } from "@vueuse/core";
 import { ref } from "vue";
 
 import Fade from "embla-carousel-fade";
@@ -16,16 +16,31 @@ const selectedIndex = ref(0);
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-// NOTE: To run the cameras for development, run the flask server from h>
 const cameraFeeds = ref([
   { id: 1, name: "UGC", src: "http://127.0.0.1:5000/video_feed" },
-  { id: 2, name: "UAV", src: "http://127.0.0.1:5000/video_feed" }
+  { id: 2, name: "UAV", src: "" }
 ]);
 
 const layout = ref("grid");
 
+// This resets the carousel/emblaAPI everytime we switch layouts, so that the camera switching functions properly.
+function cleanupCarousels() {
+  if (emblaMainApi.value) {
+    emblaMainApi.value.off("select", onSelect);
+    emblaMainApi.value.off("reInit", onSelect);
+    emblaMainApi.value.destroy();
+    emblaMainApi.value = undefined;
+  }
+
+  if (emblaThumbnailApi.value) {
+    emblaThumbnailApi.value.destroy();
+    emblaThumbnailApi.value = undefined;
+  }
+}
+
 const toggleLayout = () => {
-  if (layout.value == "grid") {
+  if (layout.value === "grid") {
+    cleanupCarousels();
     layout.value = "carousel";
   } else {
     layout.value = "grid";
@@ -43,12 +58,13 @@ function onThumbClick(index: number) {
   emblaMainApi.value.scrollTo(index);
 }
 
-watchOnce(emblaMainApi, (emblaMainApi) => {
-  if (!emblaMainApi) return;
+// This chunk of code gives errors, but it still works properly and is NEEDED to initialize carousel.
+whenever(emblaMainApi, (api) => {
+  if (!api) return;
 
   onSelect();
-  emblaMainApi.on("select", onSelect);
-  emblaMainApi.on("reInit", onSelect);
+  api.on("select", onSelect);
+  api.on("reInit", onSelect);
 });
 </script>
 
@@ -60,7 +76,6 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
         <p class="text-center text-xl font-semibold">{{ feed.name }}</p>
         <Card class="cursor-pointer" @click="toggleLayout">
           <CardContent class="flex p-0">
-            <!-- Conditionally renders skeleton/image based on if the camera feed is running. -->
             <Skeleton class="aspect-[4/3] w-full" v-if="!feed.src" />
             <img
               class="image"
@@ -77,7 +92,6 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
 
   <!-- Carousel Layout -->
   <div class="carousel-container" v-else-if="layout === 'carousel'">
-    <!-- Plugin adds fade transition -->
     <Carousel class="p-5" @init-api="(val) => (emblaMainApi = val)" :plugins="[Fade()]">
       <CarouselContent>
         <CarouselItem v-for="feed in cameraFeeds" :key="feed.id">
@@ -85,7 +99,6 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
             <p class="text-center text-xl font-semibold">{{ feed.name }}</p>
             <Card class="cursor-pointer" @click="toggleLayout">
               <CardContent class="flex p-0">
-                <!-- Conditionally renders skeleton/image based on if the camera feed is running. -->
                 <Skeleton class="aspect-[4/3] w-full" v-if="!feed.src" />
                 <img class="image" :src="feed.src" :alt="feed.name" v-if="feed.src" />
               </CardContent>
@@ -114,7 +127,6 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
               <p class="text-center text-xl font-semibold">{{ feed.name }}</p>
               <Card>
                 <CardContent class="flex p-0">
-                  <!-- Conditionally renders skeleton/image based on if the camera feed is running. -->
                   <Skeleton class="aspect-[4/3] w-full" v-if="!feed.src" />
                   <img class="image" :src="feed.src" :alt="feed.name" v-if="feed.src" />
                 </CardContent>
@@ -128,12 +140,10 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
 </template>
 
 <style lang="css" scoped>
+/* Your existing styles remain the same */
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(
-    2,
-    1fr
-  ); /* 2 -> num of cols / 1fr -> each column takes up an equal fraction of space) */
+  grid-template-columns: repeat(2, 1fr);
   height: 90%;
   align-items: center;
   overflow: hidden;
@@ -156,7 +166,6 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
   width: 10vw;
 }
 .p-0 {
-  /* Removes card padding inherited from CardContent UI */
   padding: 0 !important;
 }
 .image {
