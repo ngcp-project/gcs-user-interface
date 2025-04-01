@@ -1,6 +1,6 @@
 use super::types::*;
+use rand::Rng;
 use std::sync::Arc;
-use std::{collections::HashMap, option};
 use tauri::{AppHandle, Runtime};
 use taurpc;
 use tokio::sync::Mutex;
@@ -199,7 +199,6 @@ pub trait MissionApi {
     async fn create_mission(
         app_handle: AppHandle<impl Runtime>,
         mission_name: String,
-        mission_id: u32,
     ) -> Result<(), String>;
 
     // Stage Data
@@ -255,12 +254,11 @@ impl MissionApi for MissionApiImpl {
         self,
         app_handle: AppHandle<impl Runtime>,
         mission_name: String,
-        mission_id: u32,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
 
         // TODO: fix to use database defined id
-        let new_mission_data = Self::create_default_mission(&mission_name, mission_id);
+        let new_mission_data = Self::create_default_mission(&mission_name, rand::random::<u32>());
 
         state.missions.push(new_mission_data);
         println!("Mission length: {:?}", state.missions.len());
@@ -287,10 +285,11 @@ impl MissionApi for MissionApiImpl {
             VehicleEnum::ERU => &mut mission.vehicles.ERU,
             VehicleEnum::MRA => &mut mission.vehicles.MRA,
         };
-
-        vehicle
-            .stages
-            .push(Self::create_default_stage(&stage_name, 4));
+        // TODO: fix to use database defined id
+        vehicle.stages.push(Self::create_default_stage(
+            &stage_name,
+            rand::random::<u32>(),
+        ));
         self.emit_state_update(&app_handle, &state)
     }
     async fn delete_stage(
