@@ -36,7 +36,7 @@ const statusStyles = {
 
     <!-- Mission Title -->
     <CardTitle>
-      <Input v-model="mission.mission_name"/>
+      <Input class="w-flex" v-model="mission.mission_name" />
     </CardTitle>
 
     <!-- Status Section -->
