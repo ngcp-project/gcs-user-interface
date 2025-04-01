@@ -208,6 +208,12 @@ pub trait MissionApi {
         mission_id: u32,
         vehicle_name: VehicleEnum,
     ) -> Result<(), String>;
+    async fn delete_stage(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        vehicle_name: VehicleEnum,
+        stage_id: u32,
+    ) -> Result<(), String>;
     async fn transition_stage(
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
@@ -283,6 +289,42 @@ impl MissionApi for MissionApiImpl {
         vehicle
             .stages
             .push(Self::create_default_stage("New Stage", 4));
+        self.emit_state_update(&app_handle, &state)
+    }
+    async fn delete_stage(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        vehicle_name: VehicleEnum,
+        stage_id: u32,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found".to_string())?;
+        let vehicle = match vehicle_name {
+            VehicleEnum::MEA => &mut mission.vehicles.MEA,
+            VehicleEnum::ERU => &mut mission.vehicles.ERU,
+            VehicleEnum::MRA => &mut mission.vehicles.MRA,
+        };
+
+        if vehicle.stages.len() < 1 {
+            return Err("Vehicle has no stages".to_string());
+        }
+
+        let stage_index = vehicle.stages.iter().position(|s| s.stage_id == stage_id);
+
+        if stage_index == None {
+            return Err("Stage not found".to_string());
+        }
+
+        if vehicle.current_stage >= (stage_index.unwrap() as u32) {
+            return Err("Cannot delete already completed or current stage".to_string());
+        }
+
+        vehicle.stages.remove(stage_index.unwrap());
         self.emit_state_update(&app_handle, &state)
     }
     async fn transition_stage(
