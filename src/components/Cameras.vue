@@ -30,7 +30,7 @@ const toggleLayout = () => {
   } else {
     layout.value = "grid";
   }
-}
+};
 
 function onSelect() {
   if (!emblaMainApi.value || !emblaThumbnailApi.value) return;
@@ -50,17 +50,33 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
   emblaMainApi.on("select", onSelect);
   emblaMainApi.on("reInit", onSelect);
 });
-
 </script>
 
 <template>
-  <!-- Side-by-Side Layout -->
-  <div class="overflow-hidden cursor-pointer" v-if="layout === 'grid'">
-    <div @click="toggleLayout">test</div>
+  <!-- Side-by-Side (Grid) Layout -->
+  <div class="grid-container" v-if="layout === 'grid'">
+    <div v-for="feed in cameraFeeds" :key="feed.id">
+      <div class="camera">
+        <p class="text-center text-xl font-semibold">{{ feed.name }}</p>
+        <Card class="cursor-pointer" @click="toggleLayout">
+          <CardContent class="flex p-0">
+            <!-- Conditionally renders skeleton/image based on if the camera feed is running. -->
+            <Skeleton class="aspect-[4/3] w-full" v-if="!feed.src" />
+            <img
+              class="image"
+              :src="feed.src"
+              :alt="feed.name"
+              @error="feed.src = ''"
+              v-if="feed.src"
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   </div>
 
   <!-- Carousel Layout -->
-  <div class="carousel-container overflow-hidden" v-else-if="layout === 'carousel'">
+  <div class="carousel-container" v-else-if="layout === 'carousel'">
     <!-- Plugin adds fade transition -->
     <Carousel class="p-5" @init-api="(val) => (emblaMainApi = val)" :plugins="[Fade()]">
       <CarouselContent>
@@ -69,16 +85,9 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
             <p class="text-center text-xl font-semibold">{{ feed.name }}</p>
             <Card class="cursor-pointer" @click="toggleLayout">
               <CardContent class="flex p-0">
-                <Skeleton class="aspect-[4/3] w-full" />
-                <!-- If there is a camera feed, it will automatically cover the skeleton. -->
-                <!-- Image returns an error if the camera feed is not running. -->
-                <img
-                  class="image"
-                  :src="feed.src"
-                  :alt="feed.name"
-                  @error="feed.src = ''"
-                  v-if="feed.src"
-                />
+                <!-- Conditionally renders skeleton/image based on if the camera feed is running. -->
+                <Skeleton class="aspect-[4/3] w-full" v-if="!feed.src" />
+                <img class="image" :src="feed.src" :alt="feed.name" v-if="feed.src" />
               </CardContent>
             </Card>
           </div>
@@ -89,7 +98,7 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
     <!-- Carousel Thumbnails -->
     <Carousel
       class="relative max-w-md"
-      :opts="{ watchDrag: false }" 
+      :opts="{ watchDrag: false }"
       @init-api="(val) => (emblaThumbnailApi = val)"
     >
       <CarouselContent class="flex justify-center gap-5">
@@ -100,22 +109,14 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
           v-show="index !== selectedIndex"
           @click="onThumbClick(index)"
         >
-          <!-- NOTE: You can click and drag around the thumbnails. This is meant for multiple thumbnails that don't fit the carousel. I do not know how to disable this feature.-->
           <div v-if="index !== selectedIndex">
             <div class="thumbnail-camera">
               <p class="text-center text-xl font-semibold">{{ feed.name }}</p>
               <Card>
                 <CardContent class="flex p-0">
-                  <Skeleton class="aspect-[4/3] w-full" />
-                  <!-- If there is a camera feed, it will automatically cover the skeleton. -->
-                  <!-- Image returns an error if the camera feed is not running. -->
-                  <img
-                    class="image"
-                    :src="feed.src"
-                    :alt="feed.name"
-                    @error="feed.src = ''"
-                    v-if="feed.src"
-                  />
+                  <!-- Conditionally renders skeleton/image based on if the camera feed is running. -->
+                  <Skeleton class="aspect-[4/3] w-full" v-if="!feed.src" />
+                  <img class="image" :src="feed.src" :alt="feed.name" v-if="feed.src" />
                 </CardContent>
               </Card>
             </div>
@@ -127,10 +128,25 @@ watchOnce(emblaMainApi, (emblaMainApi) => {
 </template>
 
 <style lang="css" scoped>
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(
+    2,
+    1fr
+  ); /* 2 -> num of cols / 1fr -> each column takes up an equal fraction of space) */
+  height: 90%;
+  align-items: center;
+  overflow: hidden;
+}
+.camera {
+  width: 45vw;
+  margin: auto;
+}
 .carousel-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
 }
 .focused-camera {
   width: 45vw;
