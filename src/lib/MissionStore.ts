@@ -9,15 +9,25 @@ import {
 import { DeepReadonly, reactive } from "vue";
 import { MissionStore, ViewState, ViewType } from "@/lib/MissionStore.types";
 
+
+// =============================================
+// Initialization
+// ===============================================
 const taurpc = createTauRPCProxy();
 
 // Fetch initial state from backend
 const initialState: MissionsStruct = await taurpc.mission.get_all_missions();
 
+// =============================================
+// Zustand Store
+// ===============================================
 export const missionZustandStore = createStore<MissionStore>((set, get) => ({
-  // Backend States
+
+  // --------------------------
+  // Backend State
+  // --------------------------
   state: initialState, // Synced with rust state
-  // method to update the store state with rust state
+
   syncRustState: (rustState: MissionsStruct) => {
     set(
       () =>
@@ -26,13 +36,17 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
         }) satisfies Partial<MissionStore>
     );
   },
-  //  Frontend State
+
+  // --------------------------
+  // Frontend View State
+  // --------------------------
   view: {
     currentView: "mission",
     currentMissionId: null,
     currentVehicleName: null,
     currentStageId: null
   },
+
   setCurrentView: (view: ViewType) => {
     set((state) => ({
       view: {
@@ -41,35 +55,6 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
       } satisfies ViewState
     }));
   },
-
-  addStage: async (missionId: number, vehicleName: VehicleEnum) =>
-    await taurpc.mission.add_stage(missionId, vehicleName, "New Stage"),
-  deleteStage: async (missionId: number, vehicleName: VehicleEnum, stageId: number) =>
-    await taurpc.mission.delete_stage(missionId, vehicleName, stageId),
-  transitionStage: async (missionId: number, vehicleName: VehicleEnum) => {
-    return await taurpc.mission.transition_stage(missionId, vehicleName);
-  },
-  setAutoMode: async (missionId: number, vehicleName: VehicleEnum, isAuto: boolean) => {
-    return await taurpc.mission.set_auto_mode(missionId, vehicleName, isAuto);
-  },
-
-  getAllMissions: () => get().state.missions,
-  getMissionData: (missionId: number) =>
-    get().state.missions.find((mission) => mission.mission_id === missionId),
-
-  getVehicleData: (missionId: number, vehicleName: VehicleEnum) =>
-    get().state.missions.find((mission) => mission.mission_id === missionId)?.vehicles[vehicleName],
-  getStageData: (missionId: number, vehicleName: VehicleEnum, stageId: number) =>
-    get()
-      .state.missions.find((mission) => mission.mission_id === missionId)
-      ?.vehicles[vehicleName].stages.find((stage) => stage.stage_id === stageId),
-  createNewMission: async (missionName: string) => {
-    // TODO: Uses random integer id, change when database is done
-    return await taurpc.mission.create_mission(missionName);
-  },
-
-  setMissionData: async (missionData: MissionStruct) =>
-    await taurpc.mission.set_mission_data(missionData),
 
   setCurrentMissionID: (missionId: number | null) =>
     set((state) => ({
@@ -104,24 +89,61 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
         currentStageId: stageId
       } satisfies ViewState
     }));
-  }
+  },
+
+  // --------------------------
+  // Mission Data
+  // --------------------------
+  getAllMissions: () => get().state.missions,
+
+  getMissionData: (missionId: number) =>
+    get().state.missions.find((mission) => mission.mission_id === missionId),
+
+  setMissionData: async (missionData: MissionStruct) =>
+    await taurpc.mission.set_mission_data(missionData),
+
+  createNewMission: async (missionName: string) => {
+    return await taurpc.mission.create_mission(missionName);
+  },
+
+  // --------------------------
+  // Vehicle Data 
+  // --------------------------
+  getVehicleData: (missionId: number, vehicleName: VehicleEnum) =>
+    get().state.missions.find((mission) => mission.mission_id === missionId)?.vehicles[vehicleName],
+
+  setAutoMode: async (missionId: number, vehicleName: VehicleEnum, isAuto: boolean) => {
+    return await taurpc.mission.set_auto_mode(missionId, vehicleName, isAuto);
+  },
+
+  // --------------------------
+  // Stage Data 
+  // --------------------------
+  getStageData: (missionId: number, vehicleName: VehicleEnum, stageId: number) =>
+    get()
+      .state.missions.find((mission) => mission.mission_id === missionId)
+      ?.vehicles[vehicleName].stages.find((stage) => stage.stage_id === stageId),
+
+  addStage: async (missionId: number, vehicleName: VehicleEnum) =>
+    await taurpc.mission.add_stage(missionId, vehicleName, "New Stage"),
+
+  deleteStage: async (missionId: number, vehicleName: VehicleEnum, stageId: number) =>
+    await taurpc.mission.delete_stage(missionId, vehicleName, stageId),
+
+  transitionStage: async (missionId: number, vehicleName: VehicleEnum) => {
+    return await taurpc.mission.transition_stage(missionId, vehicleName);
+  },
+
+
 }));
 
-// listen to zustandStore changes and update the reactive object
-missionZustandStore.subscribe((newState) => {
-  // overwrite the reactive vue object and replace it with
-  // the new store from zustand
-  Object.assign(missionStore, newState);
-  console.log("zustand change");
-});
 
-// ok so this will probably get lost to time but ive been working on this for a week straight
-// we HAVE to use a setRustState within the store and we cant utilize a setState() otherwise
-// it runs into weird issues with shallow merging, object overwriting, and issues triggering
-// rerenders for dependencies in components
-
-// Never EVER use missionZustandStore.setState() or else
-// view properties both exist and dont exist, rust and frontend desync, etc.
+// =============================================
+// Backend Event Listeners 
+// ===============================================
+// IMPORTANT: Never use missionZustandStore.setState() directly
+// - use syncRustState to modify the state property
+// - directly modifying the store will cause desync issues
 
 // On initial page load, fetch the mission data from the backend
 taurpc.mission.get_all_missions().then((data) => {
@@ -135,8 +157,20 @@ taurpc.mission.on_updated.on((data: MissionsStruct) => {
   missionZustandStore.getState().syncRustState(data);
 });
 
-// convert zustandStore to a reactive vue object that triggers rerenders
-// to avoid frontend from modifying "private" properties (causes desync in state property)
-// make reactive state readonlyi
-// also use .getState() since we only ever read properties
+
+// =============================================
+// Reactive Vue Zustand Store
+// ===============================================
+// Convert store to reactive vue object to allow
+// components to automatically rerender on property changes
+
+// Syncs reactive vue store with zustand changes
+// Reassign the entire state to ensure methods returns
+// are synced with new zustand state
+missionZustandStore.subscribe((newState) => {
+  Object.assign(missionStore, newState);
+  console.log("Zustand Store updated", missionStore);
+});
+
+// Make all properties readonly to avoid desync
 export const missionStore: DeepReadonly<MissionStore> = reactive(missionZustandStore.getState());
