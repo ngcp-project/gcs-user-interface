@@ -148,6 +148,10 @@ pub trait MissionApi {
         app_handle: AppHandle<impl Runtime>,
         mission_name: String,
     ) -> Result<(), String>;
+    async fn delete_mission(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+    ) -> Result<(), String>;
 
     // Vehicle Data
     async fn set_auto_mode(
@@ -231,6 +235,26 @@ impl MissionApi for MissionApiImpl {
 
         state.missions.push(new_mission_data);
         println!("Mission length: {:?}", state.missions.len());
+        self.emit_state_update(&app_handle, &state)
+    }
+    async fn delete_mission(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        let mission_index = state
+            .missions
+            .iter()
+            .position(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found".to_string())?;
+        if !matches!(
+            state.missions[mission_index].mission_status,
+            MissionStageStatusEnum::Inactive,
+        ) {
+            return Err("Cannot delete active or past missions".to_string());
+        }
+        state.missions.remove(mission_index);
         self.emit_state_update(&app_handle, &state)
     }
 
