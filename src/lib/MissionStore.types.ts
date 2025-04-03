@@ -38,6 +38,7 @@ export interface MissionStore {
   getMissionData: (missionId: number) => MissionStruct | undefined;
   setMissionData: (missionData: MissionStruct) => Promise<null>;
   createNewMission: (missionName: string) => Promise<null>;
+  deleteMission: (missionId: number) => Promise<null>;
 
   // Vehicle Data
   getVehicleData: (missionId: number, vehicleName: VehicleEnum) => VehicleStruct | undefined;
