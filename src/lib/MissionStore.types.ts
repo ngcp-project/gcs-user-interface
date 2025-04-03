@@ -15,9 +15,14 @@ export interface ViewState {
 }
 
 export interface MissionStore {
+  // Backend State
   state: MissionsStruct;
   syncRustState: (state: MissionsStruct) => void;
+
+  // Frontend State
   view: ViewState;
+
+  // METHODS
 
   // Frontend State
   setCurrentView: (view: ViewType) => void;
@@ -25,9 +30,8 @@ export interface MissionStore {
   setCurrentVehicleName: (vehicleName: VehicleEnum | null) => void;
   setCurrentStageID: (stageId: number | null) => void;
 
-  // Mission Data
+  // Mission Data 
   getAllMissions: () => MissionStruct[];
-
   getMissionData: (missionId: number) => MissionStruct | undefined;
   setMissionData: (missionData: MissionStruct) => Promise<null>;
   createNewMission: (missionName: string) => Promise<null>;
@@ -37,12 +41,12 @@ export interface MissionStore {
   setAutoMode: (missionId: number, vehicleName: VehicleEnum, isAuto: boolean) => Promise<null>;
 
   // Stage Data
-  addStage: (missionId: number, vehicleName: VehicleEnum, stageName: string) => Promise<null>;
-  deleteStage: (missionId: number, vehicleName: VehicleEnum, stageId: number) => Promise<null>;
   getStageData: (
     missionId: number,
     vehicleName: VehicleEnum,
     stageId: number
   ) => StageStruct | undefined;
+  addStage: (missionId: number, vehicleName: VehicleEnum, stageName: string) => Promise<null>;
+  deleteStage: (missionId: number, vehicleName: VehicleEnum, stageId: number) => Promise<null>;
   transitionStage: (missionId: number, vehicleName: VehicleEnum) => Promise<null>;
 }
