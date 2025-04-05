@@ -70,8 +70,14 @@ pub struct StageStruct {
 #[taurpc::ipc_type]
 #[derive(Debug)]
 pub struct ZonesStruct {
-    pub keep_in_zones: GeofenceType,
-    pub keep_out_zones: GeofenceType,
+    pub keep_in_zones: Vec<GeofenceType>,
+    pub keep_out_zones: Vec<GeofenceType>,
+}
+
+#[derive(Debug, serde::Deserialize, serde::Serialize, Clone, specta::Type)]
+pub enum ZoneType {
+    KeepIn,
+    KeepOut,
 }
 
 #[taurpc::ipc_type]
