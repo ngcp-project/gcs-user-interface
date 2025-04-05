@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import ZoneCard from '@/components/SidebarCards/ZoneCard.vue';
-import SidebarHeader from '@/components/ui/sidebar/SidebarHeader.vue';
+import ZoneCard from '@/components/Sidebar/SidebarCards/ZoneCard.vue';
+import SidebarGroup from '@/components/ui/sidebar/SidebarGroup.vue';
 </script>
 
 <template>
   <div>
     <SidebarGroup>
-      <ZoneCard zoneType="In" />
-      <ZoneCard zoneType="Out" />
+      <ZoneCard zoneType="KeepIn" />
+      <ZoneCard zoneType="KeepOut" />
     </SidebarGroup>
   </div>
 </template>
