@@ -5,7 +5,7 @@ import BreadcrumbNav from "@/components/Sidebar/BreadcrumbNav.vue";
 import MissionView from "@/components/Sidebar/Tabs/MissionView.vue";
 import VehicleView from "@/components/Sidebar/Tabs/VehicleView.vue";
 import StageView from "@/components/Sidebar/Tabs/StageView.vue";
-// import ZoneView from '@/views/ZoneView.vue'
+import ZoneView from "@/components/Sidebar/Tabs/ZoneView.vue";
 
 import { missionStore } from "@/lib/MissionStore";
 
@@ -24,7 +24,7 @@ const renderView = {
   mission: { component: MissionView, title: "Missions" },
   vehicle: { component: VehicleView, title: "Vehicles" },
   stage: { component: StageView, title: "Stages" },
-  zone: { component: MissionView, title: "Zones" },
+  zone: { component: ZoneView, title: "Zones" }
 };
 
 // current title based on currentView

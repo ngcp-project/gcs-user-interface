@@ -2,16 +2,13 @@
 import { Card, CardContent, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { computed, defineEmits } from "vue";
+import { computed } from "vue";
 import { Trash2 } from "lucide-vue-next";
 import { missionStore } from "@/lib/MissionStore";
-import { MissionStruct } from "@/lib/bindings";
 
 const props = defineProps<{
   missionId: number;
-}>();
-
-const mission = computed(() => missionStore.getMissionData(props.missionId));
+}>()
 
 // Status Styles
 const statusStyles = {
@@ -22,6 +19,14 @@ const statusStyles = {
     Complete: "text-chart-2 font-semibold"
   }
 };
+
+const mission = computed(() => missionStore.getMissionData(props.missionId));
+
+const handleZoneClick = () => {
+  missionStore.setCurrentMissionID(props.missionId)
+  missionStore.setCurrentView("zone")
+}
+
 </script>
 
 <template>
@@ -31,7 +36,7 @@ const statusStyles = {
     <CardTitle class="flex items-center gap-2">
       <Input class="flex-1" v-model="mission.mission_name" />
       <!-- Trash Icon -->
-      <div v-if="mission.mission_status == 'Inactive' "class="cursor-pointer">
+      <div v-if="mission.mission_status == 'Inactive'" class="cursor-pointer">
         <Trash2 @click.stop="" class="h-5 w-5 text-foreground hover:text-destructive" />
       </div>
     </CardTitle>
@@ -48,18 +53,11 @@ const statusStyles = {
 
     <!-- Submit Button -->
     <CardFooter class="mt-4 justify-start">
-      <Button
-        class="mr-2"
-        :disabled="
-          mission.mission_status === 'Active' ||
-          mission.mission_status === 'Complete' ||
-          mission.mission_status === 'Failed'
-        "
-        @click.stop=""
-      >
+      <Button class="mr-2" :disabled="mission.mission_status !== 'Inactive'
+        " @click.stop="">
         Start
       </Button>
-      <Button @click.stop> Zones </Button>
+      <Button @click.stop="handleZoneClick"> Zones </Button>
     </CardFooter>
   </Card>
 </template>
