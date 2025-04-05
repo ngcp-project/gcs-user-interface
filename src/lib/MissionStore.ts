@@ -4,7 +4,8 @@ import {
   MissionsStruct,
   MissionStruct,
   StageStruct,
-  VehicleEnum
+  VehicleEnum,
+  ZoneType
 } from "@/lib/bindings";
 import { DeepReadonly, reactive } from "vue";
 import { MissionStore, ViewState, ViewType } from "@/lib/MissionStore.types";
@@ -133,6 +134,23 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
   transitionStage: async (missionId: number, vehicleName: VehicleEnum) => {
     return await taurpc.mission.transition_stage(missionId, vehicleName);
   },
+
+  // --------------------------
+  // Zone Data
+  // --------------------------
+  getZoneData: (missionId: number, zoneType: ZoneType) => {
+    let zone: Record<ZoneType, "keep_in_zones" | "keep_out_zones"> = {
+      KeepIn: "keep_in_zones",
+      KeepOut: "keep_out_zones"
+    }
+    return get().state.missions.find((mission) => mission.mission_id === missionId)?.zones[zone[zoneType]];
+  },
+
+  addZone: async (missionId: number, zoneType: ZoneType) =>
+    await taurpc.mission.add_zone(missionId, zoneType),
+
+  deleteZone: async (missionId: number, zoneType: ZoneType, zoneIndex: number) =>
+    await taurpc.mission.delete_zone(missionId, zoneType, zoneIndex),
 
 
 }));

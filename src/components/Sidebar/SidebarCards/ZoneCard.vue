@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { Card, CardContent, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { Trash2, Eye, EyeOff, Pencil, Square, Plus } from 'lucide-vue-next'
+import { missionStore } from "@/lib/MissionStore";
+import { ZoneType } from "@/lib/bindings";
 
-defineProps<{
-  zoneType: 'In' | 'Out'
+const props = defineProps<{
+  zoneType: ZoneType
 }>()
 
 // Title Styles
@@ -16,25 +18,24 @@ const titleStyles = computed(() => ({
   }
 }))
 
+const zoneType = {
+  KeepIn: "In",
+  KeepOut: "Out"
+}[String(props.zoneType)]
+
 // Track zones
-const zones = ref<{ id: number; isVisible: boolean }[]>([]) // Store zone items with visibility
+const currentMissionId = missionStore.view.currentMissionId;
+const mission = missionStore.getMissionData(currentMissionId);
 
-// Function to add a new zone
-const addZone = () => {
-  const newZone = { id: Date.now(), isVisible: true } // Unique ID with visibility state
-  zones.value.push(newZone)
-}
+const zones = computed(() => currentMissionId !== null ? missionStore.getZoneData(currentMissionId, props.zoneType) : [])
 
-// Function to delete a zone by ID
-const deleteZone = (zoneID: number) => {
-  zones.value = zones.value.filter(zone => zone.id !== zoneID)
-}
 
 // Toggle Eye Icon for specific zone
 const toggleVisibility = (zoneID: number) => {
-  const zone = zones.value.find(zone => zone.id === zoneID)
-  if (zone) zone.isVisible = !zone.isVisible
+  // const zone = zones.value.find(zone => zone.id === zoneID)
+  // if (zone) zone.isVisible = !zone.isVisible
 }
+console.log(zones)
 </script>
 
 <template>
@@ -47,29 +48,23 @@ const toggleVisibility = (zoneID: number) => {
 
     <!-- Zones List -->
     <CardContent class="mt-2 flex flex-col items-start space-y-3">
-      <div v-for="zone in zones" :key="zone.id" class="flex items-center justify-between w-full pb-1 pt-1">
-        <span class="font-semibold">Zone {{ zone.id }}</span>
-        <div class="flex gap-x-2">
+      <div v-for="(zone, index) in zones" :key="props.zoneType"
+        class="flex items-center justify-between w-full pb-1 pt-1">
+        <span class="font-semibold">Zone {{ index }}</span>
+        <div v-if="mission?.mission_status === 'Inactive'" class="flex gap-x-2">
           <Pencil class="w-5 h-5 text-gray-700 hover:text-gray-500 cursor-pointer" />
-          <component 
-            :is="zone.isVisible ? Eye : EyeOff" 
-            class="w-5 h-5 text-gray-700 hover:text-gray-500 cursor-pointer"
-            @click="toggleVisibility(zone.id)"
-          />
-          <Trash2 
-            @click="deleteZone(zone.id)" 
-            class="w-5 h-5 text-gray-700 hover:text-destructive cursor-pointer"
-          />
+          <component :is="zone.isVisible ? Eye : EyeOff"
+            class="w-5 h-5 text-gray-700 hover:text-gray-500 cursor-pointer" @click="toggleVisibility(zone.id)" />
+          <Trash2 @click="missionStore.deleteZone(currentMissionId, props.zoneType, index)"
+            class="w-5 h-5 text-gray-700 hover:text-gray-500 cursor-pointer" />
         </div>
       </div>
     </CardContent>
 
     <!-- Add Zone Button -->
-    <CardFooter class="mt-4 justify-center items-center">
-      <Button 
-        @click="addZone"
-        class="bg-transparent shadow-none flex flex-col items-center hover:bg-transparent"
-      >
+    <CardFooter v-if="mission?.mission_status === 'Inactive'" class="mt-4 justify-center items-center">
+      <Button @click="missionStore.addZone(currentMissionId, props.zoneType)"
+        class="text-fg bg-transparent shadow-none flex flex-col items-center hover:bg-transparent">
         <Plus class="w-5 h-5" />
         Add Zone
       </Button>
