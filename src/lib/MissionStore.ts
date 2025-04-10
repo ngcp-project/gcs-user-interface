@@ -10,7 +10,6 @@ import {
 import { DeepReadonly, reactive } from "vue";
 import { MissionStore, ViewState, ViewType } from "@/lib/MissionStore.types";
 
-
 // =============================================
 // Initialization
 // ===============================================
@@ -23,7 +22,6 @@ const initialState: MissionsStruct = await taurpc.mission.get_all_missions();
 // Zustand Store
 // ===============================================
 export const missionZustandStore = createStore<MissionStore>((set, get) => ({
-
   // --------------------------
   // Backend State
   // --------------------------
@@ -106,9 +104,12 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
   createNewMission: async (missionName: string) => {
     return await taurpc.mission.create_mission(missionName);
   },
+  deleteMission: async (missionId: number) => {
+    return await taurpc.mission.delete_mission(missionId);
+  },
 
   // --------------------------
-  // Vehicle Data 
+  // Vehicle Data
   // --------------------------
   getVehicleData: (missionId: number, vehicleName: VehicleEnum) =>
     get().state.missions.find((mission) => mission.mission_id === missionId)?.vehicles[vehicleName],
@@ -118,7 +119,7 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
   },
 
   // --------------------------
-  // Stage Data 
+  // Stage Data
   // --------------------------
   getStageData: (missionId: number, vehicleName: VehicleEnum, stageId: number) =>
     get()
@@ -142,22 +143,21 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
     let zone: Record<ZoneType, "keep_in_zones" | "keep_out_zones"> = {
       KeepIn: "keep_in_zones",
       KeepOut: "keep_out_zones"
-    }
-    return get().state.missions.find((mission) => mission.mission_id === missionId)?.zones[zone[zoneType]];
+    };
+    return get().state.missions.find((mission) => mission.mission_id === missionId)?.zones[
+      zone[zoneType]
+    ];
   },
 
   addZone: async (missionId: number, zoneType: ZoneType) =>
     await taurpc.mission.add_zone(missionId, zoneType),
 
   deleteZone: async (missionId: number, zoneType: ZoneType, zoneIndex: number) =>
-    await taurpc.mission.delete_zone(missionId, zoneType, zoneIndex),
-
-
+    await taurpc.mission.delete_zone(missionId, zoneType, zoneIndex)
 }));
 
-
 // =============================================
-// Backend Event Listeners 
+// Backend Event Listeners
 // ===============================================
 // IMPORTANT: Never use missionZustandStore.setState() directly
 // - use syncRustState to modify the state property
@@ -174,7 +174,6 @@ taurpc.mission.on_updated.on((data: MissionsStruct) => {
   console.log("Mission data updated:", data);
   missionZustandStore.getState().syncRustState(data);
 });
-
 
 // =============================================
 // Reactive Vue Zustand Store

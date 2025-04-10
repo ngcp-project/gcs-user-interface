@@ -8,7 +8,14 @@ import { missionStore } from "@/lib/MissionStore";
 
 const props = defineProps<{
   missionId: number;
-}>()
+}>();
+
+const mission = computed(() => missionStore.getMissionData(props.missionId));
+
+const handleZoneButtonClick = () => {
+  missionStore.setCurrentView("zone");
+  missionStore.setCurrentMissionID(props.missionId);
+};
 
 // Status Styles
 const statusStyles = {
@@ -20,24 +27,23 @@ const statusStyles = {
   }
 };
 
-const mission = computed(() => missionStore.getMissionData(props.missionId));
-
 const handleZoneClick = () => {
-  missionStore.setCurrentMissionID(props.missionId)
-  missionStore.setCurrentView("zone")
-}
-
+  missionStore.setCurrentMissionID(props.missionId);
+  missionStore.setCurrentView("zone");
+};
 </script>
 
 <template>
   <Card v-if="mission" class="relative m-2 bg-sidebar-foreground p-2 text-foreground">
-
     <!-- Mission Title -->
     <CardTitle class="flex items-center gap-2">
       <Input class="flex-1" v-model="mission.mission_name" />
       <!-- Trash Icon -->
       <div v-if="mission.mission_status == 'Inactive'" class="cursor-pointer">
-        <Trash2 @click.stop="" class="h-5 w-5 text-foreground hover:text-destructive" />
+        <Trash2
+          @click.stop="missionStore.deleteMission(mission.mission_id)"
+          class="h-5 w-5 text-foreground hover:text-destructive"
+        />
       </div>
     </CardTitle>
 
@@ -53,11 +59,10 @@ const handleZoneClick = () => {
 
     <!-- Submit Button -->
     <CardFooter class="mt-4 justify-start">
-      <Button class="mr-2" :disabled="mission.mission_status !== 'Inactive'
-        " @click.stop="">
+      <Button class="mr-2" :disabled="mission.mission_status != 'Inactive'" @click.stop>
         Start
       </Button>
-      <Button @click.stop="handleZoneClick"> Zones </Button>
+      <Button @click.stop="handleZoneButtonClick"> Zones </Button>
     </CardFooter>
   </Card>
 </template>
