@@ -16,6 +16,7 @@ const missionId = missionStore.view.currentMissionId;
 
 const vehicle =
   missionId !== null ? missionStore.getVehicleData(missionId, props.vehicleName) : null;
+
 const currentVehicleStage =
   vehicle === undefined || vehicle === null || missionId === null
     ? null
@@ -64,14 +65,16 @@ const patientStatusStyles = {
       <!-- TODO: Add logic to disable if vehicle is at last stage or if mission is not submitted or not started-->
       <Button
         :disabled="vehicle.stages.length < 1 || vehicle.current_stage === vehicle.stages.length - 1"
-        @click.stop="missionStore.transitionStage(missionId, props.vehicleName)"
-      >
+        @click.stop="missionStore.transitionStage(missionId, props.vehicleName)">
         Next Stage
       </Button>
-      <!-- TODO: Add logic to disable if vehicle is at last stage or if mission is not submitted or not started-->
-      <!-- <span v-if="vehicle.is_auto !== null" class="font-semibold">
-        <Toggle> Auto </Toggle>
-      </span> -->
+      <span v-if="vehicle.is_auto !== null " class="font-semibold">
+        <Toggle 
+        class="bg-primary text-primary-foreground ml-2 hover:bg-primary/90 hover:text-primary-foreground"
+        @click.stop="missionStore.setAutoMode(missionId, props.vehicleName, !vehicle.is_auto)">
+        Auto 
+        </Toggle>
+      </span>
     </CardFooter>
   </Card>
 </template>

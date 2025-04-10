@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, render } from "vue";
 import { Sidebar, SidebarHeader } from "@/components/ui/sidebar";
 import BreadcrumbNav from "@/components/Sidebar/BreadcrumbNav.vue";
 import MissionView from "@/components/Sidebar/Tabs/MissionView.vue";
 import VehicleView from "@/components/Sidebar/Tabs/VehicleView.vue";
 import StageView from "@/components/Sidebar/Tabs/StageView.vue";
+import { ChevronLeft } from "lucide-vue-next";
 // import ZoneView from '@/views/ZoneView.vue'
-
 import { missionStore } from "@/lib/MissionStore";
 
 const currentView = computed(() => missionStore.view.currentView);
@@ -30,14 +30,33 @@ const renderView = {
 // current title based on currentView
 const currentTitle = computed(() => renderView[currentView.value]?.title || "Title");
 
+// handle back button
+const handleBack = () => {
+  if (currentView.value === 'stage') {
+    missionStore.setCurrentView('vehicle');
+  } else if (currentView.value === 'vehicle') {
+    missionStore.setCurrentView('mission');
+  }
+};
 </script>
 
 <template>
   <Sidebar :key="String(stateUpdate)" side="right">
     <SidebarHeader class="bg-sidebar-background items-center">
-      <span class="text-xl font-semibold">
-        {{ currentTitle }}
-      </span>
+      <div class="flex items-center gap-2">
+        <!-- Back Button -->
+        <button
+          v-if="currentView === 'stage' || currentView === 'vehicle'"
+          @click="handleBack"
+          class="absolute left-4 text-primary-foreground bg-transparent"
+        >
+          <ChevronLeft class="w-5 h-5" />
+        </button>
+        <!-- Title -->
+        <span class="text-xl font-semibold">
+          {{ currentTitle }}
+        </span>
+      </div>
       <BreadcrumbNav :currentState="currentView" />
     </SidebarHeader>
     <!-- Access the component from renderView -->

@@ -9,29 +9,27 @@ defineProps<{
 
 <template>
   <div class="relative flex flex-col h-full w-full items-center">
-    <div class="h-[1px] w-2 border-2 border-[#020817]"></div>
-    <div class="relative flex h-6 w-4 rounded-[4px] border-[3px] border-[#020817] items-end">
-      <!-- <div :class="percentageCSS" :style="{ width: this.percentage + '%' }"></div> -->
+    <!-- Smaller tip -->
+    <div class="h-[1px] w-1 border border-[#020817]"></div> <!-- Reduced width/height -->
+    
+    <!-- Smaller main battery body -->
+    <div class="relative flex h-4 w-3 rounded-[2px] border-[1.5px] border-[#020817] items-end"> <!-- Halved dimensions -->
+      <!-- Battery fill (dynamic height) -->
       <div
         class="bg-foreground w-full"
-        :style="{ height: Math.max(percentage , 5) + '%' }"
+        :style="{ height: Math.max(percentage, 5) + '%' }"
       />
-      <div class="absolute flex h-full w-full items-center justify-center">
-        <img class="h-4/5 w-full" src="..\..\assets\lightning-icon-png-5.png" />
+      
+      <!-- Lightning icon (scaled down) -->
+      <div v-if="charging" class="absolute flex h-full w-full items-center justify-center">
+        <img class="h-3/5 w-3/5" src="..\..\assets\lightning-icon-png-5.png" /> <!-- Reduced icon size -->
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* .battery_icon {
-        position: absolute;
-        width: 40%;
-        left: 30%;
-        top: 15%;
-        animation: blinker 1s linear infinite;
-        visibility: hidden;
-    } */
+/* Animation styles (unchanged) */
 .dead {
   visibility: visible;
   animation: blinker 1s linear infinite;

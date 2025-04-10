@@ -44,15 +44,14 @@ const stage = computed(() => {
 
 <template>
   <Card v-if="stage" class="relative m-2 p-2">
-    <!-- Trash Icon -->
-    <div class="absolute right-2 top-2 cursor-pointer">
-      <Trash2 @click="missionStore.deleteStage(currentMissionId, currentVehicleName, props.stageID)"
-        class="h-5 w-5 text-foreground hover:text-destructive" />
-    </div>
-
-    <!-- Mission Title -->
-    <CardTitle>
-      <Input v-model="stage.stage_name" />
+    <!-- Stage Title -->
+    <CardTitle class="flex items-center gap-2">
+      <Input v-model="stage.stage_name" class="flex-1" />
+      <!-- Trash Icon -->
+      <Trash2 
+        @click="missionStore.deleteStage(currentMissionId, currentVehicleName, props.stageID)"
+        class="h-5 w-5 text-foreground hover:text-destructive cursor-pointer" 
+      />
     </CardTitle>
 
     <!-- Status Section -->

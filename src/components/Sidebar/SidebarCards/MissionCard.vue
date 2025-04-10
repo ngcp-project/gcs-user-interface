@@ -29,7 +29,15 @@ const statusStyles = {
 
     <!-- Mission Title -->
     <CardTitle class="flex items-center gap-2">
-      <Input class="flex-1" v-model="mission.mission_name" />
+      <Input 
+        v-if="mission.mission_status === 'Inactive' "
+        v-model="mission.mission_name" 
+        class="flex-1"
+      />
+      <span v-else class="flex-1">
+        {{ mission.mission_name }}
+      </span> 
+
       <!-- Trash Icon -->
       <div v-if="mission.mission_status == 'Inactive' "class="cursor-pointer">
         <Trash2 @click.stop="" class="h-5 w-5 text-foreground hover:text-destructive" />

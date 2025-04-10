@@ -29,7 +29,10 @@ const currentVehicleName = computed(() => missionStore.view.currentVehicleName);
 
 const breadcrumbMissionName = computed(() => {
   if (currentMissionId.value !== null && currentView.value !== "mission") {
-    return missionStore.getMissionData(currentMissionId.value)?.mission_name;
+    const missionName = missionStore.getMissionData(currentMissionId.value)?.mission_name;
+    return missionName && missionName.length > 8 
+      ? `${missionName.substring(0, 8)}...` 
+      : missionName || "Missions";
   } else {
     return "Missions";
   }
