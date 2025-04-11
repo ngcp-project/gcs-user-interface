@@ -2,6 +2,7 @@
 import VehicleStatus from "../components/VehicleStatusComponent.vue";
 import { onMounted, ref, Ref } from "vue";
 import Map from "../components/Map.vue";
+import { Button } from "@/components/ui/button";
 
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
 const ERU_data = ref({
@@ -93,6 +94,50 @@ function updateIsInKeepIn(vehicleKey: string, isInZone: boolean) {
 function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
   vehicleMap[vehicleKey.toLowerCase()].value.inKeepOut = isInZone;
 }
+
+// Add ref for the map component
+const mapRef = ref();
+
+// Add methods to control the map
+const handleDrawPolygon = () => {
+  mapRef.value?.toggleDrawMode();
+};
+
+const handleEditPolygon = () => {
+  mapRef.value?.toggleEditMode();
+};
+
+const handleDragPolygon = () => {
+  mapRef.value?.toggleDragMode();
+};
+
+const handleRemovePolygon = () => {
+  mapRef.value?.toggleRemoveMode();
+};
+
+const handleZoneIn = async () => {
+  try {
+    await mapRef.value?.sendZoneInPolygonPoints();
+  } catch (error) {
+    console.error("Error handling Zone In:", error);
+  }
+};
+
+const handleZoneOut = async () => {
+  try {
+    await mapRef.value?.sendZoneOutPolygonPoints();
+  } catch (error) {
+    console.error("Error handling Zone Out:", error);
+  }
+};
+
+const handleClearPolygons = async () => {
+  try {
+    await mapRef.value?.clearPolygons();
+  } catch (error) {
+    console.error("Error handling Clear All:", error);
+  }
+};
 </script>
 
 <template>
@@ -100,6 +145,7 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
     <div class="flex-grow">
       <!-- should be fire coords -->
       <Map
+        ref="mapRef"
         :ERU_coords="ERU_data.coordinates"
         :ERU_yaw="ERU_data.yaw"
         :MEA_coords="MEA_data.coordinates"
@@ -111,12 +157,71 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
         :FRA_yaw="FRA_data.yaw"
         @keepIn="updateIsInKeepIn"
         @keepOut="updateIsInKeepOut"
-      ></Map>
+      />
     </div>
 
-    <div
-      class="flex h-full w-fit max-w-[300px] flex-none flex-col gap-[6px] overflow-y-scroll bg-background p-[6px]"
-    >
+    <div class="flex h-full w-fit max-w-[300px] flex-none flex-col gap-[6px] overflow-y-scroll bg-background p-[6px]">
+      <!-- Add Geoman Controls Section -->
+      <div class="flex flex-col gap-2 p-2 bg-secondary/10 rounded-lg">
+        <h3 class="text-lg font-semibold">Map Controls</h3>
+        <div class="grid grid-cols-2 gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            @click="handleDrawPolygon"
+          >
+            Draw
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            @click="handleEditPolygon"
+          >
+            Edit
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            @click="handleDragPolygon"
+          >
+            Move
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            @click="handleRemovePolygon"
+          >
+            Delete
+          </Button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            class="bg-green-500/10 hover:bg-green-500/20"
+            @click="handleZoneIn"
+          >
+            Zone In
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            class="bg-red-500/10 hover:bg-red-500/20"
+            @click="handleZoneOut"
+          >
+            Zone Out
+          </Button>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm"
+          @click="handleClearPolygons"
+        >
+          Clear All
+        </Button>
+      </div>
+
+      <!-- Existing Vehicle Status Components -->
       <VehicleStatus
         :batteryPct="ERU_data.batteryPct"
         :latency="ERU_data.lastUpdated"

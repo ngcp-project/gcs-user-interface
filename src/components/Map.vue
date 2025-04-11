@@ -228,8 +228,7 @@ const addPoint = (event: LeafletMouseEvent) => {
 */
 
 // clear every polygon (selected and backend)
-const clearPolygons = async (event: MouseEvent) => {
-  event.stopPropagation();
+const clearPolygons = async () => {
   // Clear the local state
   polygonPoints.value = [];
   zoneInPolygons.value = [];
@@ -455,29 +454,25 @@ const initGeomanControls = () => {
       removalMode: true
     });
     // handle polygon creation
-    // Add the create event listener to the map
+    // add create event listener to map
     map.on("pm:create", (e: any) => {
       // manually trigger a tile layer update
       tileLayerKey.value++;
 
       console.log("Polygon create event", e);
-      if (polygonPoints.value.length === 0) {
-        polygonPoints.value = e.layer.getLatLngs()[0].map((ll: any) => [ll.lat, ll.lng] as LatLng);
+      const newLatLngs = e.layer.getLatLngs()[0].map((ll: any) => [ll.lat, ll.lng] as LatLng);
+      
+      // store each polygon's points separately
+      polygonPoints.value = [...(polygonPoints.value || []), newLatLngs];
 
-        // clear all extra geoman layers from map except one just created
-        const map = mapRef.value?.leafletObject;
-        if (map) {
-          map.eachLayer((layer: any) => {
-            if (map.pm.getGeomanDrawLayers()[0] !== layer) {
-              map.removeLayer(layer);
-            }
-          });
-        }
-      } else {
-        polygonPoints.value.push(
-          e.layer.getLatLngs()[0].map((ll: any) => [ll.lat, ll.lng] as LatLng)
-        );
-      }
+      // style each layer
+      e.layer.setStyle({
+        color: 'blue',
+        fillColor: 'blue',
+        fillOpacity: 0.2,
+        pmIgnore: false,
+        draggable: true
+      });
     });
 
     console.log("Geoman controls initialized successfully");
@@ -553,6 +548,85 @@ watch(
   },
   { deep: true }
 );
+
+// methods to export geoman controls
+const toggleDrawMode = () => {
+  const map = mapRef.value?.leafletObject;
+  if (!map) return;
+  
+  // disable other modes first
+  map.pm.disableGlobalEditMode();
+  map.pm.disableGlobalDragMode();
+  map.pm.disableGlobalRemovalMode();
+
+  // check if draw mode is already enabled
+  if (map.pm.Draw.Polygon?._enabled) {
+    map.pm.disableDraw();
+  } else {
+    // enable draw mode with Polygon shape
+    map.pm.enableDraw('Polygon', {
+      snappable: true,
+      snapDistance: 20,
+      allowSelfIntersection: false,
+      templineStyle: {
+        color: 'blue',
+      },
+      hintlineStyle: {
+        color: 'blue',
+        dashArray: [5, 5],
+      },
+      pathOptions: {
+        color: 'blue',
+        fillColor: 'blue',
+        fillOpacity: 0.2,
+      }
+    });
+  }
+};
+
+const toggleEditMode = () => {
+  const map = mapRef.value?.leafletObject;
+  if (!map) return;
+  // disable any active modes first
+  map.pm.disableDraw();
+  map.pm.disableGlobalDragMode();
+  map.pm.disableGlobalRemovalMode();
+  // toggle edit mode
+  map.pm.toggleGlobalEditMode();
+};
+
+const toggleDragMode = () => {
+  const map = mapRef.value?.leafletObject;
+  if (!map) return;
+  // disable any active modes first
+  map.pm.disableDraw();
+  map.pm.disableGlobalEditMode();
+  map.pm.disableGlobalRemovalMode();
+  // toggle drag mode
+  map.pm.toggleGlobalDragMode();
+};
+
+const toggleRemoveMode = () => {
+  const map = mapRef.value?.leafletObject;
+  if (!map) return;
+  // disable any active modes first
+  map.pm.disableDraw();
+  map.pm.disableGlobalEditMode();
+  map.pm.disableGlobalDragMode();
+  // toggle remove mode
+  map.pm.toggleGlobalRemovalMode();
+};
+
+// expose methods
+defineExpose({
+  sendZoneInPolygonPoints,
+  sendZoneOutPolygonPoints,
+  clearPolygons,
+  toggleDrawMode,
+  toggleEditMode,
+  toggleDragMode,
+  toggleRemoveMode
+});
 </script>
 
 <style>
