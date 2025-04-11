@@ -2,7 +2,7 @@
 import MissionCard from "@/components/Sidebar/SidebarCards/MissionCard.vue";
 import { missionStore } from "@/lib/MissionStore";
 import { ref, watch } from "vue";
-import { SidebarContent, SidebarFooter } from "@/components/ui/sidebar";
+import { SidebarContent, SidebarFooter, SidebarGroup } from "@/components/ui/sidebar";
 import { Plus } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +17,7 @@ const handleClick = (missionId: number) => {
 
 <template>
   <SidebarContent class="bg-sidebar-background">
+  <SidebarGroup>
     <div class="flex w-full flex-col items-center">
       <div v-if="missions && missions.length > 0" class="w-full space-y-4">
         <MissionCard v-for="(mission, index) in missions" :key="index" :missionId="mission.mission_id"
@@ -26,6 +27,7 @@ const handleClick = (missionId: number) => {
         <span>No Mission Created</span>
       </div>
     </div>
+</SidebarGroup>
   </SidebarContent>
   <SidebarFooter class="bg-sidebar-background">
     <Button @click="missionStore.createNewMission('new mission')"

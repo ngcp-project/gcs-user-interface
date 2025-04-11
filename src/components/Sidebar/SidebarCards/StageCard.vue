@@ -26,10 +26,6 @@ const toggleVisibility = () => {
   isVisible.value = !isVisible.value;
 };
 
-const deleteStage = () => {
-
-  console.log("Deleted stage");
-};
 
 const currentMissionId = missionStore.view.currentMissionId;
 const currentVehicleName = missionStore.view.currentVehicleName;
@@ -39,7 +35,6 @@ const stage = computed(() => {
     return missionStore.getStageData(currentMissionId, currentVehicleName, props.stageID);
 });
 
-// Stage click handlers
 </script>
 
 <template>

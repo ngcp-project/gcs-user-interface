@@ -148,6 +148,10 @@ pub trait MissionApi {
         app_handle: AppHandle<impl Runtime>,
         mission_name: String,
     ) -> Result<(), String>;
+    async fn delete_mission(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+    ) -> Result<(), String>;
 
     // Vehicle Data
     async fn set_auto_mode(
@@ -174,6 +178,19 @@ pub trait MissionApi {
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
         vehicle_name: VehicleEnum,
+    ) -> Result<(), String>;
+
+    // Zone Data
+    async fn add_zone(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        zone_type: ZoneType,
+    ) -> Result<(), String>;
+    async fn delete_zone(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        zone_type: ZoneType,
+        zone_index: u32,
     ) -> Result<(), String>;
 }
 
@@ -218,6 +235,26 @@ impl MissionApi for MissionApiImpl {
 
         state.missions.push(new_mission_data);
         println!("Mission length: {:?}", state.missions.len());
+        self.emit_state_update(&app_handle, &state)
+    }
+    async fn delete_mission(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        let mission_index = state
+            .missions
+            .iter()
+            .position(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found".to_string())?;
+        if !matches!(
+            state.missions[mission_index].mission_status,
+            MissionStageStatusEnum::Inactive,
+        ) {
+            return Err("Cannot delete active or past missions".to_string());
+        }
+        state.missions.remove(mission_index);
         self.emit_state_update(&app_handle, &state)
     }
 
@@ -343,6 +380,66 @@ impl MissionApi for MissionApiImpl {
         }
 
         println!("Vehicle data set: {:?}", vehicle);
+        self.emit_state_update(&app_handle, &state)
+    }
+
+    // Zone Data
+    async fn add_zone(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        zone_type: ZoneType,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found".to_string())?;
+
+        match zone_type {
+            ZoneType::KeepIn => {
+                mission.zones.keep_in_zones.push(GeofenceType::default());
+            }
+            ZoneType::KeepOut => {
+                mission.zones.keep_out_zones.push(GeofenceType::default());
+            }
+        }
+
+        self.emit_state_update(&app_handle, &state)
+    }
+
+    async fn delete_zone(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        zone_type: ZoneType,
+        zone_index: u32,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found".to_string())?;
+
+        match zone_type {
+            ZoneType::KeepIn => {
+                if zone_index > mission.zones.keep_in_zones.len() as u32 {
+                    return Err("Keep In zone index out of range".to_string());
+                }
+                mission.zones.keep_in_zones.remove(zone_index as usize);
+            }
+            ZoneType::KeepOut => {
+                if zone_index > mission.zones.keep_out_zones.len() as u32 {
+                    return Err("Keep Out zone index out of range".to_string());
+                }
+                mission.zones.keep_out_zones.remove(zone_index as usize);
+            }
+        }
+
         self.emit_state_update(&app_handle, &state)
     }
 
