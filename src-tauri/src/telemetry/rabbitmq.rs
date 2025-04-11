@@ -74,14 +74,14 @@ impl RabbitMQConsumer {
         //Create consumer
         let consumer = self.create_consumer(queue_name).await?;
         //Start processing
-        self.process_telemetry(consumer).await?;
+        self.process_telemetry(queue_name, consumer).await?;
 
         Ok(())
     }
 
     //In this part we should emit to the frontend, ads
 
-    pub async fn process_telemetry(&self, mut consumer: Consumer) -> LapinResult<()> {
+    pub async fn process_telemetry(&self, mut queue_name: &str, mut consumer: Consumer) -> LapinResult<()> {
         while let Some(delivery) = consumer.next().await {
             if let Ok(delivery) = delivery {
                 let raw_message = String::from_utf8_lossy(&delivery.data);
@@ -94,7 +94,7 @@ impl RabbitMQConsumer {
                     Ok(mut json_data) => {
                         // Step 2: Transform JSON to match `TelemetryData`
                         let transformed_data = json!({
-                            "vehicle_id": "eru",  // Add vehicle ID if missing
+                            "vehicle_id": queue_name.strip_prefix("telemetry_").unwrap_or("unknown").to_string(),  // Add vehicle ID if missing
                             "pitch": json_data["pitch"].as_f64().unwrap_or(0.0) as f32,
                             "yaw": json_data["yaw"].as_f64().unwrap_or(0.0) as f32,
                             "roll": json_data["roll"].as_f64().unwrap_or(0.0) as f32,
