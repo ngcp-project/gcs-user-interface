@@ -1,17 +1,10 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import HomeScreen from "../views/HomeScreen.vue";
 import StaticScreen from "../views/StaticScreen.vue";
-import Cam2Focus from "../views/Cam2Focus.vue";
-import CamFocus from "../views/CamFocus.vue";
-import MissionInitialization from "../views/MissionInitialization.vue";
 
 const routes = [
   { path: "/", component: HomeScreen },
-  { path: "/StaticScreen", component: StaticScreen },
-  { path: "/MissionInitialization", component: MissionInitialization },
-  { path: "/2", component: Cam2Focus },
-  // { path: '/CamFocus/:id', component: CamFocus },
-  { path: "/CamFocus/:id/:vehicleID", component: CamFocus } // passing vehicle id (name)
+  { path: "/StaticScreen", component: StaticScreen }
 ];
 
 const router = createRouter({
