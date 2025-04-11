@@ -98,8 +98,9 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
   getMissionData: (missionId: number) =>
     get().state.missions.find((mission) => mission.mission_id === missionId),
 
-  setMissionData: async (missionData: MissionStruct) =>
-    await taurpc.mission.set_mission_data(missionData),
+  renameMission: async (missionId: number, missionName: string) => {
+    return await taurpc.mission.rename_mission(missionId, missionName);
+  },
 
   createNewMission: async (missionName: string) => {
     return await taurpc.mission.create_mission(missionName);
@@ -131,6 +132,13 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
 
   deleteStage: async (missionId: number, vehicleName: VehicleEnum, stageId: number) =>
     await taurpc.mission.delete_stage(missionId, vehicleName, stageId),
+
+  renameStage: async (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    stageId: number,
+    stageName: string
+  ) => await taurpc.mission.rename_stage(missionId, vehicleName, stageId, stageName),
 
   transitionStage: async (missionId: number, vehicleName: VehicleEnum) => {
     return await taurpc.mission.transition_stage(missionId, vehicleName);

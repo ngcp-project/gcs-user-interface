@@ -6,7 +6,7 @@ import {
   VehicleStruct,
   ZoneType,
   ZonesStruct,
-  GeoCoordinateStruct,
+  GeoCoordinateStruct
 } from "@/lib/bindings";
 
 export type ViewType = "mission" | "vehicle" | "stage" | "zone";
@@ -33,10 +33,10 @@ export interface MissionStore {
   setCurrentVehicleName: (vehicleName: VehicleEnum | null) => void;
   setCurrentStageID: (stageId: number | null) => void;
 
-  // Mission Data 
+  // Mission Data
   getAllMissions: () => MissionStruct[];
   getMissionData: (missionId: number) => MissionStruct | undefined;
-  setMissionData: (missionData: MissionStruct) => Promise<null>;
+  renameMission: (missionId: number, missionName: string) => Promise<null>;
   createNewMission: (missionName: string) => Promise<null>;
   deleteMission: (missionId: number) => Promise<null>;
 
@@ -52,6 +52,12 @@ export interface MissionStore {
   ) => StageStruct | undefined;
   addStage: (missionId: number, vehicleName: VehicleEnum, stageName: string) => Promise<null>;
   deleteStage: (missionId: number, vehicleName: VehicleEnum, stageId: number) => Promise<null>;
+  renameStage: (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    stageId: number,
+    stageName: string
+  ) => Promise<null>;
   transitionStage: (missionId: number, vehicleName: VehicleEnum) => Promise<null>;
 
   // Zone Data
