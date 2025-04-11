@@ -26,7 +26,6 @@ const toggleVisibility = () => {
   isVisible.value = !isVisible.value;
 };
 
-
 const currentMissionId = missionStore.view.currentMissionId;
 const currentVehicleName = missionStore.view.currentVehicleName;
 
@@ -35,17 +34,27 @@ const stage = computed(() => {
     return missionStore.getStageData(currentMissionId, currentVehicleName, props.stageID);
 });
 
+const handleStageNameChange = (event: Event) => {
+  if (currentMissionId === null || currentVehicleName === null) return;
+  const newName = (event.target as HTMLInputElement).value;
+  missionStore.renameStage(currentMissionId, currentVehicleName, props.stageID, newName);
+};
 </script>
 
 <template>
   <Card v-if="stage" class="relative m-2 p-2">
     <!-- Stage Title -->
     <CardTitle class="flex items-center gap-2">
-      <Input v-model="stage.stage_name" class="flex-1" />
+      <Input
+        @blur="handleStageNameChange"
+        @keyup.enter="handleStageNameChange"
+        v-model="stage.stage_name"
+        class="flex-1"
+      />
       <!-- Trash Icon -->
-      <Trash2 
+      <Trash2
         @click="missionStore.deleteStage(currentMissionId, currentVehicleName, props.stageID)"
-        class="h-5 w-5 text-foreground hover:text-destructive cursor-pointer" 
+        class="h-5 w-5 cursor-pointer text-foreground hover:text-destructive"
       />
     </CardTitle>
 
@@ -58,10 +67,14 @@ const stage = computed(() => {
       <div class="flex w-full items-center justify-between">
         <span class="font-semibold">Search Area</span>
         <div class="flex gap-x-2">
-          <Pencil class="h-5 w-5 cursor-pointer text-secondary-foreground hover:text-secondary-foreground/80" />
-          <component :is="isVisible ? Eye : EyeOff"
+          <Pencil
             class="h-5 w-5 cursor-pointer text-secondary-foreground hover:text-secondary-foreground/80"
-            @click="toggleVisibility" />
+          />
+          <component
+            :is="isVisible ? Eye : EyeOff"
+            class="h-5 w-5 cursor-pointer text-secondary-foreground hover:text-secondary-foreground/80"
+            @click="toggleVisibility"
+          />
         </div>
       </div>
     </CardContent>

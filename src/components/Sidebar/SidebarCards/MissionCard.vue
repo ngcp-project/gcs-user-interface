@@ -5,17 +5,11 @@ import { Input } from "@/components/ui/input";
 import { computed } from "vue";
 import { Trash2 } from "lucide-vue-next";
 import { missionStore } from "@/lib/MissionStore";
+import { event } from "@tauri-apps/api";
 
 const props = defineProps<{
   missionId: number;
 }>();
-
-const mission = computed(() => missionStore.getMissionData(props.missionId));
-
-const handleZoneButtonClick = () => {
-  missionStore.setCurrentView("zone");
-  missionStore.setCurrentMissionID(props.missionId);
-};
 
 // Status Styles
 const statusStyles = {
@@ -27,9 +21,17 @@ const statusStyles = {
   }
 };
 
-const handleZoneClick = () => {
-  missionStore.setCurrentMissionID(props.missionId);
+const mission = computed(() => missionStore.getMissionData(props.missionId));
+
+const handleZoneButtonClick = () => {
   missionStore.setCurrentView("zone");
+  missionStore.setCurrentMissionID(props.missionId);
+};
+
+// Triggered on blur (unforcused) or enter key
+const handleMissionNameChange = (event: Event) => {
+  const newName = (event.target as HTMLInputElement).value;
+  missionStore.renameMission(props.missionId, newName);
 };
 </script>
 
@@ -37,14 +39,16 @@ const handleZoneClick = () => {
   <Card v-if="mission" class="relative m-2 bg-sidebar-foreground p-2 text-foreground">
     <!-- Mission Title -->
     <CardTitle class="flex items-center gap-2">
-      <Input 
-        v-if="mission.mission_status === 'Inactive' "
-        v-model="mission.mission_name" 
+      <Input
+        @blur="handleMissionNameChange"
+        @keyup.enter="handleMissionNameChange"
+        v-if="mission.mission_status === 'Inactive'"
+        v-model="mission.mission_name"
         class="flex-1"
       />
       <span v-else class="flex-1">
         {{ mission.mission_name }}
-      </span> 
+      </span>
 
       <!-- Trash Icon -->
       <div v-if="mission.mission_status == 'Inactive'" class="cursor-pointer">

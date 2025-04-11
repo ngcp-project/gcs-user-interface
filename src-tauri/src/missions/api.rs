@@ -4,18 +4,20 @@ use tauri::{AppHandle, Runtime};
 use taurpc;
 use tokio::sync::Mutex;
 
-// Define the MissionApiImpl struct that contains a mutable MissionsStruct
+/*==============================================================================
+ * MissionApiImpl Structure and Default Implementation
+ *============================================================================*/
+
+/// Mission API implementation containing mission state
 #[derive(Clone)]
 pub struct MissionApiImpl {
     state: Arc<Mutex<MissionsStruct>>,
 }
 
-// Default implementation for MissionApiImpl that sets the initial state
-// Initializes mission state when calling MissionApiImpl::default()
 impl Default for MissionApiImpl {
+    /// Initializes mission state with default values
+    /// TODO: Replace with proper database initialization later
     fn default() -> Self {
-        // Use long default state for now
-        // Remove later
         let initial_state = MissionsStruct {
             current_mission: 0,
             missions: vec![MissionStruct {
@@ -55,19 +57,23 @@ impl Default for MissionApiImpl {
             }],
         };
 
-        // Create a new instance of MissionApiImpl with the initial state
         Self::new(initial_state)
     }
 }
 
+/*==============================================================================
+ * MissionApiImpl Methods
+ *============================================================================*/
+
 impl MissionApiImpl {
-    // Constructor for MissionApiImpl
+    /// Create new instance with initial state
     pub fn new(initial_state: MissionsStruct) -> Self {
-        // Must wrap the state in an Arc<Mutex<>>
         Self {
             state: Arc::new(Mutex::new(initial_state)),
         }
     }
+
+    /// Create default stage configuration
     pub fn create_default_stage(name: &str, id: u32) -> StageStruct {
         StageStruct {
             stage_name: name.to_string(),
@@ -76,6 +82,8 @@ impl MissionApiImpl {
             search_area: vec![],
         }
     }
+
+    /// Create default mission configuration
     pub fn create_default_mission(name: &str, id: u32) -> MissionStruct {
         MissionStruct {
             mission_name: name.to_string(),
@@ -110,8 +118,9 @@ impl MissionApiImpl {
             },
         }
     }
-    // Helper method to emit state changes
-    // Use whenever state needs to update
+
+    /// Emit state changes to frontend
+    /// Should be called after any state modification
     fn emit_state_update(
         &self,
         app_handle: &AppHandle<impl Runtime>,
@@ -123,25 +132,35 @@ impl MissionApiImpl {
     }
 }
 
-#[taurpc::procedures(
-  event_trigger = MissionEventTrigger, // Define the event trigger for the mission api (used in emit_state_update)
-  export_to = "../src/lib/bindings.ts", // Export the API to the bindings file
-  path = "mission" // Namespace for the mission api
-)]
+/*==============================================================================
+ * MissionApi Trait Definition
+ *============================================================================*/
 
-// Define the MissionApi trait with the required methods
+#[taurpc::procedures(
+    event_trigger = MissionEventTrigger,
+    export_to = "../src/lib/bindings.ts",
+    path = "mission"
+)]
 pub trait MissionApi {
+    // ----------------------------------
+    // Event Handlers
+    // ----------------------------------
     #[taurpc(event)]
     async fn on_updated(new_data: MissionsStruct);
-    async fn get_default_data() -> MissionsStruct;
 
-    // State initialization
+    // ----------------------------------
+    // State Management
+    // ----------------------------------
+    async fn get_default_data() -> MissionsStruct;
     async fn get_all_missions() -> MissionsStruct;
 
-    // Mission Data
-    async fn set_mission_data(
+    // ----------------------------------
+    // Mission Operations
+    // ----------------------------------
+    async fn rename_mission(
         app_handle: AppHandle<impl Runtime>,
-        mission_data: MissionStruct,
+        mission_id: u32,
+        mission_name: String,
     ) -> Result<(), String>;
     async fn get_mission_data(mission_id: u32) -> MissionStruct;
     async fn create_mission(
@@ -153,7 +172,9 @@ pub trait MissionApi {
         mission_id: u32,
     ) -> Result<(), String>;
 
-    // Vehicle Data
+    // ----------------------------------
+    // Vehicle Operations
+    // ----------------------------------
     async fn set_auto_mode(
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
@@ -161,7 +182,9 @@ pub trait MissionApi {
         is_auto: bool,
     ) -> Result<(), String>;
 
-    // Stage Data
+    // ----------------------------------
+    // Stage Operations
+    // ----------------------------------
     async fn add_stage(
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
@@ -174,13 +197,22 @@ pub trait MissionApi {
         vehicle_name: VehicleEnum,
         stage_id: u32,
     ) -> Result<(), String>;
+    async fn rename_stage(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        vehicle_name: VehicleEnum,
+        stage_id: u32,
+        stage_name: String,
+    ) -> Result<(), String>;
     async fn transition_stage(
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
         vehicle_name: VehicleEnum,
     ) -> Result<(), String>;
 
-    // Zone Data
+    // ----------------------------------
+    // Zone Operations
+    // ----------------------------------
     async fn add_zone(
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
@@ -194,32 +226,49 @@ pub trait MissionApi {
     ) -> Result<(), String>;
 }
 
-// Implement the MissionApi trait methods
+/*==============================================================================
+ * MissionApi Trait Implementation
+ *============================================================================*/
+
 #[taurpc::resolvers]
 impl MissionApi for MissionApiImpl {
-    // State initialization
-    async fn get_mission_data(self, mission_id: u32) -> MissionStruct {
-        // search for mission_id field in missions array
-        let state = self.state.lock().await;
-
-        for mission in state.missions.iter() {
-            if mission.mission_id == mission_id {
-                return mission.clone();
-            }
-        }
-        panic!("Mission not found");
+    // ----------------------------------
+    // State Management Implementations
+    // ----------------------------------
+    async fn get_default_data(self) -> MissionsStruct {
+        Self::default().state.lock().await.clone()
     }
 
-    // Mission Data
-    async fn set_mission_data(
+    async fn get_all_missions(self) -> MissionsStruct {
+        self.state.lock().await.clone()
+    }
+
+    // ----------------------------------
+    // Mission Operations Implementations
+    // ----------------------------------
+    async fn get_mission_data(self, mission_id: u32) -> MissionStruct {
+        let state = self.state.lock().await;
+        state
+            .missions
+            .iter()
+            .find(|m| m.mission_id == mission_id)
+            .map(|m| m.clone())
+            .unwrap_or_else(|| panic!("Mission not found"))
+    }
+
+    async fn rename_mission(
         self,
         app_handle: AppHandle<impl Runtime>,
-        mission_data: MissionStruct,
+        mission_id: u32,
+        mission_name: String,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
-        let new_mission = mission_data.clone();
-        state.missions[new_mission.mission_id as usize] = mission_data;
-        println!("Mission data set: {:?}", state);
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found")?;
+        mission.mission_name = mission_name;
         self.emit_state_update(&app_handle, &state)
     }
 
@@ -229,14 +278,11 @@ impl MissionApi for MissionApiImpl {
         mission_name: String,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
-
-        // TODO: fix to use database defined id
-        let new_mission_data = Self::create_default_mission(&mission_name, rand::random::<u32>());
-
-        state.missions.push(new_mission_data);
-        println!("Mission length: {:?}", state.missions.len());
+        let new_mission = Self::create_default_mission(&mission_name, rand::random::<u32>());
+        state.missions.push(new_mission);
         self.emit_state_update(&app_handle, &state)
     }
+
     async fn delete_mission(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -247,18 +293,22 @@ impl MissionApi for MissionApiImpl {
             .missions
             .iter()
             .position(|m| m.mission_id == mission_id)
-            .ok_or("Mission not found".to_string())?;
+            .ok_or("Mission not found")?;
+
         if !matches!(
             state.missions[mission_index].mission_status,
-            MissionStageStatusEnum::Inactive,
+            MissionStageStatusEnum::Inactive
         ) {
-            return Err("Cannot delete active or past missions".to_string());
+            return Err("Cannot delete active/past missions".into());
         }
+
         state.missions.remove(mission_index);
         self.emit_state_update(&app_handle, &state)
     }
 
-    // Vehicle Data
+    // ----------------------------------
+    // Vehicle Operations Implementations
+    // ----------------------------------
     async fn set_auto_mode(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -271,22 +321,21 @@ impl MissionApi for MissionApiImpl {
             .missions
             .iter_mut()
             .find(|m| m.mission_id == mission_id)
-            .ok_or("Mission not found".to_string())?;
+            .ok_or("Mission not found")?;
 
         let vehicle = match vehicle_name {
             VehicleEnum::MEA => &mut mission.vehicles.MEA,
             VehicleEnum::ERU => &mut mission.vehicles.ERU,
-            VehicleEnum::MRA => &mut mission.vehicles.MRA,
+            VehicleEnum::MRA => return Err("MRA auto mode unsupported".into()),
         };
-        if matches!(vehicle_name, VehicleEnum::MRA) {
-            return Err("Auto mode is not supported for MRA".to_string());
-        }
 
         vehicle.is_auto = Some(is_auto);
         self.emit_state_update(&app_handle, &state)
     }
 
-    // Stage Data
+    // ----------------------------------
+    // Stage Operations Implementations
+    // ----------------------------------
     async fn add_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -299,20 +348,21 @@ impl MissionApi for MissionApiImpl {
             .missions
             .iter_mut()
             .find(|m| m.mission_id == mission_id)
-            .ok_or("Mission not found".to_string())?;
+            .ok_or("Mission not found")?;
 
         let vehicle = match vehicle_name {
             VehicleEnum::MEA => &mut mission.vehicles.MEA,
             VehicleEnum::ERU => &mut mission.vehicles.ERU,
             VehicleEnum::MRA => &mut mission.vehicles.MRA,
         };
-        // TODO: fix to use database defined id
+
         vehicle.stages.push(Self::create_default_stage(
             &stage_name,
             rand::random::<u32>(),
         ));
         self.emit_state_update(&app_handle, &state)
     }
+
     async fn delete_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -325,28 +375,52 @@ impl MissionApi for MissionApiImpl {
             .missions
             .iter_mut()
             .find(|m| m.mission_id == mission_id)
-            .ok_or("Mission not found".to_string())?;
+            .ok_or("Mission not found")?;
+
         let vehicle = match vehicle_name {
             VehicleEnum::MEA => &mut mission.vehicles.MEA,
             VehicleEnum::ERU => &mut mission.vehicles.ERU,
             VehicleEnum::MRA => &mut mission.vehicles.MRA,
         };
 
-        if vehicle.stages.len() < 1 {
-            return Err("Vehicle has no stages".to_string());
+        let stage_index = vehicle
+            .stages
+            .iter()
+            .position(|s| s.stage_id == stage_id)
+            .ok_or("Stage not found")?;
+
+        if vehicle.current_stage >= stage_index as u32 {
+            return Err("Cannot delete current/completed stage".into());
         }
 
-        let stage_index = vehicle.stages.iter().position(|s| s.stage_id == stage_id);
-
-        if stage_index == None {
-            return Err("Stage not found".to_string());
-        }
-
-        if vehicle.current_stage >= (stage_index.unwrap() as u32) {
-            return Err("Cannot delete already completed or current stage".to_string());
-        }
-
-        vehicle.stages.remove(stage_index.unwrap());
+        vehicle.stages.remove(stage_index);
+        self.emit_state_update(&app_handle, &state)
+    }
+    async fn rename_stage(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        vehicle_name: VehicleEnum,
+        stage_id: u32,
+        stage_name: String,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found")?;
+        let vehicle = match vehicle_name {
+            VehicleEnum::MEA => &mut mission.vehicles.MEA,
+            VehicleEnum::ERU => &mut mission.vehicles.ERU,
+            VehicleEnum::MRA => &mut mission.vehicles.MRA,
+        };
+        let stage = vehicle
+            .stages
+            .iter_mut()
+            .find(|s| s.stage_id == stage_id)
+            .ok_or("Stage not found")?;
+        stage.stage_name = stage_name;
         self.emit_state_update(&app_handle, &state)
     }
     async fn transition_stage(
@@ -360,30 +434,31 @@ impl MissionApi for MissionApiImpl {
             .missions
             .iter_mut()
             .find(|m| m.mission_id == mission_id)
-            .ok_or("Mission not found".to_string())?;
-        // Pass by reference to avoid partial move
+            .ok_or("Mission not found")?;
+
         let vehicle = match vehicle_name {
             VehicleEnum::MEA => &mut mission.vehicles.MEA,
             VehicleEnum::ERU => &mut mission.vehicles.ERU,
             VehicleEnum::MRA => &mut mission.vehicles.MRA,
         };
 
+        // Mark current stage as complete
         vehicle.stages[vehicle.current_stage as usize].stage_status =
             MissionStageStatusEnum::Complete;
 
-        if (vehicle.current_stage as usize) < vehicle.stages.len() {
+        // Transition to next stage if available
+        if (vehicle.current_stage as usize) < vehicle.stages.len() - 1 {
             vehicle.current_stage += 1;
             vehicle.stages[vehicle.current_stage as usize].stage_status =
                 MissionStageStatusEnum::Active;
-
-            println!("Vehicle is at last stage");
         }
 
-        println!("Vehicle data set: {:?}", vehicle);
         self.emit_state_update(&app_handle, &state)
     }
 
-    // Zone Data
+    // ----------------------------------
+    // Zone Operations Implementations
+    // ----------------------------------
     async fn add_zone(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -391,20 +466,15 @@ impl MissionApi for MissionApiImpl {
         zone_type: ZoneType,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
-
         let mission = state
             .missions
             .iter_mut()
             .find(|m| m.mission_id == mission_id)
-            .ok_or("Mission not found".to_string())?;
+            .ok_or("Mission not found")?;
 
         match zone_type {
-            ZoneType::KeepIn => {
-                mission.zones.keep_in_zones.push(GeofenceType::default());
-            }
-            ZoneType::KeepOut => {
-                mission.zones.keep_out_zones.push(GeofenceType::default());
-            }
+            ZoneType::KeepIn => mission.zones.keep_in_zones.push(GeofenceType::default()),
+            ZoneType::KeepOut => mission.zones.keep_out_zones.push(GeofenceType::default()),
         }
 
         self.emit_state_update(&app_handle, &state)
@@ -418,39 +488,27 @@ impl MissionApi for MissionApiImpl {
         zone_index: u32,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
-
         let mission = state
             .missions
             .iter_mut()
             .find(|m| m.mission_id == mission_id)
-            .ok_or("Mission not found".to_string())?;
+            .ok_or("Mission not found")?;
 
         match zone_type {
             ZoneType::KeepIn => {
-                if zone_index > mission.zones.keep_in_zones.len() as u32 {
-                    return Err("Keep In zone index out of range".to_string());
+                if zone_index >= mission.zones.keep_in_zones.len() as u32 {
+                    return Err("KeepIn index out of range".into());
                 }
                 mission.zones.keep_in_zones.remove(zone_index as usize);
             }
             ZoneType::KeepOut => {
-                if zone_index > mission.zones.keep_out_zones.len() as u32 {
-                    return Err("Keep Out zone index out of range".to_string());
+                if zone_index >= mission.zones.keep_out_zones.len() as u32 {
+                    return Err("KeepOut index out of range".into());
                 }
                 mission.zones.keep_out_zones.remove(zone_index as usize);
             }
         }
 
         self.emit_state_update(&app_handle, &state)
-    }
-
-    // Return the default state of the mission
-    // used by frontend to first initialize the mission
-    async fn get_default_data(self) -> MissionsStruct {
-        Self::default().state.lock().await.clone()
-    }
-
-    // Get the current state of the mission
-    async fn get_all_missions(self) -> MissionsStruct {
-        self.state.lock().await.clone()
     }
 }
