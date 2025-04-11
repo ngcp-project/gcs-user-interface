@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import Battery from "../components/VehicleStatus/VehicleBattery.vue";
-import Connection from "../components/VehicleStatus/VehicleConnection.vue";
-import Camera from "../components/CameraFeed.vue";
-import CameraCarousel from "../components/CameraCarousel.vue";
+import Cameras from "@/components/Cameras.vue";
 import HomeSidebar from "@/components/HomeSidebar.vue";
 
 const vehicleDataExample: {
@@ -42,7 +39,7 @@ const vehicleDataExample: {
 <template>
   <div class="flex w-full">
     <HomeSidebar :vehicles="vehicleDataExample" />
-    <CameraCarousel />
+    <Cameras />
     <!-- <div class="grid grid-cols-2 grid-rows-2 w-full h-[90dvh] gap-1 p-1">
         <div
           v-for="(vehicle, index) in vehicleDataExample"
