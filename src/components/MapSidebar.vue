@@ -36,6 +36,8 @@ const handleBack = () => {
     missionStore.setCurrentView('vehicle');
   } else if (currentView.value === 'vehicle') {
     missionStore.setCurrentView('mission');
+  }else if (currentView.value === 'zone') {
+    missionStore.setCurrentView('mission');
   }
 };
 </script>
@@ -46,7 +48,7 @@ const handleBack = () => {
       <div class="flex items-center gap-2">
         <!-- Back Button -->
         <button
-          v-if="currentView === 'stage' || currentView === 'vehicle'"
+          v-if="currentView === 'stage' || currentView === 'vehicle' || currentView === 'zone'"
           @click="handleBack"
           class="absolute left-4 text-primary-foreground bg-transparent"
         >
@@ -57,7 +59,10 @@ const handleBack = () => {
           {{ currentTitle }}
         </span>
       </div>
-      <BreadcrumbNav :currentState="currentView" />
+      <BreadcrumbNav 
+      v-if="currentView !== 'zone'"
+      :currentState="currentView" 
+      />
     </SidebarHeader>
     <!-- Access the component from renderView -->
     <component :is="renderView[currentView].component" />
