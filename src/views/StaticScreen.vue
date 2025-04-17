@@ -3,6 +3,7 @@ import VehicleStatus from "../components/VehicleStatusComponent.vue";
 import { onMounted, ref, Ref } from "vue";
 import Map from "../components/Map.vue";
 import { Button } from "@/components/ui/button";
+import MapSidebar from "@/components/MapSidebar.vue";
 
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
 const ERU_data = ref({
@@ -141,7 +142,7 @@ const handleClearPolygons = async () => {
 </script>
 
 <template>
-  <div class="flex h-full w-[100dvw]">
+  <div class="flex h-full w-[100dvw] flex-row">
     <div class="flex-grow">
       <!-- should be fire coords -->
       <Map
@@ -160,107 +161,41 @@ const handleClearPolygons = async () => {
       />
     </div>
 
-    <div class="flex h-full w-fit max-w-[300px] flex-none flex-col gap-[6px] overflow-y-scroll bg-background p-[6px]">
-      <!-- Add Geoman Controls Section -->
-      <div class="flex flex-col gap-2 p-2 bg-secondary/10 rounded-lg">
-        <h3 class="text-lg font-semibold">Map Controls</h3>
-        <div class="grid grid-cols-2 gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            @click="handleDrawPolygon"
-          >
-            Draw
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            @click="handleEditPolygon"
-          >
-            Edit
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            @click="handleDragPolygon"
-          >
-            Move
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            @click="handleRemovePolygon"
-          >
-            Delete
-          </Button>
-        </div>
-        <div class="grid grid-cols-2 gap-2 mt-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            class="bg-green-500/10 hover:bg-green-500/20"
-            @click="handleZoneIn"
-          >
-            Zone In
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            class="bg-red-500/10 hover:bg-red-500/20"
-            @click="handleZoneOut"
-          >
-            Zone Out
-          </Button>
-        </div>
-        <Button 
-          variant="outline" 
+    <!-- <div
+      class="flex h-full w-fit max-w-[300px] flex-none flex-col gap-[6px] overflow-y-scroll bg-background p-[6px]"
+    > -->
+    <!-- Add Geoman Controls Section -->
+    <div class="flex flex-col gap-2 rounded-lg bg-secondary/10 p-2">
+      <h3 class="text-lg font-semibold">Map Controls</h3>
+      <div class="grid grid-cols-2 gap-2">
+        <Button variant="outline" size="sm" @click="handleDrawPolygon"> Draw </Button>
+        <Button variant="outline" size="sm" @click="handleEditPolygon"> Edit </Button>
+        <Button variant="outline" size="sm" @click="handleDragPolygon"> Move </Button>
+        <Button variant="outline" size="sm" @click="handleRemovePolygon"> Delete </Button>
+      </div>
+      <div class="mt-2 grid grid-cols-2 gap-2">
+        <Button
+          variant="outline"
           size="sm"
-          @click="handleClearPolygons"
+          class="bg-green-500/10 hover:bg-green-500/20"
+          @click="handleZoneIn"
         >
-          Clear All
+          Zone In
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          class="bg-red-500/10 hover:bg-red-500/20"
+          @click="handleZoneOut"
+        >
+          Zone Out
         </Button>
       </div>
-
-      <!-- Existing Vehicle Status Components -->
-      <VehicleStatus
-        :batteryPct="ERU_data.batteryPct"
-        :latency="ERU_data.lastUpdated"
-        :coordinates="ERU_data.coordinates"
-        :vehicleName="'ERU'"
-        :vehicleStatus="ERU_data.status"
-        :isInKeepInZone="ERU_data.inKeepIn"
-        :isInKeepOutZone="ERU_data.inKeepOut"
-      />
-      <VehicleStatus
-        :batteryPct="MEA_data.batteryPct"
-        :latency="MEA_data.lastUpdated"
-        :coordinates="MEA_data.coordinates"
-        :vehicleName="'MEA'"
-        :vehicleStatus="MEA_data.status"
-        :isInKeepInZone="MEA_data.inKeepIn"
-        :isInKeepOutZone="MEA_data.inKeepOut"
-      />
-      <VehicleStatus
-        :batteryPct="MRA_data.batteryPct"
-        :latency="MRA_data.lastUpdated"
-        :coordinates="MRA_data.coordinates"
-        :vehicleName="'MRA'"
-        :vehicleStatus="MRA_data.status"
-        :isInKeepInZone="MRA_data.inKeepIn"
-        :isInKeepOutZone="MRA_data.inKeepOut"
-      />
-      <VehicleStatus
-        :batteryPct="FRA_data.batteryPct"
-        :latency="FRA_data.lastUpdated"
-        :coordinates="FRA_data.coordinates"
-        :vehicleName="'FRA'"
-        :vehicleStatus="FRA_data.status"
-        :isInKeepInZone="FRA_data.inKeepIn"
-        :isInKeepOutZone="FRA_data.inKeepOut"
-      />
+      <Button variant="outline" size="sm" @click="handleClearPolygons"> Clear All </Button>
     </div>
 
-    <!-- <div @keepIn="receiveKeepInEmit"></div> -->
+    <MapSidebar side="right" />
+    <!-- </div> -->
   </div>
 </template>
 

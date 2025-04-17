@@ -38,7 +38,7 @@ const nav_links = [
 </script>
 
 <template>
-  <nav class="h-fit bg-background p-3">
+  <nav class="h-fit bg-background p-3 z-50">
     <div class="flex items-center justify-between gap-2">
       <router-link to="/" class="text-3xl font-bold tracking-wider text-[#249b73]">
         <span class="hover:text-[#646cff]">NG</span>CP

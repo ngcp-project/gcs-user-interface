@@ -15,8 +15,9 @@
   "dependencies": {
     "@geoman-io/leaflet-geoman-free": "^2.18.3",
     "@rushstack/eslint-patch": "^1.10.3",
-    "@tauri-apps/api": "^1.4.0",
-    "@vueuse/core": "^12.7.0",
+    "@tauri-apps/api": "2.0.0",
+    "@tauri-apps/plugin-shell": "~2",
+    "@vueuse/core": "^12.8.2",
     "axios": "^1.6.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -28,15 +29,17 @@
     "reka-ui": "^2.0.2",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
+    "taurpc": "^1.8.0",
     "vue": "^3.2.45",
     "vue-flight-indicators": "^0.1.1",
     "vue-router": "^4.3.0",
-    "ws": "^8.16.0"
+    "ws": "^8.16.0",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@iconify-json/radix-icons": "^1.1.14",
     "@iconify/vue": "^4.1.2",
-    "@tauri-apps/cli": "^1.6.3",
+    "@tauri-apps/cli": "2.0.0",
     "@types/leaflet": "^1.9.12",
     "@types/node": "^18.19.34",
     "@vitejs/plugin-vue": "^4.0.0",

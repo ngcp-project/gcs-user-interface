@@ -1,15 +1,20 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+use taurpc::Router;
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+mod missions;
+use missions::api::{MissionApi, MissionApiImpl};
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    // Initialize apis here
+    let missions_api = MissionApiImpl::default();
+
+    let router = Router::new().merge(missions_api.into_handler());
+
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .plugin(tauri_plugin_shell::init())
+        .invoke_handler(router.into_handler())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
