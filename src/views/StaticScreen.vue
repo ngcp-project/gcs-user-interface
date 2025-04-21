@@ -4,7 +4,7 @@ import { onMounted, ref, Ref } from "vue";
 import Map from "../components/Map.vue";
 import { Button } from "@/components/ui/button";
 import MapSidebar from "@/components/MapSidebar.vue";
-
+import mapStore from "@/lib/MapStore";
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
 const ERU_data = ref({
   batteryPct: 0,
@@ -168,7 +168,7 @@ const handleClearPolygons = async () => {
     <div class="flex flex-col gap-2 rounded-lg bg-secondary/10 p-2">
       <h3 class="text-lg font-semibold">Map Controls</h3>
       <div class="grid grid-cols-2 gap-2">
-        <Button variant="outline" size="sm" @click="handleDrawPolygon"> Draw </Button>
+        <Button variant="outline" size="sm" @click="mapStore.toggleDrawMode"> Draw </Button>
         <Button variant="outline" size="sm" @click="handleEditPolygon"> Edit </Button>
         <Button variant="outline" size="sm" @click="handleDragPolygon"> Move </Button>
         <Button variant="outline" size="sm" @click="handleRemovePolygon"> Delete </Button>
