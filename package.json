@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@rushstack/eslint-patch": "^1.10.3",
-    "@tauri-apps/api": "2.0.0",
+    "@tauri-apps/api": "^2.5.0",
     "@tauri-apps/plugin-shell": "~2",
     "@vueuse/core": "^12.7.0",
     "axios": "^1.6.8",
