@@ -48,60 +48,29 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Icon } from "@iconify/vue";
+import { createTauRPCProxy } from "@/lib/commands_bindings";
 
-const props = defineProps<{
-  vehicleName: string;
-}>();
+const { vehicleName } = defineProps<{ vehicleName: string }>();
 
 const vehicle_names = ["ERU", "MEA", "MRA", "FRA"];
+const commands = createTauRPCProxy().commands;
 
-function sendStopCommand() {
-  const promises: any[] = [];
-  if (props.vehicleName == "all") {
-    // send Emergency Stop command for all vehicles
-    vehicle_names.forEach((name) => {
-      const promise = fetch("http://localhost:5135/EmergencyStop", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ Key: name })
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => console.log(data))
-        .catch((error) => console.error("Error sending stop command:", error));
-      promises.push(promise);
-    });
-
-    Promise.all(promises)
-      .then((data) => {
-        console.log("Sent stop commands to all four vehicles!");
-      })
-      .catch((error) => {
-        console.error("Error sending stop command:", error);
-      });
-  } else {
-    // send Emergency Stop command for specific vehicle
-    fetch("http://localhost:5135/EmergencyStop", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ Key: props.vehicleName })
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => console.log(data))
-      .catch((error) => console.error("Error sending stop command:", error));
-  } //end else
+async function sendStopCommand() {
+  try {
+    if (vehicleName == "all") {
+      // Send Emergency Stop command for all vehicles
+      const promises = vehicle_names.map(name => 
+        commands.send_emergency_stop(name)
+      );
+      await Promise.all(promises);
+      console.log("Sent stop commands to all vehicles!");
+    } else {
+      // Send Emergency Stop command for specific vehicle
+      await commands.send_emergency_stop(vehicleName);
+      console.log(`Sent stop command to vehicle ${vehicleName}`);
+    }
+  } catch (error) {
+    console.error("Error sending stop command:", error);
+  }
 }
 </script>
