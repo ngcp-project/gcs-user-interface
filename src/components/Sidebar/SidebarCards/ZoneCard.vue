@@ -5,18 +5,19 @@ import { computed } from 'vue'
 import { Trash2, Eye, EyeOff, Pencil, Square, Plus } from 'lucide-vue-next'
 import { missionStore } from "@/lib/MissionStore";
 import { ZoneType } from "@/lib/bindings";
+import { title } from 'process';
 
 const props = defineProps<{
   zoneType: ZoneType
 }>()
 
-// Title Styles
-const titleStyles = computed(() => ({
+// Title Color Styles
+const titleStyles = {
   titleColor: {
     'In': 'bg-chart-2',
     'Out': 'bg-destructive'
   }
-}))
+}
 
 const zoneType = {
   KeepIn: "In",
@@ -25,7 +26,7 @@ const zoneType = {
 
 // Track zones
 const currentMissionId = missionStore.view.currentMissionId;
-const mission = missionStore.getMissionData(currentMissionId);
+const mission = currentMissionId !== null ? missionStore.getMissionData(currentMissionId) : null;
 
 const zones = computed(() => currentMissionId !== null ? missionStore.getZoneData(currentMissionId, props.zoneType) : [])
 
@@ -40,7 +41,7 @@ console.log(zones)
 
 <template>
   <Card class="p-2 m-2 relative">
-    <!-- Mission Title -->
+    <!-- Zone Card Title -->
     <CardTitle class="text-x2 font-bold flex items-center">
       Keep {{ zoneType }}
       <Square class="w-5 h-5 ml-3 rounded-sm text-transparent" :class="titleStyles.titleColor[zoneType]" />
@@ -51,19 +52,27 @@ console.log(zones)
       <div v-for="(zone, index) in zones" :key="props.zoneType"
         class="flex items-center justify-between w-full pb-1 pt-1">
         <span class="font-semibold">Zone {{ index }}</span>
-        <div v-if="mission?.mission_status === 'Inactive'" class="flex gap-x-2">
-          <Pencil class="w-5 h-5 text-gray-700 hover:text-gray-500 cursor-pointer" />
+        <div class="flex gap-x-2">
+          <Pencil 
+            v-if="mission?.mission_status !== 'Complete'"
+            class="w-5 h-5 text-gray-700 hover:text-gray-500 cursor-pointer" 
+          />
           <component :is="zone.isVisible ? Eye : EyeOff"
             class="w-5 h-5 text-gray-700 hover:text-gray-500 cursor-pointer" @click="toggleVisibility(zone.id)" />
-          <Trash2 @click="missionStore.deleteZone(currentMissionId, props.zoneType, index)"
-            class="w-5 h-5 text-gray-700 hover:text-gray-500 cursor-pointer" />
+          <Trash2
+            v-if="mission?.mission_status !== 'Complete' && currentMissionId !== null"
+            @click="missionStore.deleteZone(currentMissionId, props.zoneType, index)"
+            class="w-5 h-5 text-gray-700 hover:text-gray-500 cursor-pointer" 
+          />
         </div>
       </div>
     </CardContent>
 
     <!-- Add Zone Button -->
-    <CardFooter v-if="mission?.mission_status === 'Inactive'" class="mt-4 justify-center items-center">
-      <Button @click="missionStore.addZone(currentMissionId, props.zoneType)"
+    <CardFooter v-if="mission?.mission_status !== 'Complete'" class="mt-4 justify-center items-center">
+      <Button 
+        v-if="currentMissionId !== null"
+        @click="missionStore.addZone(currentMissionId, props.zoneType)"
         class="text-fg bg-transparent shadow-none flex flex-col items-center hover:bg-transparent">
         <Plus class="w-5 h-5" />
         Add Zone

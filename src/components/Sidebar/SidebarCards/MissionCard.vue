@@ -28,7 +28,7 @@ const handleZoneButtonClick = () => {
   missionStore.setCurrentMissionID(props.missionId);
 };
 
-// Triggered on blur (unforcused) or enter key
+// Triggered on blur (unfocused) or enter key
 const handleMissionNameChange = (event: Event) => {
   const newName = (event.target as HTMLInputElement).value;
   missionStore.renameMission(props.missionId, newName);
