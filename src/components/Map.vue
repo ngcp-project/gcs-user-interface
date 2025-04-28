@@ -6,6 +6,7 @@
       v-model:zoom="mapStore.zoom"
       :use-global-leaflet="true"
       :center="[mapStore.mapOrigin[0] as LatLng[0], mapStore.mapOrigin[1] as LatLng[1]]"
+      @ready="handleReady"
     >
       <GeomanController />
       <l-tile-layer
@@ -25,14 +26,14 @@ import "leaflet/dist/leaflet.css";
 import { ref, watch, onMounted, reactive } from "vue";
 import { LMap, LTileLayer, LPolygon, LMarker, LControl } from "@vue-leaflet/vue-leaflet";
 import { LeafletMouseEvent, LatLngTuple as LatLng, icon } from "leaflet";
-import mapStore from "@/lib/MapStore";
+import mapStore, { LeafletMapGeoman } from "@/lib/MapStore";
 import GeomanController from "@/components/map/GeomanController.vue";
 
 // Updates the store with templateRef when map component renders
-const mapRef = ref<any>(null);
-onMounted(() => {
+const mapRef = ref<LeafletMapGeoman | null>(null);
+const handleReady = () => {
   mapStore.updateMapRef(mapRef.value);
-});
+};
 </script>
 
 <style>

@@ -142,10 +142,11 @@ const handleClearPolygons = async () => {
 </script>
 
 <template>
+
   <div class="flex h-full w-[100dvw] flex-row">
+
     <div class="flex-grow">
-      <!-- should be fire coords -->
-      <Map
+       <!-- should be fire coords --> <Map
         ref="mapRef"
         :ERU_coords="ERU_data.coordinates"
         :ERU_yaw="ERU_data.yaw"
@@ -160,43 +161,11 @@ const handleClearPolygons = async () => {
         @keepOut="updateIsInKeepOut"
       />
     </div>
-
-    <!-- <div
+     <!-- <div
       class="flex h-full w-fit max-w-[300px] flex-none flex-col gap-[6px] overflow-y-scroll bg-background p-[6px]"
-    > -->
-    <!-- Add Geoman Controls Section -->
-    <div class="flex flex-col gap-2 rounded-lg bg-secondary/10 p-2">
-      <h3 class="text-lg font-semibold">Map Controls</h3>
-      <div class="grid grid-cols-2 gap-2">
-        <Button variant="outline" size="sm" @click="mapStore.toggleDrawMode"> Draw </Button>
-        <Button variant="outline" size="sm" @click="handleEditPolygon"> Edit </Button>
-        <Button variant="outline" size="sm" @click="handleDragPolygon"> Move </Button>
-        <Button variant="outline" size="sm" @click="handleRemovePolygon"> Delete </Button>
-      </div>
-      <div class="mt-2 grid grid-cols-2 gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          class="bg-green-500/10 hover:bg-green-500/20"
-          @click="handleZoneIn"
-        >
-          Zone In
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          class="bg-red-500/10 hover:bg-red-500/20"
-          @click="handleZoneOut"
-        >
-          Zone Out
-        </Button>
-      </div>
-      <Button variant="outline" size="sm" @click="handleClearPolygons"> Clear All </Button>
-    </div>
-
-    <MapSidebar side="right" />
-    <!-- </div> -->
+    > --> <MapSidebar side="right" /> <!-- </div> -->
   </div>
+
 </template>
 
 <style scoped>
@@ -228,3 +197,4 @@ const handleClearPolygons = async () => {
   width: 77%;
 }
 </style>
+
