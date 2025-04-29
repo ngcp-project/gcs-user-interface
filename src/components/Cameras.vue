@@ -70,7 +70,11 @@ whenever(emblaMainApi, (api) => {
 </script>
 
 <template>
-  <ErrorToast />
+  <!-- Toast testing bar -->
+  <div class="fixed flex z-50 justify-center pt-3 gap-3 w-full items-center">
+    <ErrorToast />
+  </div>
+
   <!-- Side-by-Side (Grid) Layout -->
   <div class="grid-container" v-if="layout === 'grid'">
     <div v-for="feed in cameraFeeds" :key="feed.id">

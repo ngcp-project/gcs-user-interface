@@ -8,17 +8,65 @@ const { toast } = useToast();
 
 <template>
   <!-- Duration 0 prevents toast from automatically disappearing -->
-  <Toaster :duration="0" />
+  <Toaster class="z-50" :duration="0" />
   <Button
     @click="
       () => {
         toast({
-          title: 'Scheduled: Catch up',
-          description: 'Friday, February 10, 2023 at 5:57 PM'
+          title: 'Error: Connection Failure',
+          description: `Unable to connect to \${vehicle}!`
         });
       }
     "
   >
-    Add to calendar
+    Connection Error
+  </Button>
+  <Button
+    @click="
+      () => {
+        toast({
+          title: 'Error: Abnormal Status',
+          description: `Abnormal \${vehicle} status (low battery, system error/failure)!`
+        });
+      }
+    "
+  >
+    Abnormal Status Error
+  </Button>
+  <Button
+    @click="
+      () => {
+        toast({
+          title: 'Warning: Signal Integrity',
+          description: `Weak signal integrity/connection lost to \${vehicle}!`
+        });
+      }
+    "
+  >
+    Signal Integrity Warning
+  </Button>
+  <Button
+    @click="
+      () => {
+        toast({
+          title: 'Warning: Keep-Out',
+          description: `\${vehicle} within \${distance} ft of keep-out zone!`
+        });
+      }
+    "
+  >
+    Keep-Out Warning
+  </Button>
+  <Button
+    @click="
+      () => {
+        toast({
+          title: 'Warning: Vehicle Proximity',
+          description: `\${vehicle1} and \${vehicle2} are within \${distance} ft of each other!`
+        });
+      }
+    "
+  >
+    Proximity Warning
   </Button>
 </template>
