@@ -1,7 +1,7 @@
 #[taurpc::ipc_type]
 #[derive(Debug)]
 pub struct MissionsStruct {
-    pub current_mission: u32,
+    pub current_mission: i32, // -1 for no mission
     pub missions: Vec<MissionStruct>,
 }
 

@@ -18,45 +18,48 @@ impl Default for MissionApiImpl {
     /// Initializes mission state with default values
     /// TODO: Replace with proper database initialization later
     fn default() -> Self {
+        // let initial_state = MissionsStruct {
+        //     current_mission: 0,
+        //     missions: vec![MissionStruct {
+        //         mission_name: "Mission 1".to_string(),
+        //         mission_id: 0,
+        //         mission_status: MissionStageStatusEnum::Active,
+        //         vehicles: VehiclesStruct {
+        //             MEA: VehicleStruct {
+        //                 vehicle_name: VehicleEnum::MEA,
+        //                 current_stage: 0,
+        //                 is_auto: Some(false),
+        //                 patient_status: Some(PatientStatusEnum::Secured),
+        //                 stages: vec![
+        //                     Self::create_default_stage("test", 0),
+        //                     Self::create_default_stage("test1", 1),
+        //                 ],
+        //             },
+        //             ERU: VehicleStruct {
+        //                 vehicle_name: VehicleEnum::ERU,
+        //                 current_stage: 0,
+        //                 is_auto: Some(false),
+        //                 patient_status: Some(PatientStatusEnum::Unsecured),
+        //                 stages: vec![],
+        //             },
+        //             MRA: VehicleStruct {
+        //                 vehicle_name: VehicleEnum::MRA,
+        //                 current_stage: 0,
+        //                 is_auto: None,
+        //                 patient_status: None,
+        //                 stages: vec![],
+        //             },
+        //         },
+        //         zones: ZonesStruct {
+        //             keep_in_zones: vec![],
+        //             keep_out_zones: vec![],
+        //         },
+        //     }],
+        // };
         let initial_state = MissionsStruct {
-            current_mission: 0,
-            missions: vec![MissionStruct {
-                mission_name: "Mission 1".to_string(),
-                mission_id: 0,
-                mission_status: MissionStageStatusEnum::Active,
-                vehicles: VehiclesStruct {
-                    MEA: VehicleStruct {
-                        vehicle_name: VehicleEnum::MEA,
-                        current_stage: 0,
-                        is_auto: Some(false),
-                        patient_status: Some(PatientStatusEnum::Secured),
-                        stages: vec![
-                            Self::create_default_stage("test", 0),
-                            Self::create_default_stage("test1", 1),
-                        ],
-                    },
-                    ERU: VehicleStruct {
-                        vehicle_name: VehicleEnum::ERU,
-                        current_stage: 0,
-                        is_auto: Some(false),
-                        patient_status: Some(PatientStatusEnum::Unsecured),
-                        stages: vec![],
-                    },
-                    MRA: VehicleStruct {
-                        vehicle_name: VehicleEnum::MRA,
-                        current_stage: 0,
-                        is_auto: None,
-                        patient_status: None,
-                        stages: vec![],
-                    },
-                },
-                zones: ZonesStruct {
-                    keep_in_zones: vec![],
-                    keep_out_zones: vec![],
-                },
-            }],
+            current_mission: -1,
+            missions: vec![]
         };
-
         Self::new(initial_state)
     }
 }
@@ -168,6 +171,10 @@ pub trait MissionApi {
         mission_name: String,
     ) -> Result<(), String>;
     async fn delete_mission(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+    ) -> Result<(), String>;
+    async fn start_mission(
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
     ) -> Result<(), String>;
@@ -303,6 +310,25 @@ impl MissionApi for MissionApiImpl {
         }
 
         state.missions.remove(mission_index);
+        self.emit_state_update(&app_handle, &state)
+    }
+
+    async fn start_mission(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        
+        let idx = state.missions.iter().position(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found")?;
+        
+        if idx !=0 {
+            state.missions[idx-1].mission_status = MissionStageStatusEnum::Complete;
+        }
+        
+        state.missions[idx].mission_status = MissionStageStatusEnum::Active;
+        
         self.emit_state_update(&app_handle, &state)
     }
 

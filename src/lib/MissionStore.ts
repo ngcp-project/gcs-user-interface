@@ -108,6 +108,9 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
   deleteMission: async (missionId: number) => {
     return await taurpc.mission.delete_mission(missionId);
   },
+  startMission: async (missionId: number) => {
+    return await taurpc.mission.start_mission(missionId);
+  },
 
   // --------------------------
   // Vehicle Data
