@@ -93,6 +93,7 @@ pub async fn test_publisher() -> Result<(), Box<dyn std::error::Error>> {
         for vehicle_id in &vehicle_ids {
             let data = TelemetryData {
                 vehicle_id: vehicle_id.to_string(),
+                signal_string: rand::random::<f32>() - 80.0,
                 pitch: rand::random::<f32>() * 100.0,
                 yaw: rand::random::<f32>() * 100.0,
                 roll: rand::random::<f32>() * 100.0,
@@ -104,7 +105,7 @@ pub async fn test_publisher() -> Result<(), Box<dyn std::error::Error>> {
                     longitude: rand::random::<f64>() * 100.0,
                 },
                 last_updated: SystemTime::now(),
-                vehicle_status: rand::random::<i8>(),
+                vehicle_status: "something".to_string(),
                 request_coordinate: RequestCoordinate {
                     message_flag: rand::random::<i32>(),
                     request_location: Coordinate {

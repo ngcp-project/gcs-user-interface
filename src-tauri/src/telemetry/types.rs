@@ -10,7 +10,8 @@ use std::time::SystemTime;
 
 pub struct TelemetryData {    
     pub vehicle_id: String, // Added vehicle_id
-    // pub localIP: String,
+    // pub localIP: String
+    pub signal_string: f32,
     pub pitch: f32,
     pub yaw: f32,
     pub roll: f32,
@@ -21,7 +22,7 @@ pub struct TelemetryData {
     pub last_updated: SystemTime, //what is the exact format we have to follow timestamp 8 bytes
     // pub fire_found: bool,
     // pub fire_coordinate: Coordinate,
-    pub vehicle_status: i8, 
+    pub vehicle_status: String, 
     pub request_coordinate: RequestCoordinate,
 }
 //Change vehicleStatus : i8 1 byte 0 - 255

@@ -8,7 +8,8 @@ import { invoke } from "@tauri-apps/api";
 // Type definitions
 interface VehicleData {
   batteryPct: number;
-  lastUpdated: number;
+  //Signal String
+  signal_string: number;
   coordinates: { longitude: number; latitude: number };
   status: string;
   yaw: number;
@@ -38,7 +39,7 @@ interface TelemetryEvent {
 // Initialize reactive variables for each vehicle's telemetry data
 const ERU_data = ref<VehicleData>({
   batteryPct: 0,
-  lastUpdated: 0,
+  signal_string: 0,
   coordinates: { longitude: 0, latitude: 0 },
   status: "Standby",
   yaw: 0,
@@ -48,7 +49,7 @@ const ERU_data = ref<VehicleData>({
 
 const MEA_data = ref<VehicleData>({
   batteryPct: 0,
-  lastUpdated: 0,
+  signal_string: 0,
   coordinates: { longitude: 0, latitude: 0 },
   status: "Standby",
   yaw: 0,
@@ -58,7 +59,7 @@ const MEA_data = ref<VehicleData>({
 
 const MRA_data = ref<VehicleData>({
   batteryPct: 0,
-  lastUpdated: 0,
+  signal_string: 0,
   coordinates: { longitude: 0, latitude: 0 },
   status: "Standby",
   yaw: 0,
@@ -68,7 +69,7 @@ const MRA_data = ref<VehicleData>({
 
 const FRA_data = ref<VehicleData>({
   batteryPct: 0,
-  lastUpdated: 0,
+  signal_string: 0,
   coordinates: { longitude: 0, latitude: 0 },
   fire_coordinates: { longitude: 0, latitude: 0 },
   status: "Standby",
@@ -104,11 +105,13 @@ function handleTelemetryUpdate(event: any) {
   console.log("Processing update for vehicle:", vehicleKey, "with data:", telemetryData);
 
   if (vehicle) {
+    console.log(telemetryData.signal_string);
     // Update vehicle data with the new format
     vehicle.value = {
       ...vehicle.value,
-      status: telemetryData.vehicleStatus || "Standby",
+      status: telemetryData.vehicle_status || "Standby",
       batteryPct: telemetryData.battery_life || vehicle.value.batteryPct,
+      signal_string: telemetryData.signal_string || vehicle.value.signal_string,
       coordinates: {
         latitude:
           telemetryData.currentPosition?.latitude ||
@@ -121,8 +124,7 @@ function handleTelemetryUpdate(event: any) {
           telemetryData.coordinates?.longitude ||
           vehicle.value.coordinates.longitude
       },
-      lastUpdated:
-        telemetryData.lastUpdated || telemetryData.last_updated || vehicle.value.lastUpdated,
+
       yaw: telemetryData.yaw || vehicle.value.yaw,
       inKeepIn: vehicle.value.inKeepIn,
       inKeepOut: vehicle.value.inKeepOut
@@ -211,7 +213,7 @@ onUnmounted(() => {
         v-for="(data, key) in vehicleMap"
         :key="key"
         :batteryPct="data.value.batteryPct"
-        :latency="data.value.lastUpdated"
+        :signal_string="data.value.signal_string"
         :coordinates="data.value.coordinates"
         :vehicleName="String(key).toUpperCase()"
         :vehicleStatus="data.value.status"

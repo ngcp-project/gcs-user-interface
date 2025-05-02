@@ -11,7 +11,7 @@ const props = defineProps({
   vehicleName: { required: true, type: String },
   vehicleStatus: { required: true, type: String },
   batteryPct: { required: true, type: Number },
-  latency: { required: true, type: Number },
+  signal_string: { required: true, type: Number },
   coordinates: {
     required: true,
     type: Object as PropType<{ longitude: number; latitude: number }>
@@ -42,7 +42,11 @@ const props = defineProps({
         <!-- Multiply batteryPct by 100 because it is in between 0 and 1 -->
       </div>
       <div class="flex h-[30px] w-[70px] flex-none">
-        <Connection :latency="props.latency" :displayLatency="true" class="h-full w-[100px]" />
+        <Connection
+          :signal_string="props.signal_string"
+          :displayLatency="true"
+          class="h-full w-[100px]"
+        />
       </div>
     </div>
 

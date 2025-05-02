@@ -6,6 +6,7 @@ use lapin::{
     Result as LapinResult,
 };
 use serde_json::json;
+use std::ptr::null;
 use std::sync::Arc;
 use tauri::Window;
 use tokio::sync::Mutex;
@@ -81,31 +82,72 @@ impl RabbitMQConsumer {
 
     pub async fn process_telemetry(&self, mut consumer: Consumer) -> LapinResult<()> {
         use futures_util::StreamExt;
+
+        let mut failure_count = 0;
+
         while let Some(delivery) = consumer.next().await {
             if let Ok(delivery) = delivery {
-                if let Ok(data) = serde_json::from_slice::<TelemetryData>(&delivery.data) {
-                    let payload = json!({
-                        // map according to the structure key | val
-                        "vehicle_id": data.vehicle_id,
-                        "telemetry": data
-                    });
-                    //we have different structure: consumer and publisher
-                    if let Err(e) = self.window.emit("telemetry_update", payload.clone()) {
-                        println!("Failed to emit telemetry update: {}", e);
-                        // You might want to return the error or handle it appropriately
+                match serde_json::from_slice::<TelemetryData>(&delivery.data) {
+                    Ok(mut data) => {
+                        failure_count = 0; // reset on success
+
+                        if data.signal_string < -70.0 {
+                            data.vehicle_status = "Bad Connection".to_string();
+                        }
+
+                        let payload = json!({
+                            "vehicle_id": data.vehicle_id,
+                            "telemetry": data
+                        });
+
+                        if let Err(e) = self.window.emit("telemetry_update", payload.clone()) {
+                            println!("Failed to emit telemetry update: {}", e);
+                        }
+
+                        println!("Received telemetry data: {:?}", payload);
+                        println!("Signal status: {:?}", data.vehicle_status);
+                        delivery.ack(BasicAckOptions::default()).await?;
                     }
-                    println!("Received telemetry data: {:?}", payload);
-                    delivery.ack(BasicAckOptions::default()).await?;
-                } else {
-                    delivery.reject(BasicRejectOptions::default()).await?;
-                    println!("Failed to parse Telemetry data")
+                    Err(e) => {
+                        failure_count += 1;
+                        println!(
+                            "Failed to parse Telemetry data (attempt {}): {}",
+                            failure_count, e
+                        );
+                        println!("Raw payload: {:?}", String::from_utf8_lossy(&delivery.data));
+                        delivery.reject(BasicRejectOptions::default()).await?;
+
+                        if failure_count >= 3 {
+                            let error_payload = json!({
+                                "error": "Failed to establish a connection after 3 invalid messages"
+                            });
+
+                            self.window.emit("telemetry_error", error_payload).ok();
+
+                            return Err(lapin::Error::InvalidChannelState(
+                                lapin::ChannelState::Closed,
+                            )); // or another appropriate variant
+                        }
+                    }
                 }
             }
         }
+
         Ok(())
     }
-}
 
+    // pub async fn lost_vehicle_connection(mut string_signal:f32) -> boolean{
+    //         if string_signal < -40.0  {
+    //             string_signal = "Disconnect";
+    //         }
+    // }
+
+    // pub async
+    //create function that check if the signal string is inside the range.
+    // if not just wait n second, pass that we send an alert/ trigger the
+    // function failedconnectioninit()?? }
+    //
+}
 #[tauri::command]
 pub async fn init_telemetry_consumer(window: Window, vehicle_id: String) -> Result<(), String> {
     // Validate vehicle ID
