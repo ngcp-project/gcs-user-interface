@@ -91,7 +91,7 @@ impl RabbitMQConsumer {
                     Ok(mut data) => {
                         failure_count = 0; // reset on success
 
-                        if data.signal_string < -70.0 {
+                        if data.signal_string < -70 {
                             data.vehicle_status = "Bad Connection".to_string();
                         }
 

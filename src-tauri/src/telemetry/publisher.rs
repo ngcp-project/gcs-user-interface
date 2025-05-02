@@ -93,7 +93,7 @@ pub async fn test_publisher() -> Result<(), Box<dyn std::error::Error>> {
         for vehicle_id in &vehicle_ids {
             let data = TelemetryData {
                 vehicle_id: vehicle_id.to_string(),
-                signal_string: rand::random::<f32>() - 80.0,
+                signal_string: rand::random::<i32>() % 70 +30,
                 pitch: rand::random::<f32>() * 100.0,
                 yaw: rand::random::<f32>() * 100.0,
                 roll: rand::random::<f32>() * 100.0,

@@ -11,7 +11,7 @@ use std::time::SystemTime;
 pub struct TelemetryData {    
     pub vehicle_id: String, // Added vehicle_id
     // pub localIP: String
-    pub signal_string: f32,
+    pub signal_string: i32,
     pub pitch: f32,
     pub yaw: f32,
     pub roll: f32,
