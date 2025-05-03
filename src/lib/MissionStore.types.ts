@@ -63,5 +63,6 @@ export interface MissionStore {
   // Zone Data
   getZoneData: (missionId: number, zoneType: ZoneType) => GeoCoordinateStruct[][] | undefined;
   addZone: (missionId: number, zoneType: ZoneType) => Promise<null>;
+  updateZone: (missionId: number, zoneType: ZoneType, zoneIndex: number, polygon: GeoCoordinateStruct[]) => Promise<null>;
   deleteZone: (missionId: number, zoneType: ZoneType, zoneIndex: number) => Promise<null>;
 }

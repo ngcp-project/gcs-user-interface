@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { computed, ref } from "vue";
 import { Trash2, Eye, EyeOff, Pencil } from "lucide-vue-next";
 import { missionStore } from "@/lib/MissionStore";
+import mapStore from "@/lib/MapStore";
 
 const props = defineProps<{
   stageID: number;
@@ -24,6 +25,19 @@ const isVisible = ref(true); // Track visibility state
 
 const toggleVisibility = () => {
   isVisible.value = !isVisible.value;
+  const currentMissionId = missionStore.view.currentMissionId;
+  const currentVehicleName = missionStore.view.currentVehicleName;
+  
+  if (currentMissionId === null || currentVehicleName === null) return;
+  
+  const stageLayer = mapStore.getStageLayer(currentMissionId, currentVehicleName, props.stageID);
+  if (stageLayer) {
+    if (isVisible.value) {
+      stageLayer.polygon.setStyle({ opacity: 1, fillOpacity: 0.2 });
+    } else {
+      stageLayer.polygon.setStyle({ opacity: 0, fillOpacity: 0 });
+    }
+  }
 };
 
 const currentMissionId = missionStore.view.currentMissionId;
@@ -39,6 +53,12 @@ const handleStageNameChange = (event: Event) => {
   const newName = (event.target as HTMLInputElement).value;
   missionStore.renameStage(currentMissionId, currentVehicleName, props.stageID, newName);
 };
+
+const handleDeleteStage = () => {
+  if (currentMissionId === null || currentVehicleName === null) return;
+  missionStore.deleteStage(currentMissionId, currentVehicleName, props.stageID);
+  mapStore.removeStageLayer(currentMissionId, currentVehicleName, props.stageID);
+};
 </script>
 
 <template>
@@ -53,7 +73,7 @@ const handleStageNameChange = (event: Event) => {
       />
       <!-- Trash Icon -->
       <Trash2
-        @click="missionStore.deleteStage(currentMissionId, currentVehicleName, props.stageID)"
+        @click="handleDeleteStage"
         class="h-5 w-5 cursor-pointer text-foreground hover:text-destructive"
       />
     </CardTitle>

@@ -1,6 +1,7 @@
 import { createStore } from "zustand/vanilla";
 import {
   createTauRPCProxy,
+  GeoCoordinateStruct,
   MissionsStruct,
   MissionStruct,
   StageStruct,
@@ -157,8 +158,13 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
     ];
   },
 
-  addZone: async (missionId: number, zoneType: ZoneType) =>
-    await taurpc.mission.add_zone(missionId, zoneType),
+  updateZone: async (missionId: number, zoneType: ZoneType, zoneIndex: number, zoneCoords: GeoCoordinateStruct[]) => {
+    return await taurpc.mission.update_zone(missionId, zoneType, zoneIndex, zoneCoords)
+  },
+
+  addZone: async (missionId: number, zoneType: ZoneType) => {
+    return await taurpc.mission.add_zone(missionId, zoneType)
+  },
 
   deleteZone: async (missionId: number, zoneType: ZoneType, zoneIndex: number) =>
     await taurpc.mission.delete_zone(missionId, zoneType, zoneIndex)

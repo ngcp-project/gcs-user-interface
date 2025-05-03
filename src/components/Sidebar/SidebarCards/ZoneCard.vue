@@ -34,15 +34,36 @@ const zones = computed(() =>
 
 // Toggle Eye Icon for specific zone
 const toggleVisibility = (zoneID: number) => {
-  // const zone = zones.value.find(zone => zone.id === zoneID)
-  // if (zone) zone.isVisible = !zone.isVisible
+  if (currentMissionId === null) return;
+  const zoneLayers = mapStore.getZoneLayers(currentMissionId, props.zoneType);
+  const layer = zoneLayers[zoneID];
+  if (layer) {
+    if (layer.options.opacity === 0) {
+      layer.setStyle({ opacity: 1, fillOpacity: 0.2 });
+    } else {
+      layer.setStyle({ opacity: 0, fillOpacity: 0 });
+    }
+  }
 };
 
 const handleNewZone = () => {
   if (currentMissionId === null) return;
   missionStore.addZone(currentMissionId, props.zoneType);
-  mapStore.addZonePolygon(props.zoneType);
+  
 };
+
+const handleDeleteZone = (index: number) => {
+  if (currentMissionId === null) return;
+  missionStore.deleteZone(currentMissionId, props.zoneType, index);
+  mapStore.removeZoneLayer(currentMissionId, props.zoneType, index);
+};
+
+const testZoneFunc = (index: number) => {
+  // console.log(mapStore)
+  if (currentMissionId === null) return;
+  mapStore.updateZonePolygon(currentMissionId, props.zoneType, index)
+}
+
 </script>
 
 <template>
@@ -69,10 +90,10 @@ const handleNewZone = () => {
           <component
             :is="zone.isVisible ? Eye : EyeOff"
             class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500"
-            @click="toggleVisibility(zone.id)"
+            @click="testZoneFunc(index)"
           />
           <Trash2
-            @click="missionStore.deleteZone(currentMissionId, props.zoneType, index)"
+            @click="handleDeleteZone(index)"
             class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500"
           />
         </div>

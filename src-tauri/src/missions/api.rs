@@ -218,6 +218,13 @@ pub trait MissionApi {
         mission_id: u32,
         zone_type: ZoneType,
     ) -> Result<(), String>;
+    async fn update_zone(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        zone_type: ZoneType,
+        zone_index: u32,
+        zone_coords: GeofenceType,
+    ) -> Result<(), String>;
     async fn delete_zone(
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
@@ -479,7 +486,39 @@ impl MissionApi for MissionApiImpl {
 
         self.emit_state_update(&app_handle, &state)
     }
+    async fn update_zone(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        zone_type: ZoneType,
+        zone_index: u32,
+        zone_coords: GeofenceType,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found")?;
 
+        match zone_type {
+            ZoneType::KeepIn => {
+                if zone_index >= mission.zones.keep_in_zones.len() as u32 {
+                    return Err("KeepIn index out of range".into());
+                }
+                mission.zones.keep_in_zones[zone_index as usize] = zone_coords;
+            }
+            ZoneType::KeepOut => {
+                if zone_index >= mission.zones.keep_out_zones.len() as u32 {
+                    return Err("KeepOut index out of range".into());
+                }
+                mission.zones.keep_out_zones[zone_index as usize] = zone_coords;
+            }
+        }
+
+        self.emit_state_update(&app_handle, &state)
+    }
+    
     async fn delete_zone(
         self,
         app_handle: AppHandle<impl Runtime>,
