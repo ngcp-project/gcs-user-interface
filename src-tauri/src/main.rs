@@ -524,16 +524,7 @@ async fn init_database_dummy_data() {
     db_conn.close().await.expect("Failed to close database connection");
 }
 
-
-
-// async fn setup_router() -> Router {
-//     // Initialize all the APIs here
-//     let mission_api = MissionApiImpl::new().await;
-    
-//     Router::new()
-//         .merge(mission_api.into_handler())
-// }
-
+// init db
 async fn initialize_database() {
     let mut db_conn = PgConnection::connect(DB_URL).await.expect("Failed to connect to the database");
 
@@ -613,6 +604,41 @@ async fn initialize_database() {
     // CREATE INDEX idx_stage_vehicle
     // ON Stage(vehicleName);
     // ").execute(&mut db_conn).await;
+
+    ////////////////////////////////
+    // BEGIN JOIN //////////////////
+    ////////////////////////////////
+    let missions = sqlx::query(
+        "
+        SELECT 
+            missions.mission_name,
+            missions.status AS mission_status,
+            missions.keep_in_zones,
+            missions.keep_out_zones,
+            vehicles.vehicle_name,
+            vehicles.current_stage_id AS current_stage,
+            vehicles.is_auto,
+            vehicles.patient_status,
+            stages.stage_id,
+            stages.stage_name,
+            stages.search_area,
+            stages.target_coordinate
+        FROM missions
+        LEFT JOIN vehicles ON vehicles.mission_name = missions.mission_name
+        LEFT JOIN stages 
+            ON stages.vehicle_name = vehicles.vehicle_name
+            AND stages.mission_name = vehicles.mission_name;
+        "
+    )
+    .fetch_all(&mut db_conn)
+    .await
+    .expect("Failed to execute query");
+
+    // Print the results
+    println!("Results: {:?}", missions);
+    ////////////////////////////////
+    // END JOIN ////////////////////
+    ////////////////////////////////
 
     db_conn.close().await.expect("Failed to close database connection");
 
