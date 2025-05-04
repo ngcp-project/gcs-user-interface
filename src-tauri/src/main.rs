@@ -608,34 +608,34 @@ async fn initialize_database() {
     ////////////////////////////////
     // BEGIN JOIN //////////////////
     ////////////////////////////////
-    let missions = sqlx::query(
-        "
-        SELECT 
-            missions.mission_name,
-            missions.status AS mission_status,
-            missions.keep_in_zones,
-            missions.keep_out_zones,
-            vehicles.vehicle_name,
-            vehicles.current_stage_id AS current_stage,
-            vehicles.is_auto,
-            vehicles.patient_status,
-            stages.stage_id,
-            stages.stage_name,
-            stages.search_area,
-            stages.target_coordinate
-        FROM missions
-        LEFT JOIN vehicles ON vehicles.mission_name = missions.mission_name
-        LEFT JOIN stages 
-            ON stages.vehicle_name = vehicles.vehicle_name
-            AND stages.mission_name = vehicles.mission_name;
-        "
-    )
-    .fetch_all(&mut db_conn)
-    .await
-    .expect("Failed to execute query");
+    // let missions = sqlx::query(
+    //     "
+    //     SELECT 
+    //         missions.mission_name,
+    //         missions.status AS mission_status,
+    //         missions.keep_in_zones,
+    //         missions.keep_out_zones,
+    //         vehicles.vehicle_name,
+    //         vehicles.current_stage_id AS current_stage,
+    //         vehicles.is_auto,
+    //         vehicles.patient_status,
+    //         stages.stage_id,
+    //         stages.stage_name,
+    //         stages.search_area,
+    //         stages.target_coordinate
+    //     FROM missions
+    //     LEFT JOIN vehicles ON vehicles.mission_name = missions.mission_name
+    //     LEFT JOIN stages 
+    //         ON stages.vehicle_name = vehicles.vehicle_name
+    //         AND stages.mission_name = vehicles.mission_name;
+    //     "
+    // )
+    // .fetch_all(&mut db_conn)
+    // .await
+    // .expect("Failed to execute query");
 
-    // Print the results
-    println!("Results: {:?}", missions);
+    // // Print the results
+    // println!("Results: {:?}", missions);
     ////////////////////////////////
     // END JOIN ////////////////////
     ////////////////////////////////
