@@ -30,14 +30,14 @@ const toggleVisibility = () => {
   
   if (currentMissionId === null || currentVehicleName === null) return;
   
-  const stageLayer = mapStore.getStageLayer(currentMissionId, currentVehicleName, props.stageID);
-  if (stageLayer) {
-    if (isVisible.value) {
-      stageLayer.polygon.setStyle({ opacity: 1, fillOpacity: 0.2 });
-    } else {
-      stageLayer.polygon.setStyle({ opacity: 0, fillOpacity: 0 });
-    }
-  }
+  // const stageLayer = mapStore.getStageLayer(currentMissionId, currentVehicleName, props.stageID);
+  // if (stageLayer) {
+  //   if (isVisible.value) {
+  //     stageLayer.polygon.setStyle({ opacity: 1, fillOpacity: 0.2 });
+  //   } else {
+  //     stageLayer.polygon.setStyle({ opacity: 0, fillOpacity: 0 });
+  //   }
+  // }
 };
 
 const currentMissionId = missionStore.view.currentMissionId;

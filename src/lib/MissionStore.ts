@@ -10,6 +10,7 @@ import {
 } from "@/lib/bindings";
 import { DeepReadonly, reactive } from "vue";
 import { MissionStore, ViewState, ViewType } from "@/lib/MissionStore.types";
+import { LatLng } from "leaflet";
 
 // =============================================
 // Initialization

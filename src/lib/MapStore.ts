@@ -3,14 +3,14 @@ import { reactive } from "vue";
 import { LMap } from "@vue-leaflet/vue-leaflet";
 import { LatLngTuple as LatLng } from "leaflet";
 import * as L from "leaflet";
-import { VehicleEnum, ZoneType } from "@/lib//bindings";
+import { GeoCoordinateStruct, VehicleEnum, ZoneType } from "@/lib//bindings";
 import { missionStore } from "./MissionStore";
 import { watch } from "vue";
 
 // New interfaces for layer tracking
 interface StageLayer {
   stageId: number;
-  polygon: ZoneLayer | {}; // change name to stageLayer
+  polygon: ZoneLayer | {}; // TODO: change name to stageLayer
 }
 
 interface VehicleLayers {
@@ -79,7 +79,7 @@ interface MapStore {
   logMapStore: () => void;
   // Add new methods for layer management
   addStageLayer: (missionId: number, vehicle: VehicleEnum, stageId: number, polygon: L.Polygon) => void;
-  updateZonePolygon: (missionId: number, type: ZoneType, zoneIndex: number, polygon: L.Polygon) => void;
+  updateZonePolygon: (missionId: number, type: ZoneType, zoneIndex: number) => void;
   removeStageLayer: (missionId: number, vehicle: VehicleEnum, stageId: number) => void;
   removeZoneLayer: (missionId: number, type: ZoneType, index: number) => void;
   getStageLayer: (missionId: number, vehicle: VehicleEnum, stageId: number) => StageLayer | undefined;
@@ -145,6 +145,7 @@ const mapStore = createStore<MapStore>((set, get) => ({
       console.log(map.hasLayer(layer)); // should be true before remove()
 
       // Add custom properties
+      // TODO: Modify later properties are in layerTracking
       geoJSONFeature.properties = {
         ...({
           missionId: 1,
@@ -154,10 +155,17 @@ const mapStore = createStore<MapStore>((set, get) => ({
         } as layerProperties),
         ...geoJSONFeature.properties
       };
-      // Todo: maybe its better to keep it as [lat,long] and transform that into the GeoCoordinateStruct in missionStore
-      // also convert geoJsonCoord to lat long coords
-      console.log(geoJSONFeature.geometry.coordinates)
-      // missionStore.updateZone(missionId, type, zoneIndex, geoJSONFeature.geometry.coordinates)
+      // we know that L.LatLng is an array of [lat, long] since only 1 polygon
+      // so we can unwrap the array to get the first and only polygon
+      const latlngs = layer.getLatLngs()[0] as L.LatLng[] 
+      // use layer latlng coords since GeoJson coords are different
+      // map latlng to GeoCoordinateStruct
+      const geoCoordinateStructs: GeoCoordinateStruct[] = latlngs.map(latlng => ({
+        lat: latlng.lat,
+        long: latlng.lng
+      })) 
+      console.log(geoCoordinateStructs)
+      missionStore.updateZone(missionId, type, zoneIndex, geoCoordinateStructs)
       // get().addZoneLayer(1, type, layer); // TODO: Get current mission ID from mission store
       
       // copy polygon to layers
@@ -179,34 +187,32 @@ const mapStore = createStore<MapStore>((set, get) => ({
     const map = get().map?.leafletObject;
     if (!map) return;
 
-    // Clean all layers
-    map.eachLayer((layer) => {
-      layer.remove();
-    });
+    // Clear the geoJSON layer
+    // get().layers.clearLayers();
+    
+    console.log("layerTracking", get().layerTracking.missions)
 
-    // Readd geoJSON layer
-    map.addLayer(get().layers);
-
-    // Readd all tracked layers
-    Object.entries(get().layerTracking.missions).forEach(([missionId, missionLayers]) => {
-      // Add zone layers
-      Object.entries(missionLayers.zones).forEach(([zoneType, polygons]) => {
-        polygons.forEach(polygon => {
-          if ('addTo' in polygon) {
-            (polygon as L.Polygon).addTo(map);
-          }
-        });
-      });
-
-      // Add stage layers
-      Object.entries(missionLayers.vehicles).forEach(([vehicle, vehicleLayers]) => {
-        Object.values(vehicleLayers.stages).forEach(stageLayer => {
-          if ('addTo' in stageLayer.polygon) {
-            (stageLayer.polygon as L.Polygon).addTo(map);
+    // Repopulate geoJSON layer from layerTracking
+    Object.values(get().layerTracking.missions).forEach((missionLayers) => {
+      Object.values(missionLayers.zones).forEach((zoneArray) => {
+        zoneArray.forEach((zone) => {
+          if (zone && 'layer' in zone && zone.layer) {
+            // Convert L.Polygon to GeoJSON feature
+            const geoJSONFeature = zone.layer.toGeoJSON();
+            // Attach properties if available
+            if (zone.properties) {
+              geoJSONFeature.properties = {
+                ...zone.properties,
+                ...geoJSONFeature.properties
+              };
+            }
+            get().layers.addData(geoJSONFeature);
           }
         });
       });
     });
+    map.addLayer(get().layers)
+    console.log(get().layers)
   },
 
   createNewGeoJSON: () => {
@@ -293,6 +299,7 @@ const mapStore = createStore<MapStore>((set, get) => ({
     // const layers = get().layerTracking.missions[missionId]?.zones[zoneType] || [];
     // // Filter out empty objects and return only actual polygons
     // return layers.filter((layer): layer is L.Polygon => 'addTo' in layer);
+    return []
   }
 }));
 
@@ -307,7 +314,6 @@ mapStore.subscribe((state) => {
 watch(
   () => missionStore.state,
   (newState) => {
-    const store = mapStore.getState();
     const newLayerTracking: LayerTracking = {
       missions: {}
     };
@@ -339,6 +345,7 @@ watch(
           }
           // add in logic to create L.Polygon from eacch 
         })
+        store.rerenderLayers()
       }
       
       // Implement keepout
