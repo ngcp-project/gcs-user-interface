@@ -2,9 +2,9 @@
 import { Card, CardContent, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { computed } from "vue";
-import { Trash2, Eye, EyeOff, Pencil, Square, Plus } from "lucide-vue-next";
+import { Trash2, Eye, EyeOff, Pencil, Square, Plus, Check } from "lucide-vue-next";
 import { missionStore } from "@/lib/MissionStore";
-import { ZoneType } from "@/lib/bindings";
+import { GeoCoordinateStruct, ZoneType } from "@/lib/bindings";
 import mapStore from "@/lib/MapStore";
 
 const props = defineProps<{
@@ -25,7 +25,7 @@ const zoneType = {
 }[String(props.zoneType) || "KeepIn"] as "In" | "Out";
 
 // Track zones
-const currentMissionId = missionStore.view.currentMissionId;
+const currentMissionId = missionStore.view.currentMissionId ? missionStore.view.currentMissionId : null;
 const mission = currentMissionId !== null ? missionStore.getMissionData(currentMissionId) : null;
 
 const zones = computed(() =>
@@ -34,16 +34,7 @@ const zones = computed(() =>
 
 // Toggle Eye Icon for specific zone
 const toggleVisibility = (zoneID: number) => {
-  if (currentMissionId === null) return;
-  const zoneLayers = mapStore.getZoneLayers(currentMissionId, props.zoneType);
-  const layer = zoneLayers[zoneID];
-  if (layer) {
-    if (layer.options.opacity === 0) {
-      layer.setStyle({ opacity: 1, fillOpacity: 0.2 });
-    } else {
-      layer.setStyle({ opacity: 0, fillOpacity: 0 });
-    }
-  }
+  // implement
 };
 
 const handleNewZone = () => {
@@ -62,6 +53,32 @@ const testZoneFunc = (index: number) => {
   // console.log(mapStore)
   if (currentMissionId === null) return;
   mapStore.updateZonePolygon(currentMissionId, props.zoneType, index)
+};
+
+const checkEditMode = (index: number) => {
+  if (currentMissionId === null) return false;
+  const zoneLayers = mapStore.getZoneLayers(currentMissionId, props.zoneType);
+  const zone = zoneLayers[index];
+  return zone.layer.once("pm:edit", () => {
+    return true
+  })
+}
+
+const editToggle = async (zone: GeoCoordinateStruct[], index: number) => {
+  if (currentMissionId === null) return;
+  const zoneLayers = mapStore.getZoneLayers(currentMissionId, props.zoneType);
+  const zoneLayer = zoneLayers[index];
+
+  zoneLayer.layer.on("pm:edit", () => {
+    return Check
+  })
+
+  if (zone.length > 0) {
+    return Pencil
+  } else {
+    return Plus
+  }
+  
 }
 
 </script>
@@ -86,11 +103,15 @@ const testZoneFunc = (index: number) => {
       >
         <span class="font-semibold">Zone {{ index }}</span>
         <div v-if="mission?.mission_status === 'Inactive'" class="flex gap-x-2">
-          <Pencil class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500" />
+          <!-- TODO: Add ui to confirm an edit -->
           <component
-            :is="zone.isVisible ? Eye : EyeOff"
+            :is="zone.length > 0 ? Pencil : Plus"
             class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500"
             @click="testZoneFunc(index)"
+          />
+          <Eye 
+            @click="() => {}"
+            class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500" 
           />
           <Trash2
             @click="handleDeleteZone(index)"

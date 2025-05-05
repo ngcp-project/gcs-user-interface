@@ -11,9 +11,7 @@ import { watch } from "vue";
 // Types and Interfaces
 // =============================================
 interface LayerProperties {
-  missionId: number;
-  vehicle: VehicleEnum | null;
-  type: ZoneType | "Search";
+  color: string;
   visibility: boolean;
 }
 
@@ -42,7 +40,6 @@ interface MissionLayers {
 interface LayerTracking {
   missions: Record<number, MissionLayers>;
 }
-
 
 /** 
  * Merge in vue-leaflet map type with geoman L.Map
@@ -92,7 +89,7 @@ interface MapStore {
   removeStageLayer: (missionId: number, vehicle: VehicleEnum, stageId: number) => void;
   removeZoneLayer: (missionId: number, type: ZoneType, index: number) => void;
   getStageLayer: (missionId: number, vehicle: VehicleEnum, stageId: number) => StageLayer | undefined;
-  getZoneLayers: (missionId: number, type: ZoneType) => L.Polygon[];
+  getZoneLayers: (missionId: number, type: ZoneType) => ZoneLayer[];
   // TODO: fix it so that theres no as declaration when reading from missionStore
   updateLayerTracking: (state: MissionsStruct) => void;
 }
@@ -106,7 +103,7 @@ const mapStore = createStore<MapStore>((set, get) => ({
   zoom: DEFAULT_ZOOM,
   localTileURL: TILE_URL,
   layerTracking: { missions: {} },
-  layers: L.featureGroup(),
+  layers: L.featureGroup([]),
 
   // Map Management Methods
   updateMapRef: (refValue: LeafletMapGeoman | null) => {
@@ -144,8 +141,8 @@ const mapStore = createStore<MapStore>((set, get) => ({
     if (!map) return;
 
     const layerTrackedZone = get().layerTracking.missions[missionId].zones[type][zoneIndex];
-    console.log("layerTrackedZone", layerTrackedZone);
-    // not pushing in zonelayer type, pushign in empty object or L.Polygon layer
+
+    // not pushing in zonelayer type, pushing in empty object or L.Polygon layer
     if (!layerTrackedZone || Object.keys(layerTrackedZone).length === 0) {
       // If layerTrackedZone isnt initialized enable Geoman draw mode
       map.pm.enableDraw("Polygon");
@@ -168,13 +165,35 @@ const mapStore = createStore<MapStore>((set, get) => ({
         // Delete newly created layer since we want to create polygons from layerTracking 
         layer.remove();
       });
+      
     } else {
-      const layer = (layerTrackedZone as ZoneLayer).layer
-      // Enable edit mode on layerTrackedZone
-      if (layer.pm.enabled())
-        layer.pm.disable();
-      else
-        layer.pm.enable();
+      // Zone has Polygon, so we can edit it
+      const editedLayer = (layerTrackedZone as ZoneLayer).layer
+
+      // TODO: possibly add another ui element to explicitly mark when editing is done
+      // toggle the edit mode to allow show completing the zone
+      if (editedLayer.pm.enabled()) {
+        editedLayer.pm.disable();
+        return
+      }
+      
+      // enable edit mode on the selected polygon
+      editedLayer.pm.enable();
+
+      // listen to when the layer edit is complete
+      editedLayer.once("pm:update", (e) => {
+        const layer = e.layer as L.Polygon
+        const latlngs = layer.getLatLngs()[0] as L.LatLng[];
+        
+        const geoCoordinateStructs: GeoCoordinateStruct[] = latlngs.map(latlng => ({
+          lat: latlng.lat,
+          long: latlng.lng
+        }));
+
+        missionStore.updateZone(missionId, type, zoneIndex, geoCoordinateStructs);
+      });
+
+
     }
   },
 
@@ -195,7 +214,8 @@ const mapStore = createStore<MapStore>((set, get) => ({
         }
       };
 
-      if (mission.zones.keep_in_zones) {
+
+      Object.keys(mission.zones).forEach((zoneType) => {
         const keepInZones = newLayerTracking.missions[mission.mission_id].zones.KeepIn;
         
         mission.zones.keep_in_zones.forEach(zone => {
@@ -209,17 +229,21 @@ const mapStore = createStore<MapStore>((set, get) => ({
           const zoneLayer: ZoneLayer = {
             layer: polygon,
             properties: {
-              missionId: mission.mission_id,
-              vehicle: null,
-              type: "KeepIn",
+              color: "#000",
               visibility: true
             }
           };
+          polygon.setStyle({
+            color: "#000",
+            fillOpacity: 0.2,
+            opacity: 1
+          })
+
           keepInZones.push(zoneLayer);
         });
 
         set({ layerTracking: newLayerTracking });
-      }
+      });
     });
   },
 
@@ -228,7 +252,12 @@ const mapStore = createStore<MapStore>((set, get) => ({
   removeStageLayer: () => {},
   removeZoneLayer: () => {},
   getStageLayer: () => undefined,
-  getZoneLayers: () => []
+  getZoneLayers: (missionId: number | null, type: ZoneType) => {
+    if (missionId === null) return [];
+    const mission = get().layerTracking.missions[missionId];
+    if (!mission) return [];
+    return (mission.zones[type] as ZoneLayer[])
+  }
 }));
 
 // =============================================
