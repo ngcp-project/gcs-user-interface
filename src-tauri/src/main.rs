@@ -86,7 +86,7 @@ async fn init_database_dummy_data() {
     
     let _insert_dummy_discover_eru = query("
         INSERT INTO vehicles(mission_id, vehicle_name, current_stage_id)
-        VALUES ($1, $2, $3) RETURNING vehicle_id
+        VALUES ($1, $2, $3, $4) RETURNING vehicle_id
     ")
     .bind(discover_mission_id)
     .bind("ERU")
@@ -538,6 +538,8 @@ async fn init_database_dummy_data() {
             missions.keep_out_zones,
             vehicles.vehicle_name,
             vehicles.current_stage_id AS current_stage,
+            vehicles.is_auto,
+            vehicles.patient_status,
             stages.stage_id,
             stages.stage_name,
             stages.search_area,
@@ -637,6 +639,8 @@ async fn initialize_database() {
         vehicle_id SERIAL UNIQUE,
         vehicle_name VARCHAR(255) NOT NULL,
         current_stage_id INTEGER NOT NULL,
+        is_auto BOOLEAN DEFAULT FALSE,
+        patient_status VARCHAR(255),
         PRIMARY KEY (mission_id, vehicle_id)
     );
     ").execute(&mut db_conn).await.expect("Failed to execute query");
