@@ -11,7 +11,14 @@ mod missions;
 use missions::api::{MissionApiImpl, MissionApi};
 
 const DB_URL: &str = "postgres://ngcp:ngcp@localhost:5433/ngcpdb";
-
+#[derive(sqlx::Type, Debug)]
+#[sqlx(type_name = "status")]
+pub enum Status {
+    Active,
+    Inactive,
+    Complete,
+    Failed,
+}
 
 async fn init_database_dummy_data() {
     let mut db_conn = PgConnection::connect(DB_URL).await.expect("Failed to connect to the database");
@@ -518,7 +525,58 @@ async fn init_database_dummy_data() {
     //         mission_id, mission_name, keep_in_zones, keep_out_zones);
     // }
     
+    ////////////////////////////////
+    // BEGIN JOIN //////////////////
+    ////////////////////////////////
+    let missions = sqlx::query(
+        "
+        SELECT 
+            missions.mission_id,
+            missions.mission_name,
+            missions.status AS mission_status,
+            missions.keep_in_zones,
+            missions.keep_out_zones,
+            vehicles.vehicle_name,
+            vehicles.current_stage_id AS current_stage,
+            stages.stage_id,
+            stages.stage_name,
+            stages.search_area,
+            stages.target_coordinate
+        FROM missions
+        INNER JOIN vehicles ON missions.mission_id = vehicles.mission_id
+        INNER JOIN stages ON vehicles.vehicle_id = stages.vehicle_id
+        WHERE missions.mission_id = $1
+        "
+    )
+    .bind(discover_mission_id)
+    .fetch_all(&mut db_conn)
+    .await
+    .expect("Failed to execute query");
 
+    // // Print the results
+    // println!("Missions Name\tStatus\tKeep In Zones\tKeep Out Zones\tVehicle Name\tCurrent Stage\tStage ID\tStage Name\tSearch Area\tTarget Coordinate");
+    // println!("-------------------------------------------------------------------------------------------------------------------------------------------------");
+
+    // for row in missions {
+    //     let mission_name: String = row.get("mission_name");
+    //     let mission_status: Status = row.get("mission_status");
+    //     let keep_in_zones: Vec<String> = row.get("keep_in_zones");
+    //     let keep_out_zones: Vec<String> = row.get("keep_out_zones");
+    //     let vehicle_name: String = row.get("vehicle_name");
+    //     let current_stage: i32 = row.get("current_stage");
+    //     let stage_id: i32 = row.get("stage_id");
+    //     let stage_name: String = row.get("stage_name");
+    //     let search_area: Vec<String> = row.get("search_area");
+    //     let target_coordinate: String = row.get("target_coordinate");
+
+    //             println!("{}\t{:?}\t{:?}\t{:?}\t{}\t{}\t{}\t{}\t{:?}\t{}", 
+    //         mission_name, mission_status, keep_in_zones, keep_out_zones, vehicle_name, 
+    //         current_stage, stage_id, stage_name, search_area, target_coordinate);
+    // }
+
+    ////////////////////////////////
+    // END JOIN ////////////////////
+    ////////////////////////////////
 
 
     db_conn.close().await.expect("Failed to close database connection");
@@ -605,50 +663,14 @@ async fn initialize_database() {
     // ON Stage(vehicleName);
     // ").execute(&mut db_conn).await;
 
-    ////////////////////////////////
-    // BEGIN JOIN //////////////////
-    ////////////////////////////////
-    // let missions = sqlx::query(
-    //     "
-    //     SELECT 
-    //         missions.mission_name,
-    //         missions.status AS mission_status,
-    //         missions.keep_in_zones,
-    //         missions.keep_out_zones,
-    //         vehicles.vehicle_name,
-    //         vehicles.current_stage_id AS current_stage,
-    //         vehicles.is_auto,
-    //         vehicles.patient_status,
-    //         stages.stage_id,
-    //         stages.stage_name,
-    //         stages.search_area,
-    //         stages.target_coordinate
-    //     FROM missions
-    //     LEFT JOIN vehicles ON vehicles.mission_name = missions.mission_name
-    //     LEFT JOIN stages 
-    //         ON stages.vehicle_name = vehicles.vehicle_name
-    //         AND stages.mission_name = vehicles.mission_name;
-    //     "
-    // )
-    // .fetch_all(&mut db_conn)
-    // .await
-    // .expect("Failed to execute query");
-
-    // // Print the results
-    // println!("Results: {:?}", missions);
-    ////////////////////////////////
-    // END JOIN ////////////////////
-    ////////////////////////////////
-
     db_conn.close().await.expect("Failed to close database connection");
-
-    init_database_dummy_data().await;
 }
 
 
 #[tokio::main]
 async fn main() {    
     initialize_database().await;
+    init_database_dummy_data().await;
 
     // let router = setup_router();
     let missions_api = MissionApiImpl::default();
