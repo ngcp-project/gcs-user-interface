@@ -15,7 +15,6 @@ const emblaThumbnailApi = ref<CarouselApi>();
 const selectedIndex = ref(0);
 
 import { Skeleton } from "@/components/ui/skeleton";
-import ErrorToast from "@/components/ErrorToast.vue"
 
 const cameraFeeds = ref([
   { id: 1, name: "MRA", src: "http://127.0.0.1:5000/video_feed" },
@@ -70,11 +69,6 @@ whenever(emblaMainApi, (api) => {
 </script>
 
 <template>
-  <!-- Toast testing bar -->
-  <div class="fixed flex z-50 justify-center pb-3 gap-3 w-full items-center bottom-0">
-    <ErrorToast />
-  </div>
-
   <!-- Side-by-Side (Grid) Layout -->
   <div class="grid-container" v-if="layout === 'grid'">
     <div v-for="feed in cameraFeeds" :key="feed.id">
