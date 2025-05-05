@@ -1,72 +1,77 @@
 <script setup lang="ts">
-import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/toast";
-import { useToast } from "@/components/ui/toast/use-toast";
-
-const { toast } = useToast();
+import { Button } from '@/components/ui/button'
+import { toast } from 'vue-sonner'
 </script>
 
 <template>
-  <!-- Duration 0 prevents toast from automatically disappearing -->
-  <Toaster class="z-50" :duration="0" />
   <Button
-    @click="
-      () => {
-        toast({
-          title: 'Error: Connection Failure',
-          description: `Unable to connect to \${vehicle}!`
-        });
-      }
-    "
+    variant="outline" @click="() => {
+      toast('Error: Connection Failure', {
+        description: `Unable to connect to \${vehicle}!`,
+        action: {
+          label: 'Dismiss',
+          onClick: () => console.log('Undo'),
+        },
+        duration: Infinity
+      })
+    }"
   >
-    Connection Error
+  Connection Error
   </Button>
   <Button
-    @click="
-      () => {
-        toast({
-          title: 'Error: Abnormal Status',
-          description: `Abnormal \${vehicle} status (low battery, system error/failure)!`
-        });
-      }
-    "
+    variant="outline" @click="() => {
+      toast('Error: Abnormal Status', {
+        description: `Abnormal \${vehicle} status (low battery, system error/failure)!`,
+        action: {
+          label: 'Dismiss',
+          onClick: () => console.log('Undo'),
+        },
+        duration: Infinity
+      })
+    }"
   >
-    Abnormal Status Error
+  Abnormal Status Error
   </Button>
   <Button
-    @click="
-      () => {
-        toast({
-          title: 'Warning: Signal Integrity',
-          description: `Weak signal integrity/connection lost to \${vehicle}!`
-        });
-      }
-    "
+    variant="outline" @click="() => {
+      toast('Warning: Signal Integrity', {
+        description: `Weak signal integrity/connection lost to \${vehicle}!`,
+        action: {
+          label: 'Dismiss',
+          onClick: () => console.log('Undo'),
+        },
+        duration: Infinity
+      })
+    }"
   >
-    Signal Integrity Warning
+  Signal Integrity Warning
   </Button>
   <Button
-    @click="
-      () => {
-        toast({
-          title: 'Warning: Keep-Out',
-          description: `\${vehicle} within \${distance} ft of keep-out zone!`
-        });
-      }
-    "
+    variant="outline" @click="() => {
+      toast('Warning: Keep-Out', {
+        description: `\${vehicle} within \${distance} ft of keep-out zone!`,
+        action: {
+          label: 'Dismiss',
+          onClick: () => console.log('Undo'),
+        },
+        duration: Infinity
+      })
+    }"
   >
-    Keep-Out Warning
+  Keep-Out Warning
   </Button>
   <Button
-    @click="
-      () => {
-        toast({
-          title: 'Warning: Vehicle Proximity',
-          description: `\${vehicle1} and \${vehicle2} are within \${distance} ft of each other!`
-        });
-      }
-    "
+    variant="outline" @click="() => {
+      toast('Warning: Vehicle Proximity', {
+        description: `\${vehicle1} and \${vehicle2} are within \${distance} ft of each other!`,
+        action: {
+          label: 'Dismiss',
+          onClick: () => console.log('Undo'),
+        },
+        duration: Infinity
+      })
+    }"
   >
-    Proximity Warning
+  Proximity Warning
   </Button>
 </template>
