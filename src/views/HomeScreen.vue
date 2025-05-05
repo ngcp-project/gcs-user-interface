@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import Cameras from "@/components/Cameras.vue";
 import HomeSidebar from "@/components/HomeSidebar.vue";
-
+import { useRoute } from 'vue-router'
+const route = useRoute()
 const vehicleDataExample: {
   vehicleName: "ERU" | "MEA" | "MRA";
   cameraID: number;
@@ -37,6 +38,9 @@ const vehicleDataExample: {
 </script>
 
 <template>
+    <div class="text-xs text-gray-500 fixed bottom-2 right-2 z-50">
+    Route: {{ route.name }} ({{ route.path }})
+  </div>
   <div class="flex w-full">
     <HomeSidebar :vehicles="vehicleDataExample" />
     <Cameras />

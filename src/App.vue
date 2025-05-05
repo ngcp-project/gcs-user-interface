@@ -8,6 +8,7 @@ import { TargetCoordsProvider } from "./types/target-coords.provider";
 import { MissionInformation } from "./types/mission-info";
 import SidebarProvider from "./components/ui/sidebar/SidebarProvider.vue";
 import { useColorMode } from "@vueuse/core";
+
 import ErrorToast from "@/components/ErrorToast.vue"
 
 // --------- SEARCH AREA COORDINATES (used to select a search area from Map.vue) ------ //

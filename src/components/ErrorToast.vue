@@ -1,52 +1,62 @@
 <script setup lang="ts">
-import { listen } from '@tauri-apps/api/event'
+import { listen } from "@tauri-apps/api/event";
 import { emit } from "@tauri-apps/api/event";
+
+import { useRoute } from "vue-router";
+import { computed } from "vue";
 
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import { toast } from 'vue-sonner'
+import { toast } from "vue-sonner";
 
 // --------- Sync toasts across screens ------ //
-const toastMap = new Map<string, string>()
+const toastMap = new Map<string, string>();
 var id: String;
+
+// Checks which view the toast is on to adjust the position accordingly
+const route = useRoute();
+
+const toasterPosition = computed(() => {
+  return route.path === "/" ? "bottom-right" : "bottom-left"; // '/' is the route of StaticScreen
+});
 
 function generateId() {
   return `toast-${Date.now()}-${Math.random()}`;
 }
 
-listen('create-toast', (event) => {
+listen("create-toast", (event) => {
   const { id, type, title, description } = event.payload as {
-    id: string
-    type: 'error' | 'warning' | 'info'
-    title: string
-    description: string
-  }
+    id: string;
+    type: "error" | "warning" | "info";
+    title: string;
+    description: string;
+  };
 
   const toastId = toast[type](title, {
     id,
     description,
     duration: Infinity,
     action: {
-      label: 'Dismiss',
-      onClick: () => emit('dismiss-toast', { id }),
+      label: "Dismiss",
+      onClick: () => emit("dismiss-toast", { id })
     }
-  })
+  });
 
-  toastMap.set(id, String(toastId))
-})
+  toastMap.set(id, String(toastId));
+});
 
-listen('dismiss-toast', (event) => {
-  const { id } = event.payload as { id: string }
-  toast.dismiss(id)
-})
+listen("dismiss-toast", (event) => {
+  const { id } = event.payload as { id: string };
+  toast.dismiss(id);
+});
 
-listen('dismiss-all-toasts', (event) => {
+listen("dismiss-all-toasts", (event) => {
   toast.dismiss();
-})
+});
 </script>
 
 <template>
-  <Toaster richColors />
+  <Toaster richColors :position="toasterPosition"/>
 
   <!-- --------- Errors --------- -->
   <Button
@@ -58,8 +68,8 @@ listen('dismiss-all-toasts', (event) => {
           id,
           type: 'error',
           title: 'Error: Connection Failure',
-          description: `Unable to connect to \${vehicle}`,
-        })
+          description: `Unable to connect to \${vehicle}`
+        });
       }
     "
   >
@@ -74,8 +84,8 @@ listen('dismiss-all-toasts', (event) => {
           id,
           type: 'error',
           title: 'Error: Abnormal Status',
-          description: `Abnormal \${vehicle} status (low battery, system error/failure)!`,
-        })
+          description: `Abnormal \${vehicle} status (low battery, system error/failure)!`
+        });
       }
     "
   >
@@ -92,8 +102,8 @@ listen('dismiss-all-toasts', (event) => {
           id,
           type: 'warning',
           title: 'Warning: Signal Integrity',
-          description: `Weak signal integrity/connection lost to \${vehicle}!`,
-        })
+          description: `Weak signal integrity/connection lost to \${vehicle}!`
+        });
       }
     "
   >
@@ -108,8 +118,8 @@ listen('dismiss-all-toasts', (event) => {
           id,
           type: 'warning',
           title: 'Warning: Keep-Out',
-          description: `\${vehicle} within \${distance} ft of keep-out zone!`,
-        })
+          description: `\${vehicle} within \${distance} ft of keep-out zone!`
+        });
       }
     "
   >
@@ -124,8 +134,8 @@ listen('dismiss-all-toasts', (event) => {
           id,
           type: 'warning',
           title: 'Warning: Vehicle Proximity',
-          description: `\${vehicle1} and \${vehicle2} are within \${distance} ft of each other!`,
-        })
+          description: `\${vehicle1} and \${vehicle2} are within \${distance} ft of each other!`
+        });
       }
     "
   >
@@ -137,7 +147,7 @@ listen('dismiss-all-toasts', (event) => {
     variant="outline"
     @click="
       () => {
-        emit('dismiss-all-toasts')
+        emit('dismiss-all-toasts');
       }
     "
     >Dismiss All
