@@ -8,7 +8,7 @@ import { TargetCoordsProvider } from "./types/target-coords.provider";
 import { MissionInformation } from "./types/mission-info";
 import SidebarProvider from "./components/ui/sidebar/SidebarProvider.vue";
 import { useColorMode } from "@vueuse/core";
-import { Toaster } from '@/components/ui/sonner'
+import { Toaster } from "@/components/ui/sonner";
 
 // --------- SEARCH AREA COORDINATES (used to select a search area from Map.vue) ------ //
 const searchCoords = ref([""]);
@@ -111,7 +111,7 @@ export type { Coordinate, Vehicle, Stage };
 </script>
 
 <template>
-  <Toaster />
+  <Toaster richColors />
   <div class="flex h-[100dvh] flex-col">
     <SidebarProvider class="min-h-0 flex-grow overflow-y-hidden">
       <RouterView />

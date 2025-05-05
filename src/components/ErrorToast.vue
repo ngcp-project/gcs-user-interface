@@ -4,15 +4,16 @@ import { toast } from 'vue-sonner'
 </script>
 
 <template>
+  <!-- Errors -->
   <Button
     variant="outline" @click="() => {
-      toast('Error: Connection Failure', {
+      toast.error('Error: Connection Failure', {
         description: `Unable to connect to \${vehicle}!`,
         action: {
           label: 'Dismiss',
           onClick: () => console.log('Undo'),
         },
-        duration: Infinity
+        duration: Infinity,
       })
     }"
   >
@@ -20,7 +21,7 @@ import { toast } from 'vue-sonner'
   </Button>
   <Button
     variant="outline" @click="() => {
-      toast('Error: Abnormal Status', {
+      toast.error('Error: Abnormal Status', {
         description: `Abnormal \${vehicle} status (low battery, system error/failure)!`,
         action: {
           label: 'Dismiss',
@@ -32,9 +33,11 @@ import { toast } from 'vue-sonner'
   >
   Abnormal Status Error
   </Button>
+
+  <!-- Warnings -->
   <Button
     variant="outline" @click="() => {
-      toast('Warning: Signal Integrity', {
+      toast.warning('Warning: Signal Integrity', {
         description: `Weak signal integrity/connection lost to \${vehicle}!`,
         action: {
           label: 'Dismiss',
@@ -48,7 +51,7 @@ import { toast } from 'vue-sonner'
   </Button>
   <Button
     variant="outline" @click="() => {
-      toast('Warning: Keep-Out', {
+      toast.warning('Warning: Keep-Out', {
         description: `\${vehicle} within \${distance} ft of keep-out zone!`,
         action: {
           label: 'Dismiss',
@@ -62,7 +65,7 @@ import { toast } from 'vue-sonner'
   </Button>
   <Button
     variant="outline" @click="() => {
-      toast('Warning: Vehicle Proximity', {
+      toast.warning('Warning: Vehicle Proximity', {
         description: `\${vehicle1} and \${vehicle2} are within \${distance} ft of each other!`,
         action: {
           label: 'Dismiss',
@@ -73,5 +76,11 @@ import { toast } from 'vue-sonner'
     }"
   >
   Proximity Warning
+  </Button>
+  <Button
+    variant="outline" @click="() => {
+      toast.dismiss()
+    }"
+  >Dismiss All
   </Button>
 </template>

@@ -71,7 +71,7 @@ whenever(emblaMainApi, (api) => {
 
 <template>
   <!-- Toast testing bar -->
-  <div class="fixed flex z-50 justify-center pt-3 gap-3 w-full items-center">
+  <div class="fixed flex z-50 justify-center pb-3 gap-3 w-full items-center bottom-0">
     <ErrorToast />
   </div>
 
