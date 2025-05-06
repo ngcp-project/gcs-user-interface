@@ -1,5 +1,6 @@
 use super::types::*;
 use std::sync::Arc;
+use sqlx::{postgres::PgPoolOptions, PgPool};
 use tauri::{AppHandle, Runtime};
 use taurpc;
 use tokio::sync::Mutex;
@@ -12,12 +13,16 @@ use tokio::sync::Mutex;
 #[derive(Clone)]
 pub struct MissionApiImpl {
     state: Arc<Mutex<MissionsStruct>>,
+    db: PgPool,
 }
 
-impl Default for MissionApiImpl {
-    /// Initializes mission state with default values
-    /// TODO: Replace with proper database initialization later
-    fn default() -> Self {
+/*==============================================================================
+ * MissionApiImpl Methods
+ *============================================================================*/
+
+impl MissionApiImpl {
+    /// Create new instance with initial state
+    pub async fn new() -> Self {
         let initial_state = MissionsStruct {
             current_mission: 0,
             missions: vec![MissionStruct {
@@ -57,19 +62,13 @@ impl Default for MissionApiImpl {
             }],
         };
 
-        Self::new(initial_state)
-    }
-}
-
-/*==============================================================================
- * MissionApiImpl Methods
- *============================================================================*/
-
-impl MissionApiImpl {
-    /// Create new instance with initial state
-    pub fn new(initial_state: MissionsStruct) -> Self {
         Self {
             state: Arc::new(Mutex::new(initial_state)),
+            db: PgPoolOptions::new()
+                .max_connections(5)
+                .connect("postgres://ngcp:ngcp@localhost:5433/ngcpdb")
+                .await
+                .expect("Failed to connect to the database"),
         }
     }
 
@@ -236,7 +235,7 @@ impl MissionApi for MissionApiImpl {
     // State Management Implementations
     // ----------------------------------
     async fn get_default_data(self) -> MissionsStruct {
-        Self::default().state.lock().await.clone()
+        Self::new().await.state.lock().await.clone()
     }
 
     async fn get_all_missions(self) -> MissionsStruct {

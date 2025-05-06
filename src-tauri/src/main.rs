@@ -677,7 +677,7 @@ async fn main() {
     init_database_dummy_data().await;
 
     // let router = setup_router();
-    let missions_api = MissionApiImpl::default();
+    let missions_api = MissionApiImpl::new().await;
     let router = Router::new()
         .merge(missions_api.into_handler());
 
