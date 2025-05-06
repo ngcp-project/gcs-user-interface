@@ -86,7 +86,7 @@ async fn init_database_dummy_data() {
     
     let _insert_dummy_discover_eru = query("
         INSERT INTO vehicles(mission_id, vehicle_name, current_stage_id)
-        VALUES ($1, $2, $3, $4) RETURNING vehicle_id
+        VALUES ($1, $2, $3) RETURNING vehicle_id
     ")
     .bind(discover_mission_id)
     .bind("ERU")
@@ -528,32 +528,32 @@ async fn init_database_dummy_data() {
     ////////////////////////////////
     // BEGIN JOIN //////////////////
     ////////////////////////////////
-    let missions = sqlx::query(
-        "
-        SELECT 
-            missions.mission_id,
-            missions.mission_name,
-            missions.status AS mission_status,
-            missions.keep_in_zones,
-            missions.keep_out_zones,
-            vehicles.vehicle_name,
-            vehicles.current_stage_id AS current_stage,
-            vehicles.is_auto,
-            vehicles.patient_status,
-            stages.stage_id,
-            stages.stage_name,
-            stages.search_area,
-            stages.target_coordinate
-        FROM missions
-        INNER JOIN vehicles ON missions.mission_id = vehicles.mission_id
-        INNER JOIN stages ON vehicles.vehicle_id = stages.vehicle_id
-        WHERE missions.mission_id = $1
-        "
-    )
-    .bind(discover_mission_id)
-    .fetch_all(&mut db_conn)
-    .await
-    .expect("Failed to execute query");
+    // let missions = sqlx::query(
+    //     "
+    //     SELECT 
+    //         missions.mission_id,
+    //         missions.mission_name,
+    //         missions.status AS mission_status,
+    //         missions.keep_in_zones,
+    //         missions.keep_out_zones,
+    //         vehicles.vehicle_name,
+    //         vehicles.current_stage_id AS current_stage,
+    //         vehicles.is_auto,
+    //         vehicles.patient_status,
+    //         stages.stage_id,
+    //         stages.stage_name,
+    //         stages.search_area,
+    //         stages.target_coordinate
+    //     FROM missions
+    //     INNER JOIN vehicles ON missions.mission_id = vehicles.mission_id
+    //     INNER JOIN stages ON vehicles.vehicle_id = stages.vehicle_id
+    //     WHERE missions.mission_id = $1
+    //     "
+    // )
+    // .bind(discover_mission_id)
+    // .fetch_all(&mut db_conn)
+    // .await
+    // .expect("Failed to execute query");
 
     // // Print the results
     // println!("Missions Name\tStatus\tKeep In Zones\tKeep Out Zones\tVehicle Name\tCurrent Stage\tStage ID\tStage Name\tSearch Area\tTarget Coordinate");
