@@ -6,5 +6,6 @@
 # will have schema files for capabilities auto-completion
 /gen/schemas
 
-# Binaries
-/binaries/
+# Binaries (hopefully tracks the empty folder but not its contents)
+/binaries/*
+!/binaries/.gitkeep

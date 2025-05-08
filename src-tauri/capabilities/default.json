@@ -20,7 +20,7 @@
       "identifier": "shell:allow-spawn",
       "allow": [
         {
-          "name": "binaries/my-sidecar",
+          "name": "binaries/opencv",
           "sidecar": true
         }
       ]
