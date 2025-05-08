@@ -1,6 +1,6 @@
 use super::types::*;
 use std::sync::Arc;
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use sqlx::{postgres::PgPoolOptions, PgPool, Row};
 use tauri::{AppHandle, Runtime};
 use taurpc;
 use tokio::sync::Mutex;
@@ -22,58 +22,150 @@ pub struct MissionApiImpl {
 
 impl MissionApiImpl {
     /// Create new instance with initial state
+    /// TODO: SQL
     pub async fn new() -> Self {
-        let initial_state = MissionsStruct {
+        let mut initial_state = MissionsStruct {
             current_mission: 0,
-            missions: vec![MissionStruct {
-                mission_name: "Mission 1".to_string(),
-                mission_id: 0,
-                mission_status: MissionStageStatusEnum::Active,
-                vehicles: VehiclesStruct {
-                    MEA: VehicleStruct {
-                        vehicle_name: VehicleEnum::MEA,
-                        current_stage: 0,
-                        is_auto: Some(false),
-                        patient_status: Some(PatientStatusEnum::Secured),
-                        stages: vec![
-                            Self::create_default_stage("test", 0),
-                            Self::create_default_stage("test1", 1),
-                        ],
-                    },
-                    ERU: VehicleStruct {
-                        vehicle_name: VehicleEnum::ERU,
-                        current_stage: 0,
-                        is_auto: Some(false),
-                        patient_status: Some(PatientStatusEnum::Unsecured),
-                        stages: vec![],
-                    },
-                    MRA: VehicleStruct {
-                        vehicle_name: VehicleEnum::MRA,
-                        current_stage: 0,
-                        is_auto: None,
-                        patient_status: None,
-                        stages: vec![],
-                    },
-                },
-                zones: ZonesStruct {
-                    keep_in_zones: vec![],
-                    keep_out_zones: vec![],
-                },
-            }],
+            missions: vec![],
         };
 
+        let database_connection = PgPoolOptions::new()
+            .max_connections(5)
+            .connect("postgres://ngcp:ngcp@localhost:5433/ngcpdb")
+            .await
+            .expect("Failed to connect to the database");
+
+        let all_mission_ids = sqlx::query(
+            "SELECT mission_id FROM missions ")
+            .fetch_all(&database_connection)
+            .await
+            .expect("Failed to execute query");
+
+        println!("Number of mission IDs: {}", all_mission_ids.len());
+        if all_mission_ids.len() > 0 {
+            for mission_id_row in all_mission_ids {
+                let mission_id: i32 = mission_id_row.get("mission_id");
+                let mission = sqlx::query(
+                "
+                    SELECT 
+                        missions.mission_id,
+                        missions.mission_name,
+                        missions.status AS mission_status,
+                        missions.keep_in_zones,
+                        missions.keep_out_zones,
+                        vehicles.vehicle_name,
+                        vehicles.current_stage_id AS current_stage,
+                        vehicles.is_auto,
+                        vehicles.patient_status,
+                        stages.stage_id,
+                        stages.stage_name,
+                        stages.search_area,
+                        stages.target_coordinate
+                    FROM missions
+                    INNER JOIN vehicles ON missions.mission_id = vehicles.mission_id
+                    INNER JOIN stages ON vehicles.vehicle_id = stages.vehicle_id
+                    WHERE missions.mission_id = $1
+                    "
+                )
+                .bind(mission_id)
+                .fetch_all(&database_connection)
+                .await
+                .expect("Failed to execute query");
+
+                // initial_state.missions.push(MissionStruct {
+                //     mission_name: mission[0].get("mission_name"),
+                //     mission_id: mission[0].get("mission_id"),
+                //     mission_status: match mission[0].get::<String, _>("mission_status").as_str() {
+                //         "active" => MissionStageStatusEnum::Active,
+                //         "inactive" => MissionStageStatusEnum::Inactive,
+                //         "complete" => MissionStageStatusEnum::Complete,
+                //         "failed" => MissionStageStatusEnum::Failed,
+                //         _ => MissionStageStatusEnum::Inactive,
+                //     },
+                //     vehicles: VehiclesStruct {
+                //         MEA: VehicleStruct {
+                //             vehicle_name: VehicleEnum::MEA,
+                //             current_stage: mission[0].get("current_stage"),
+                //             is_auto: Some(mission[0].get("is_auto")),
+                //             patient_status: Some(mission[0].get("patient_status")),
+                //             stages: vec![
+                //                 Self::create_default_stage(
+                //                     &mission[0].get::<String, _>("stage_name"),
+                //                     mission[0].get("stage_id"),
+                //                 ),
+                //             ],
+                //         },
+                //         ERU: VehicleStruct {
+                //             vehicle_name: VehicleEnum::ERU,
+                //             current_stage: 0,
+                //             is_auto: Some(false),
+                //             patient_status: Some(PatientStatusEnum::Unsecured),
+                //             stages: vec![],
+                //         },
+                //         MRA: VehicleStruct {
+                //             vehicle_name: VehicleEnum::MRA,
+                //             current_stage: 0,
+                //             is_auto: None,
+                //             patient_status: None,
+                //             stages: vec![],
+                //         },
+                //     },
+                //     zones: ZonesStruct {
+                //         keep_in_zones: vec![],
+                //         keep_out_zones: vec![],
+                //     },
+                // });
+            }
+        } else {
+            initial_state = MissionsStruct {
+                current_mission: 0,
+                missions: vec![MissionStruct {
+                    mission_name: "Mission 1".to_string(),
+                    mission_id: 0,
+                    mission_status: MissionStageStatusEnum::Active,
+                    vehicles: VehiclesStruct {
+                        MEA: VehicleStruct {
+                            vehicle_name: VehicleEnum::MEA,
+                            current_stage: 0,
+                            is_auto: Some(false),
+                            patient_status: Some(PatientStatusEnum::Secured),
+                            stages: vec![
+                                Self::create_default_stage("test", 0),
+                                Self::create_default_stage("test1", 1),
+                            ],
+                        },
+                        ERU: VehicleStruct {
+                            vehicle_name: VehicleEnum::ERU,
+                            current_stage: 0,
+                            is_auto: Some(false),
+                            patient_status: Some(PatientStatusEnum::Unsecured),
+                            stages: vec![],
+                        },
+                        MRA: VehicleStruct {
+                            vehicle_name: VehicleEnum::MRA,
+                            current_stage: 0,
+                            is_auto: None,
+                            patient_status: None,
+                            stages: vec![],
+                        },
+                    },
+                    zones: ZonesStruct {
+                        keep_in_zones: vec![],
+                        keep_out_zones: vec![],
+                    },
+                }],
+            };
+        }
+        
         Self {
             state: Arc::new(Mutex::new(initial_state)),
-            db: PgPoolOptions::new()
-                .max_connections(5)
-                .connect("postgres://ngcp:ngcp@localhost:5433/ngcpdb")
-                .await
-                .expect("Failed to connect to the database"),
+            db: database_connection,
         }
     }
 
     /// Create default stage configuration
-    pub fn create_default_stage(name: &str, id: u32) -> StageStruct {
+    /// TODO: SQL
+    pub fn create_default_stage(name: &str, id: i32) -> StageStruct {
         StageStruct {
             stage_name: name.to_string(),
             stage_id: id,
@@ -83,7 +175,8 @@ impl MissionApiImpl {
     }
 
     /// Create default mission configuration
-    pub fn create_default_mission(name: &str, id: u32) -> MissionStruct {
+    /// TODO: SQL
+    pub fn create_default_mission(name: &str, id: i32) -> MissionStruct {
         MissionStruct {
             mission_name: name.to_string(),
             mission_id: id,
@@ -158,17 +251,17 @@ pub trait MissionApi {
     // ----------------------------------
     async fn rename_mission(
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         mission_name: String,
     ) -> Result<(), String>;
-    async fn get_mission_data(mission_id: u32) -> MissionStruct;
+    async fn get_mission_data(mission_id: i32) -> MissionStruct;
     async fn create_mission(
         app_handle: AppHandle<impl Runtime>,
         mission_name: String,
     ) -> Result<(), String>;
     async fn delete_mission(
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
     ) -> Result<(), String>;
 
     // ----------------------------------
@@ -176,7 +269,7 @@ pub trait MissionApi {
     // ----------------------------------
     async fn set_auto_mode(
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         vehicle_name: VehicleEnum,
         is_auto: bool,
     ) -> Result<(), String>;
@@ -186,26 +279,26 @@ pub trait MissionApi {
     // ----------------------------------
     async fn add_stage(
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         vehicle_name: VehicleEnum,
         stage_name: String,
     ) -> Result<(), String>;
     async fn delete_stage(
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         vehicle_name: VehicleEnum,
-        stage_id: u32,
+        stage_id: i32,
     ) -> Result<(), String>;
     async fn rename_stage(
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         vehicle_name: VehicleEnum,
-        stage_id: u32,
+        stage_id: i32,
         stage_name: String,
     ) -> Result<(), String>;
     async fn transition_stage(
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         vehicle_name: VehicleEnum,
     ) -> Result<(), String>;
 
@@ -214,14 +307,14 @@ pub trait MissionApi {
     // ----------------------------------
     async fn add_zone(
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         zone_type: ZoneType,
     ) -> Result<(), String>;
     async fn delete_zone(
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         zone_type: ZoneType,
-        zone_index: u32,
+        zone_index: i32,
     ) -> Result<(), String>;
 }
 
@@ -245,7 +338,7 @@ impl MissionApi for MissionApiImpl {
     // ----------------------------------
     // Mission Operations Implementations
     // ----------------------------------
-    async fn get_mission_data(self, mission_id: u32) -> MissionStruct {
+    async fn get_mission_data(self, mission_id: i32) -> MissionStruct {
         let state = self.state.lock().await;
         state
             .missions
@@ -255,10 +348,11 @@ impl MissionApi for MissionApiImpl {
             .unwrap_or_else(|| panic!("Mission not found"))
     }
 
+    // TODO: SQL
     async fn rename_mission(
         self,
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         mission_name: String,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
@@ -271,21 +365,23 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
 
+    // TODO: SQL
     async fn create_mission(
         self,
         app_handle: AppHandle<impl Runtime>,
         mission_name: String,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
-        let new_mission = Self::create_default_mission(&mission_name, rand::random::<u32>());
+        let new_mission = Self::create_default_mission(&mission_name, rand::random::<i32>());
         state.missions.push(new_mission);
         self.emit_state_update(&app_handle, &state)
     }
 
+    // TODO: SQL
     async fn delete_mission(
         self,
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
         let mission_index = state
@@ -308,10 +404,11 @@ impl MissionApi for MissionApiImpl {
     // ----------------------------------
     // Vehicle Operations Implementations
     // ----------------------------------
+    // TODO: SQL
     async fn set_auto_mode(
         self,
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         vehicle_name: VehicleEnum,
         is_auto: bool,
     ) -> Result<(), String> {
@@ -335,10 +432,11 @@ impl MissionApi for MissionApiImpl {
     // ----------------------------------
     // Stage Operations Implementations
     // ----------------------------------
+    // TODO: SQL
     async fn add_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         vehicle_name: VehicleEnum,
         stage_name: String,
     ) -> Result<(), String> {
@@ -357,17 +455,18 @@ impl MissionApi for MissionApiImpl {
 
         vehicle.stages.push(Self::create_default_stage(
             &stage_name,
-            rand::random::<u32>(),
+            rand::random::<i32>(),
         ));
         self.emit_state_update(&app_handle, &state)
     }
 
+    // TODO: SQL
     async fn delete_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         vehicle_name: VehicleEnum,
-        stage_id: u32,
+        stage_id: i32,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
         let mission = state
@@ -388,19 +487,20 @@ impl MissionApi for MissionApiImpl {
             .position(|s| s.stage_id == stage_id)
             .ok_or("Stage not found")?;
 
-        if vehicle.current_stage >= stage_index as u32 {
+        if vehicle.current_stage >= stage_index as i32 {
             return Err("Cannot delete current/completed stage".into());
         }
 
         vehicle.stages.remove(stage_index);
         self.emit_state_update(&app_handle, &state)
     }
+    // TODO: SQL
     async fn rename_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         vehicle_name: VehicleEnum,
-        stage_id: u32,
+        stage_id: i32,
         stage_name: String,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
@@ -422,10 +522,11 @@ impl MissionApi for MissionApiImpl {
         stage.stage_name = stage_name;
         self.emit_state_update(&app_handle, &state)
     }
+    // TODO: SQL
     async fn transition_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         vehicle_name: VehicleEnum,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
@@ -458,10 +559,11 @@ impl MissionApi for MissionApiImpl {
     // ----------------------------------
     // Zone Operations Implementations
     // ----------------------------------
+    // TODO: SQL
     async fn add_zone(
         self,
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         zone_type: ZoneType,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
@@ -479,12 +581,13 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
 
+    // TODO: SQL
     async fn delete_zone(
         self,
         app_handle: AppHandle<impl Runtime>,
-        mission_id: u32,
+        mission_id: i32,
         zone_type: ZoneType,
-        zone_index: u32,
+        zone_index: i32,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
         let mission = state
@@ -495,13 +598,13 @@ impl MissionApi for MissionApiImpl {
 
         match zone_type {
             ZoneType::KeepIn => {
-                if zone_index >= mission.zones.keep_in_zones.len() as u32 {
+                if zone_index >= mission.zones.keep_in_zones.len() as i32 {
                     return Err("KeepIn index out of range".into());
                 }
                 mission.zones.keep_in_zones.remove(zone_index as usize);
             }
             ZoneType::KeepOut => {
-                if zone_index >= mission.zones.keep_out_zones.len() as u32 {
+                if zone_index >= mission.zones.keep_out_zones.len() as i32 {
                     return Err("KeepOut index out of range".into());
                 }
                 mission.zones.keep_out_zones.remove(zone_index as usize);

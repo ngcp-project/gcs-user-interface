@@ -1,7 +1,7 @@
 #[taurpc::ipc_type]
 #[derive(Debug)]
 pub struct MissionsStruct {
-    pub current_mission: u32,
+    pub current_mission: i32,
     pub missions: Vec<MissionStruct>,
 }
 
@@ -9,7 +9,7 @@ pub struct MissionsStruct {
 #[derive(Debug)]
 pub struct MissionStruct {
     pub mission_name: String,
-    pub mission_id: u32,
+    pub mission_id: i32,
     pub mission_status: MissionStageStatusEnum,
     pub vehicles: VehiclesStruct,
     pub zones: ZonesStruct,
@@ -27,7 +27,7 @@ pub enum MissionStageStatusEnum {
 #[derive(Debug)]
 pub struct VehicleStruct {
     pub vehicle_name: VehicleEnum,
-    pub current_stage: u32,
+    pub current_stage: i32,
     pub is_auto: Option<bool>,
     pub patient_status: Option<PatientStatusEnum>,
     pub stages: Vec<StageStruct>,
@@ -62,7 +62,7 @@ pub enum PatientStatusEnum {
 #[derive(Debug)]
 pub struct StageStruct {
     pub stage_name: String,
-    pub stage_id: u32,
+    pub stage_id: i32,
     pub stage_status: MissionStageStatusEnum,
     pub search_area: GeofenceType,
 }
