@@ -1,4 +1,6 @@
 # With pyinstaller, run pyinstaller --onefile opencv.py, then move the file in dist/opencv to binaries folder.
+# After that, run this command: bun run target:triple
+# Lastly, copy the new binary name and paste in after "binaries/" in tauri.conf.json's externalBin
 
 from flask import Flask, render_template, Response
 import cv2
