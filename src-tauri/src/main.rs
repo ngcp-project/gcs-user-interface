@@ -11,14 +11,6 @@ mod missions;
 use missions::api::{MissionApiImpl, MissionApi};
 
 const DB_URL: &str = "postgres://ngcp:ngcp@localhost:5433/ngcpdb";
-#[derive(sqlx::Type, Debug)]
-#[sqlx(type_name = "status")]
-pub enum Status {
-    Active,
-    Inactive,
-    Complete,
-    Failed,
-}
 
 async fn init_database_dummy_data() {
     let mut db_conn = PgConnection::connect(DB_URL).await.expect("Failed to connect to the database");

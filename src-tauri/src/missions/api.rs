@@ -4,6 +4,7 @@ use sqlx::{postgres::PgPoolOptions, PgPool, Row};
 use tauri::{AppHandle, Runtime};
 use taurpc;
 use tokio::sync::Mutex;
+use super::sql::*;
 
 /*==============================================================================
  * MissionApiImpl Structure and Default Implementation
@@ -176,10 +177,13 @@ impl MissionApiImpl {
 
     /// Create default mission configuration
     /// TODO: SQL
-    pub fn create_default_mission(name: &str, id: i32) -> MissionStruct {
+    pub async fn create_default_mission(self, name: &str) -> MissionStruct {
+        let new_mission_id = insert_new_mission(self.db, name).await.unwrap_or(0);
+
+
         MissionStruct {
             mission_name: name.to_string(),
-            mission_id: id,
+            mission_id: new_mission_id,
             mission_status: MissionStageStatusEnum::Inactive,
             vehicles: VehiclesStruct {
                 MEA: VehicleStruct {
@@ -355,6 +359,7 @@ impl MissionApi for MissionApiImpl {
         mission_id: i32,
         mission_name: String,
     ) -> Result<(), String> {
+        println!("Renaming mission {} to {}", mission_id, mission_name);
         let mut state = self.state.lock().await;
         let mission = state
             .missions
@@ -371,8 +376,9 @@ impl MissionApi for MissionApiImpl {
         app_handle: AppHandle<impl Runtime>,
         mission_name: String,
     ) -> Result<(), String> {
+        println!("Creating mission: {}", mission_name);
         let mut state = self.state.lock().await;
-        let new_mission = Self::create_default_mission(&mission_name, rand::random::<i32>());
+        let new_mission = Self::create_default_mission(self.clone(), &mission_name).await;
         state.missions.push(new_mission);
         self.emit_state_update(&app_handle, &state)
     }
@@ -383,6 +389,7 @@ impl MissionApi for MissionApiImpl {
         app_handle: AppHandle<impl Runtime>,
         mission_id: i32,
     ) -> Result<(), String> {
+        println!("Deleting mission with ID: {}", mission_id);
         let mut state = self.state.lock().await;
         let mission_index = state
             .missions
@@ -412,6 +419,7 @@ impl MissionApi for MissionApiImpl {
         vehicle_name: VehicleEnum,
         is_auto: bool,
     ) -> Result<(), String> {
+        println!("Setting auto mode for vehicle: {:?}", vehicle_name);
         let mut state = self.state.lock().await;
         let mission = state
             .missions
@@ -440,6 +448,7 @@ impl MissionApi for MissionApiImpl {
         vehicle_name: VehicleEnum,
         stage_name: String,
     ) -> Result<(), String> {
+        println!("Adding stage: {}", stage_name);
         let mut state = self.state.lock().await;
         let mission = state
             .missions
@@ -468,6 +477,7 @@ impl MissionApi for MissionApiImpl {
         vehicle_name: VehicleEnum,
         stage_id: i32,
     ) -> Result<(), String> {
+        println!("Deleting stage with ID: {}", stage_id);
         let mut state = self.state.lock().await;
         let mission = state
             .missions
@@ -503,6 +513,7 @@ impl MissionApi for MissionApiImpl {
         stage_id: i32,
         stage_name: String,
     ) -> Result<(), String> {
+        println!("Renaming stage {} to {}", stage_id, stage_name);
         let mut state = self.state.lock().await;
         let mission = state
             .missions
@@ -529,6 +540,7 @@ impl MissionApi for MissionApiImpl {
         mission_id: i32,
         vehicle_name: VehicleEnum,
     ) -> Result<(), String> {
+        println!("Transitioning stage for vehicle: {:?}", vehicle_name);
         let mut state = self.state.lock().await;
         let mission = state
             .missions
@@ -566,6 +578,7 @@ impl MissionApi for MissionApiImpl {
         mission_id: i32,
         zone_type: ZoneType,
     ) -> Result<(), String> {
+        println!("Adding zone of type: {:?}", zone_type);
         let mut state = self.state.lock().await;
         let mission = state
             .missions
@@ -589,6 +602,7 @@ impl MissionApi for MissionApiImpl {
         zone_type: ZoneType,
         zone_index: i32,
     ) -> Result<(), String> {
+        println!("Deleting zone of type: {:?} at index: {}", zone_type, zone_index);
         let mut state = self.state.lock().await;
         let mission = state
             .missions

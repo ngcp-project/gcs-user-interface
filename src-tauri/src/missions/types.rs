@@ -15,7 +15,8 @@ pub struct MissionStruct {
     pub zones: ZonesStruct,
 }
 
-#[derive(Debug, serde::Deserialize, serde::Serialize, Clone, specta::Type)]
+#[derive(Debug, serde::Deserialize, serde::Serialize, Clone, specta::Type, sqlx::Type)]
+#[sqlx(type_name = "mission_stage_status_enum")]
 pub enum MissionStageStatusEnum {
     Active,
     Inactive,
