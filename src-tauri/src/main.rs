@@ -499,51 +499,6 @@ async fn init_database_dummy_data() {
     .await
     .expect("Failed to insert dummy data into stages");
 
-    // let test_result = query("
-    //     SELECT * FROM missions WHERE mission_name = $1
-    // ")
-    // .bind("Discover Mission")
-    // .fetch_all(&mut db_conn)
-    // .await
-    // .expect("Failed to fetch dummy data from missions");
-
-    
-    // for row in test_result {
-    //     let mission_id: i32 = row.get("mission_id");
-    //     let mission_name: String = row.get("mission_name");
-    //     let keep_in_zones: Vec<String> = row.get("keep_in_zones");
-    //     let keep_out_zones: Vec<String> = row.get("keep_out_zones");
-    //     println!("Mission ID: {}, Name: {}, Keep In Zones: {:?}, Keep Out Zones: {:?}", 
-    //         mission_id, mission_name, keep_in_zones, keep_out_zones);
-    // }
-    
-
-    // // Print the results
-    // println!("Missions Name\tStatus\tKeep In Zones\tKeep Out Zones\tVehicle Name\tCurrent Stage\tStage ID\tStage Name\tSearch Area\tTarget Coordinate");
-    // println!("-------------------------------------------------------------------------------------------------------------------------------------------------");
-
-    // for row in missions {
-    //     let mission_name: String = row.get("mission_name");
-    //     let mission_status: Status = row.get("mission_status");
-    //     let keep_in_zones: Vec<String> = row.get("keep_in_zones");
-    //     let keep_out_zones: Vec<String> = row.get("keep_out_zones");
-    //     let vehicle_name: String = row.get("vehicle_name");
-    //     let current_stage: i32 = row.get("current_stage");
-    //     let stage_id: i32 = row.get("stage_id");
-    //     let stage_name: String = row.get("stage_name");
-    //     let search_area: Vec<String> = row.get("search_area");
-    //     let target_coordinate: String = row.get("target_coordinate");
-
-    //             println!("{}\t{:?}\t{:?}\t{:?}\t{}\t{}\t{}\t{}\t{:?}\t{}", 
-    //         mission_name, mission_status, keep_in_zones, keep_out_zones, vehicle_name, 
-    //         current_stage, stage_id, stage_name, search_area, target_coordinate);
-    // }
-
-    ////////////////////////////////
-    // END JOIN ////////////////////
-    ////////////////////////////////
-
-
     db_conn.close().await.expect("Failed to close database connection");
 }
 
@@ -604,18 +559,6 @@ async fn initialize_database() {
         target_coordinate TEXT
     );
     ").execute(&mut db_conn).await.expect("Failed to execute query");
-
-
-    // NOTE: Not sure if these indexes are needed, but keeping them for now
-    // let _vehicle_index = query("
-    // CREATE INDEX idx_vehicle_currentStage
-    // ON Vehicle(currentStageID);
-    // ").execute(&mut db_conn).await;
-
-    // let _stage_index = query("
-    // CREATE INDEX idx_stage_vehicle
-    // ON Stage(vehicleName);
-    // ").execute(&mut db_conn).await;
 
     db_conn.close().await.expect("Failed to close database connection");
 }

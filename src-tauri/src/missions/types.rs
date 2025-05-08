@@ -1,3 +1,5 @@
+use std::{num::ParseFloatError, str::FromStr};
+
 #[taurpc::ipc_type]
 #[derive(Debug)]
 pub struct MissionsStruct {
@@ -63,7 +65,8 @@ impl VehicleEnum {
     }
 }
 
-#[derive(Debug, serde::Deserialize, serde::Serialize, Clone, specta::Type)]
+#[derive(Debug, serde::Deserialize, serde::Serialize, Clone, specta::Type, sqlx::Type)]
+#[sqlx(type_name = "patient_status_enum")]
 pub enum PatientStatusEnum {
     Secured,
     Unsecured,
@@ -97,5 +100,22 @@ pub struct GeoCoordinateStruct {
     pub lat: f64,
     pub long: f64,
 }
+impl FromStr for GeoCoordinateStruct {
+    type Err = ParseFloatError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split(',').collect();
+        if parts.len() != 2 {
+            return Err("Invalid coordinate format".parse::<f64>().unwrap_err());
+        }
+        let latitude = parts[0].trim().parse::<f64>()?;
+        let longitude = parts[1].trim().parse::<f64>()?;
+        Ok(GeoCoordinateStruct { 
+            lat: latitude,
+            long: longitude,
+         })
+    }
+}
+
 
 pub type GeofenceType = Vec<GeoCoordinateStruct>;

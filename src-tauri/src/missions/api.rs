@@ -73,49 +73,98 @@ impl MissionApiImpl {
                 .await
                 .expect("Failed to execute query");
 
-                // initial_state.missions.push(MissionStruct {
-                //     mission_name: mission[0].get("mission_name"),
-                //     mission_id: mission[0].get("mission_id"),
-                //     mission_status: match mission[0].get::<String, _>("mission_status").as_str() {
-                //         "active" => MissionStageStatusEnum::Active,
-                //         "inactive" => MissionStageStatusEnum::Inactive,
-                //         "complete" => MissionStageStatusEnum::Complete,
-                //         "failed" => MissionStageStatusEnum::Failed,
-                //         _ => MissionStageStatusEnum::Inactive,
-                //     },
-                //     vehicles: VehiclesStruct {
-                //         MEA: VehicleStruct {
-                //             vehicle_name: VehicleEnum::MEA,
-                //             current_stage: mission[0].get("current_stage"),
-                //             is_auto: Some(mission[0].get("is_auto")),
-                //             patient_status: Some(mission[0].get("patient_status")),
-                //             stages: vec![
-                //                 Self::create_default_stage(
-                //                     &mission[0].get::<String, _>("stage_name"),
-                //                     mission[0].get("stage_id"),
-                //                 ),
-                //             ],
-                //         },
-                //         ERU: VehicleStruct {
-                //             vehicle_name: VehicleEnum::ERU,
-                //             current_stage: 0,
-                //             is_auto: Some(false),
-                //             patient_status: Some(PatientStatusEnum::Unsecured),
-                //             stages: vec![],
-                //         },
-                //         MRA: VehicleStruct {
-                //             vehicle_name: VehicleEnum::MRA,
-                //             current_stage: 0,
-                //             is_auto: None,
-                //             patient_status: None,
-                //             stages: vec![],
-                //         },
-                //     },
-                //     zones: ZonesStruct {
-                //         keep_in_zones: vec![],
-                //         keep_out_zones: vec![],
-                //     },
-                // });
+                initial_state.missions.push(MissionStruct {
+                    mission_name: mission[0].get("mission_name"),
+                    mission_id: mission[0].get("mission_id"),
+                    // mission_status: match mission[0].get::<String, _>("mission_status").as_str() {
+                    //     "active" => MissionStageStatusEnum::Active,
+                    //     "inactive" => MissionStageStatusEnum::Inactive,
+                    //     "complete" => MissionStageStatusEnum::Complete,
+                    //     "failed" => MissionStageStatusEnum::Failed,
+                    //     _ => MissionStageStatusEnum::Inactive,
+                    // },
+                    mission_status: MissionStageStatusEnum::Inactive,
+                    vehicles: VehiclesStruct {
+                        MEA: VehicleStruct {
+                            vehicle_name: VehicleEnum::MEA,
+                            current_stage: mission[0].get("current_stage"),
+                            is_auto: mission[0].get("is_auto"),
+                            patient_status: mission[0].get("patient_status"),
+                            stages: mission.iter()
+                                .filter(|row| row.get::<String, _>("vehicle_name") == "MEA")
+                                .map(|row| StageStruct {
+                                    stage_name: row.get("stage_name"),
+                                    stage_id: row.get("stage_id"),
+                                    stage_status: MissionStageStatusEnum::Inactive,
+                                    search_area: row.try_get::<Vec<String>, _>("search_area")
+                                        .unwrap_or_else(|_| Vec::new())
+                                        .into_iter()
+                                        .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
+                                        .collect(),
+                                })
+                                .collect(),
+                        },
+                        ERU: VehicleStruct {
+                            vehicle_name: VehicleEnum::ERU,
+                            current_stage: mission[0].get("current_stage"),
+                            is_auto: mission[0].get("is_auto"),
+                            patient_status: mission[0].get("patient_status"),
+                            stages: mission.iter()
+                                .filter(|row| row.get::<String, _>("vehicle_name") == "ERU")
+                                .map(|row| StageStruct {
+                                    stage_name: row.get("stage_name"),
+                                    stage_id: row.get("stage_id"),
+                                    stage_status: MissionStageStatusEnum::Inactive,
+                                    search_area: row.try_get::<Vec<String>, _>("search_area")
+                                        .unwrap_or_else(|_| Vec::new())
+                                        .into_iter()
+                                        .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
+                                        .collect(),
+                                })
+                                .collect(),
+                        },
+                        MRA: VehicleStruct {
+                            vehicle_name: VehicleEnum::MRA,
+                            current_stage: mission[0].get("current_stage"),
+                            is_auto: mission[0].get("is_auto"),
+                            patient_status: mission[0].get("patient_status"),
+                            stages: mission.iter()
+                                .filter(|row| row.get::<String, _>("vehicle_name") == "MRA")
+                                .map(|row| StageStruct {
+                                    stage_name: row.get("stage_name"),
+                                    stage_id: row.get("stage_id"),
+                                    stage_status: MissionStageStatusEnum::Inactive,
+                                    search_area: row.try_get::<Vec<String>, _>("search_area")
+                                        .unwrap_or_else(|_| Vec::new())
+                                        .into_iter()
+                                        .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
+                                        .collect(),
+                                })
+                                .collect(),
+                        },
+                    },
+                    zones: ZonesStruct {
+                        keep_in_zones: mission[0]
+                            .try_get::<Vec<String>, _>("keep_in_zones")
+                            .unwrap_or_else(|_| Vec::new())
+                            .into_iter()
+                            .map(|zone| {
+                                serde_json::from_str::<Vec<GeoCoordinateStruct>>(&zone)
+                                    .unwrap_or_else(|_| Vec::new())
+                            })
+                            .collect(),
+                        keep_out_zones: match mission[0].try_get::<Vec<String>, _>("keep_out_zones") {
+                            Ok(zones) => zones
+                                .into_iter()
+                                .map(|zone| {
+                                    serde_json::from_str::<Vec<GeoCoordinateStruct>>(&zone)
+                                        .unwrap_or_else(|_| Vec::new())
+                                })
+                                .collect(),
+                            Err(_) => Vec::new(),
+                        },
+                    },
+                });
             }
         } 
         // else {
