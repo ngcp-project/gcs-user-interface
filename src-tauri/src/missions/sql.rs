@@ -18,7 +18,7 @@ pub async fn insert_new_mission(
 
     let new_mission_id: i32 = new_mission.get::<i32, _>("mission_id");
 
-    let insert_mra_vehicle = query("
+    let _insert_mra_vehicle = query("
         INSERT INTO vehicles(mission_id, vehicle_name, current_stage_id)
         VALUES ($1, $2, $3) RETURNING vehicle_id
     ")
@@ -29,9 +29,8 @@ pub async fn insert_new_mission(
     .await
     .expect("Failed to insert dummy data into vehicles");
     
-    // let mra_vehicle_id: i32 = insert_mra_vehicle.get::<i32, _>("vehicle_id");
 
-    let insert_eru_vehicle = query("
+    let _insert_eru_vehicle = query("
         INSERT INTO vehicles(mission_id, vehicle_name, current_stage_id)
         VALUES ($1, $2, $3) RETURNING vehicle_id
     ")
@@ -42,9 +41,8 @@ pub async fn insert_new_mission(
     .await
     .expect("Failed to insert dummy data into vehicles");
 
-    // let eru_vehicle_id: i32 = insert_eru_vehicle.get::<i32, _>("vehicle_id");
 
-    let insert_mea_vehicle = query("
+    let _insert_mea_vehicle = query("
         INSERT INTO vehicles(mission_id, vehicle_name, current_stage_id)
         VALUES ($1, $2, $3) RETURNING vehicle_id
     ")

@@ -167,48 +167,6 @@ impl MissionApiImpl {
                 });
             }
         } 
-        // else {
-        //     initial_state = MissionsStruct {
-        //         current_mission: 0,
-        //         missions: vec![MissionStruct {
-        //             mission_name: "Mission 1".to_string(),
-        //             mission_id: 0,
-        //             mission_status: MissionStageStatusEnum::Active,
-        //             vehicles: VehiclesStruct {
-        //                 MEA: VehicleStruct {
-        //                     vehicle_name: VehicleEnum::MEA,
-        //                     current_stage: 0,
-        //                     is_auto: Some(false),
-        //                     patient_status: Some(PatientStatusEnum::Secured),
-        //                     stages: vec![
-        //                         Self::create_default_stage(
-        //                             self.clone(),
-        //                             "test", 0).await,
-        //                         Self::create_default_stage(self.clone(),"test1", 1).await,
-        //                     ],
-        //                 },
-        //                 ERU: VehicleStruct {
-        //                     vehicle_name: VehicleEnum::ERU,
-        //                     current_stage: 0,
-        //                     is_auto: Some(false),
-        //                     patient_status: Some(PatientStatusEnum::Unsecured),
-        //                     stages: vec![],
-        //                 },
-        //                 MRA: VehicleStruct {
-        //                     vehicle_name: VehicleEnum::MRA,
-        //                     current_stage: 0,
-        //                     is_auto: None,
-        //                     patient_status: None,
-        //                     stages: vec![],
-        //                 },
-        //             },
-        //             zones: ZonesStruct {
-        //                 keep_in_zones: vec![],
-        //                 keep_out_zones: vec![],
-        //             },
-        //         }],
-        //     };
-        // }
         
         Self {
             state: Arc::new(Mutex::new(initial_state)),
