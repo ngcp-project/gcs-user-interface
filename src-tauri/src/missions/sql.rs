@@ -76,3 +76,18 @@ pub async fn update_mission_name(
 
     Ok(())
 }
+
+pub async fn delete_mission(
+    db_conn: PgPool,
+    mission_id: i32,
+) -> Result<(), sqlx::Error> {
+    query("
+        DELETE FROM missions WHERE mission_id = $1
+    ")
+    .bind(mission_id)
+    .execute(&db_conn)
+    .await
+    .expect("Failed to delete mission");
+
+    Ok(())
+}

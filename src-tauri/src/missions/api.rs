@@ -372,7 +372,6 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
 
-    // TODO: SQL
     async fn create_mission(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -404,6 +403,10 @@ impl MissionApi for MissionApiImpl {
         ) {
             return Err("Cannot delete active/past missions".into());
         }
+        delete_mission(
+            self.db.clone(),
+            state.missions[mission_index].mission_id,
+        ).await.expect("Failed to delete mission from database");
 
         state.missions.remove(mission_index);
         self.emit_state_update(&app_handle, &state)
