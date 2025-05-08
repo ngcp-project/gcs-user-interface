@@ -132,3 +132,37 @@ pub async fn insert_new_stage(
 
     return Ok(new_stage_id);
 }
+
+
+pub async fn delete_stage(
+    db_conn: PgPool,
+    stage_id: i32,
+) -> Result<(), sqlx::Error> {
+    query("
+        DELETE FROM stages WHERE stage_id = $1
+    ")
+    .bind(stage_id)
+    .execute(&db_conn)
+    .await
+    .expect("Failed to delete stage");
+
+    Ok(())
+}
+
+
+pub async fn update_stage_name(
+    db_conn: PgPool,
+    stage_id: i32,
+    new_stage_name: &str,
+) -> Result<(), sqlx::Error> {
+    query("
+        UPDATE stages SET stage_name = $1 WHERE stage_id = $2
+    ")
+    .bind(new_stage_name)
+    .bind(stage_id)
+    .execute(&db_conn)
+    .await
+    .expect("Failed to update stage name");
+
+    Ok(())
+}

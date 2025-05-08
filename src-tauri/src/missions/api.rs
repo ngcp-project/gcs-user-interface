@@ -451,7 +451,6 @@ impl MissionApi for MissionApiImpl {
     // ----------------------------------
     // Stage Operations Implementations
     // ----------------------------------
-    // TODO: SQL
     async fn add_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -459,7 +458,6 @@ impl MissionApi for MissionApiImpl {
         vehicle_name: VehicleEnum,
         stage_name: String,
     ) -> Result<(), String> {
-        println!("Adding stage: {}", stage_name);
         let mut state = self.state.lock().await;
         let mission = state
             .missions
@@ -486,7 +484,6 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
 
-    // TODO: SQL
     async fn delete_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -517,11 +514,15 @@ impl MissionApi for MissionApiImpl {
         if vehicle.current_stage >= stage_index as i32 {
             return Err("Cannot delete current/completed stage".into());
         }
+        delete_stage(
+            self.db.clone(),
+            stage_id,
+        ).await.expect("Failed to delete stage from database");
 
         vehicle.stages.remove(stage_index);
         self.emit_state_update(&app_handle, &state)
     }
-    // TODO: SQL
+
     async fn rename_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -530,7 +531,6 @@ impl MissionApi for MissionApiImpl {
         stage_id: i32,
         stage_name: String,
     ) -> Result<(), String> {
-        println!("Renaming stage {} to {}", stage_id, stage_name);
         let mut state = self.state.lock().await;
         let mission = state
             .missions
@@ -547,6 +547,13 @@ impl MissionApi for MissionApiImpl {
             .iter_mut()
             .find(|s| s.stage_id == stage_id)
             .ok_or("Stage not found")?;
+
+        update_stage_name(
+            self.db.clone(),
+            stage.stage_id,
+            &stage_name,
+        ).await.expect("Failed to update stage name");
+
         stage.stage_name = stage_name;
         self.emit_state_update(&app_handle, &state)
     }
