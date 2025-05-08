@@ -563,19 +563,6 @@ async fn initialize_database() {
     DROP TABLE IF EXISTS stages CASCADE;
     ").execute(&mut db_conn).await.expect("Failed to execute query");
 
-    let _cleanup_test = query("
-    DROP TABLE IF EXISTS test;
-    ").execute(&mut db_conn).await.expect("Failed to execute query");
-
-    let _create_test_table = query("
-    CREATE TABLE IF NOT EXISTS test (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        age INTEGER NOT NULL
-    );
-    ").execute(&mut db_conn).await.expect("Failed to create table 'test'");
-
-
     let _create_status_type = query("
     DO $$
     BEGIN

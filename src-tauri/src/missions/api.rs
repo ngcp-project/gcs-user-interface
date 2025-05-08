@@ -176,10 +176,8 @@ impl MissionApiImpl {
     }
 
     /// Create default mission configuration
-    /// TODO: SQL
     pub async fn create_default_mission(self, name: &str) -> MissionStruct {
         let new_mission_id = insert_new_mission(self.db, name).await.unwrap_or(0);
-
 
         MissionStruct {
             mission_name: name.to_string(),
@@ -188,23 +186,23 @@ impl MissionApiImpl {
             vehicles: VehiclesStruct {
                 MEA: VehicleStruct {
                     vehicle_name: VehicleEnum::MEA,
-                    current_stage: 0,
+                    current_stage: -1,
                     is_auto: Some(false),
-                    patient_status: Some(PatientStatusEnum::Secured),
+                    patient_status: Some(PatientStatusEnum::Unsecured),
                     stages: vec![],
                 },
                 ERU: VehicleStruct {
                     vehicle_name: VehicleEnum::ERU,
-                    current_stage: 0,
+                    current_stage: -1,
                     is_auto: Some(false),
                     patient_status: Some(PatientStatusEnum::Unsecured),
                     stages: vec![],
                 },
                 MRA: VehicleStruct {
                     vehicle_name: VehicleEnum::MRA,
-                    current_stage: 0,
+                    current_stage: -1,
                     is_auto: None,
-                    patient_status: None,
+                    patient_status: Some(PatientStatusEnum::Unsecured),
                     stages: vec![],
                 },
             },
@@ -352,20 +350,24 @@ impl MissionApi for MissionApiImpl {
             .unwrap_or_else(|| panic!("Mission not found"))
     }
 
-    // TODO: SQL
     async fn rename_mission(
         self,
         app_handle: AppHandle<impl Runtime>,
         mission_id: i32,
         mission_name: String,
     ) -> Result<(), String> {
-        println!("Renaming mission {} to {}", mission_id, mission_name);
         let mut state = self.state.lock().await;
         let mission = state
             .missions
             .iter_mut()
             .find(|m| m.mission_id == mission_id)
             .ok_or("Mission not found")?;
+
+        update_mission_name(
+            self.db.clone(),
+            mission.mission_id,
+            &mission_name,
+        ).await.expect("Failed to update mission name");
         mission.mission_name = mission_name;
         self.emit_state_update(&app_handle, &state)
     }
@@ -376,7 +378,6 @@ impl MissionApi for MissionApiImpl {
         app_handle: AppHandle<impl Runtime>,
         mission_name: String,
     ) -> Result<(), String> {
-        println!("Creating mission: {}", mission_name);
         let mut state = self.state.lock().await;
         let new_mission = Self::create_default_mission(self.clone(), &mission_name).await;
         state.missions.push(new_mission);
