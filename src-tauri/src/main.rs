@@ -15,17 +15,18 @@ fn spawn_opencv_sidecar(app_handle: tauri::AppHandle) -> Result<(), String> {
     if let Some(state) = app_handle.try_state::<Arc<Mutex<Option<CommandChild>>>>() {
         let child_process = state.lock().unwrap();
         if child_process.is_some() {
-            // A sidecar is already running, do not spawn a new one
             println!("[tauri] Sidecar is already running. Skipping spawn.");
-            return Ok(()); // Exit early since sidecar is already running
+            return Ok(());
         }
     }
+
     // Spawn sidecar (sidecar function only expects the filename, not the whole path configured in externalBin)
     let sidecar_command = app_handle
         .shell()
         .sidecar("opencv")
         .map_err(|e| e.to_string())?;
     let (mut rx, child) = sidecar_command.spawn().map_err(|e| e.to_string())?;
+    
     // Store the child process in the app state
     if let Some(state) = app_handle.try_state::<Arc<Mutex<Option<CommandChild>>>>() {
         *state.lock().unwrap() = Some(child);
@@ -40,11 +41,13 @@ fn spawn_opencv_sidecar(app_handle: tauri::AppHandle) -> Result<(), String> {
                 CommandEvent::Stdout(line_bytes) => {
                     let line = String::from_utf8_lossy(&line_bytes);
                     println!("Sidecar stdout: {}", line);
+                    
                     // Emit the line to the frontend
                     app_handle
                         .emit("sidecar-stdout", line.to_string())
                         .expect("Failed to emit sidecar stdout event");
                 }
+                
                 CommandEvent::Stderr(line_bytes) => {
                     let line = String::from_utf8_lossy(&line_bytes);
                     eprintln!("Sidecar stderr: {}", line);
@@ -83,6 +86,7 @@ fn shutdown_sidecar(app_handle: tauri::AppHandle) -> Result<String, String> {
             // Attempt to write the command to the sidecar's stdin
             if let Err(err) = process.write(command.as_bytes()) {
                 println!("[tauri] Failed to write to sidecar stdin: {}", err);
+                
                 // Restore the process reference if shutdown fails
                 *child_process = Some(process);
                 return Err(format!("Failed to write to sidecar stdin: {}", err));

@@ -5,6 +5,19 @@
 from flask import Flask, render_template, Response
 import cv2
 
+import threading
+import sys
+import time
+import os
+
+# Shuts down server if windows are manually closed opposed to CTRL+C
+def listen_for_shutdown():
+    for line in sys.stdin:
+        if line.strip() == "sidecar shutdown":
+            print("[flask] Shutdown command received.")
+            cap.release()
+            os._exit(0)
+
 app = Flask(__name__)
 
 cap = cv2.VideoCapture(0) # Might need to change this to 1 depending on your camera / OS
@@ -35,4 +48,5 @@ def index():
 
 
 if __name__ == '__main__':
+    threading.Thread(target=listen_for_shutdown, daemon=True).start()
     app.run(host="0.0.0.0", port=5000)
