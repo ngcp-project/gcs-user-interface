@@ -25,7 +25,7 @@ impl MissionApiImpl {
     /// Create new instance with initial state
     /// TODO: SQL
     pub async fn new() -> Self {
-        let mut initial_state = MissionsStruct {
+        let mut initial_state = MissionsStruct {    
             current_mission: 0,
             missions: vec![],
         };
@@ -117,46 +117,49 @@ impl MissionApiImpl {
                 //     },
                 // });
             }
-        } else {
-            initial_state = MissionsStruct {
-                current_mission: 0,
-                missions: vec![MissionStruct {
-                    mission_name: "Mission 1".to_string(),
-                    mission_id: 0,
-                    mission_status: MissionStageStatusEnum::Active,
-                    vehicles: VehiclesStruct {
-                        MEA: VehicleStruct {
-                            vehicle_name: VehicleEnum::MEA,
-                            current_stage: 0,
-                            is_auto: Some(false),
-                            patient_status: Some(PatientStatusEnum::Secured),
-                            stages: vec![
-                                Self::create_default_stage("test", 0),
-                                Self::create_default_stage("test1", 1),
-                            ],
-                        },
-                        ERU: VehicleStruct {
-                            vehicle_name: VehicleEnum::ERU,
-                            current_stage: 0,
-                            is_auto: Some(false),
-                            patient_status: Some(PatientStatusEnum::Unsecured),
-                            stages: vec![],
-                        },
-                        MRA: VehicleStruct {
-                            vehicle_name: VehicleEnum::MRA,
-                            current_stage: 0,
-                            is_auto: None,
-                            patient_status: None,
-                            stages: vec![],
-                        },
-                    },
-                    zones: ZonesStruct {
-                        keep_in_zones: vec![],
-                        keep_out_zones: vec![],
-                    },
-                }],
-            };
-        }
+        } 
+        // else {
+        //     initial_state = MissionsStruct {
+        //         current_mission: 0,
+        //         missions: vec![MissionStruct {
+        //             mission_name: "Mission 1".to_string(),
+        //             mission_id: 0,
+        //             mission_status: MissionStageStatusEnum::Active,
+        //             vehicles: VehiclesStruct {
+        //                 MEA: VehicleStruct {
+        //                     vehicle_name: VehicleEnum::MEA,
+        //                     current_stage: 0,
+        //                     is_auto: Some(false),
+        //                     patient_status: Some(PatientStatusEnum::Secured),
+        //                     stages: vec![
+        //                         Self::create_default_stage(
+        //                             self.clone(),
+        //                             "test", 0).await,
+        //                         Self::create_default_stage(self.clone(),"test1", 1).await,
+        //                     ],
+        //                 },
+        //                 ERU: VehicleStruct {
+        //                     vehicle_name: VehicleEnum::ERU,
+        //                     current_stage: 0,
+        //                     is_auto: Some(false),
+        //                     patient_status: Some(PatientStatusEnum::Unsecured),
+        //                     stages: vec![],
+        //                 },
+        //                 MRA: VehicleStruct {
+        //                     vehicle_name: VehicleEnum::MRA,
+        //                     current_stage: 0,
+        //                     is_auto: None,
+        //                     patient_status: None,
+        //                     stages: vec![],
+        //                 },
+        //             },
+        //             zones: ZonesStruct {
+        //                 keep_in_zones: vec![],
+        //                 keep_out_zones: vec![],
+        //             },
+        //         }],
+        //     };
+        // }
         
         Self {
             state: Arc::new(Mutex::new(initial_state)),
@@ -165,11 +168,16 @@ impl MissionApiImpl {
     }
 
     /// Create default stage configuration
-    /// TODO: SQL
-    pub fn create_default_stage(name: &str, id: i32) -> StageStruct {
+    pub async fn create_default_stage(self, name: &str, id: i32) -> StageStruct {
+        let stage_id = insert_new_stage(
+            self.db.clone(),
+            id,
+            name,
+        ).await.expect("Failed to insert new stage into database");
+
         StageStruct {
             stage_name: name.to_string(),
-            stage_id: id,
+            stage_id: stage_id,
             stage_status: MissionStageStatusEnum::Inactive,
             search_area: vec![],
         }
@@ -383,7 +391,6 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
 
-    // TODO: SQL
     async fn delete_mission(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -465,11 +472,17 @@ impl MissionApi for MissionApiImpl {
             VehicleEnum::ERU => &mut mission.vehicles.ERU,
             VehicleEnum::MRA => &mut mission.vehicles.MRA,
         };
+        let vehicle_id = select_vehicle_from_mission(
+            self.db.clone(),
+            mission.mission_id,
+            vehicle.vehicle_name.to_string(),
+        ).await.expect("Failed to find vehicle mission");
 
         vehicle.stages.push(Self::create_default_stage(
+            self.clone(),
             &stage_name,
-            rand::random::<i32>(),
-        ));
+            vehicle_id
+        ).await);
         self.emit_state_update(&app_handle, &state)
     }
 

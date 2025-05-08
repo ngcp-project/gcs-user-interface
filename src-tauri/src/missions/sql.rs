@@ -91,3 +91,44 @@ pub async fn delete_mission(
 
     Ok(())
 }
+
+
+pub async fn select_vehicle_from_mission(
+    db_conn: PgPool,
+    mission_id: i32,
+    vehicle_name: String,
+) -> Result<i32, sqlx::Error> {
+    let vehicle = query("
+        SELECT vehicle_id FROM vehicles WHERE mission_id = $1 AND vehicle_name = $2
+    ")
+    .bind(mission_id)
+    .bind(vehicle_name)
+    .fetch_one(&db_conn)
+    .await
+    .expect("Failed to find vehicle in mission");
+
+    let vehicle_id: i32 = vehicle.get::<i32, _>("vehicle_id");
+
+    return Ok(vehicle_id);
+}
+
+
+pub async fn insert_new_stage(
+    db_conn: PgPool,
+    vehicle_id: i32,
+    stage_name: &str,
+) -> Result<i32, sqlx::Error> {
+    let new_stage = query("
+        INSERT INTO stages(vehicle_id, stage_name) 
+        VALUES ($1, $2) RETURNING stage_id
+    ")
+    .bind(vehicle_id)
+    .bind(stage_name)
+    .fetch_one(&db_conn)
+    .await
+    .expect("Failed to insert dummy data into stages");
+
+    let new_stage_id: i32 = new_stage.get::<i32, _>("stage_id");
+
+    return Ok(new_stage_id);
+}

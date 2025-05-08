@@ -599,9 +599,9 @@ async fn initialize_database() {
     CREATE TABLE IF NOT EXISTS stages (
         stage_id SERIAL PRIMARY KEY,
         vehicle_id INTEGER REFERENCES vehicles(vehicle_id) ON DELETE CASCADE,
-        search_area TEXT[] NOT NULL,      
+        search_area TEXT[],      
         stage_name VARCHAR(255) NOT NULL,
-        target_coordinate TEXT NOT NULL
+        target_coordinate TEXT
     );
     ").execute(&mut db_conn).await.expect("Failed to execute query");
 

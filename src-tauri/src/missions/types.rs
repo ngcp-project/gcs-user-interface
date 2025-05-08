@@ -53,6 +53,16 @@ pub enum VehicleEnum {
     MRA,
 }
 
+impl VehicleEnum {
+    pub fn to_string(&self) -> String {
+        match self {
+            VehicleEnum::MEA => "MEA".to_string(),
+            VehicleEnum::ERU => "ERU".to_string(),
+            VehicleEnum::MRA => "MRA".to_string(),
+        }
+    }
+}
+
 #[derive(Debug, serde::Deserialize, serde::Serialize, Clone, specta::Type)]
 pub enum PatientStatusEnum {
     Secured,
