@@ -26,7 +26,7 @@ fn spawn_opencv_sidecar(app_handle: tauri::AppHandle) -> Result<(), String> {
         .sidecar("opencv")
         .map_err(|e| e.to_string())?;
     let (mut rx, child) = sidecar_command.spawn().map_err(|e| e.to_string())?;
-    
+
     // Store the child process in the app state
     if let Some(state) = app_handle.try_state::<Arc<Mutex<Option<CommandChild>>>>() {
         *state.lock().unwrap() = Some(child);
@@ -41,13 +41,13 @@ fn spawn_opencv_sidecar(app_handle: tauri::AppHandle) -> Result<(), String> {
                 CommandEvent::Stdout(line_bytes) => {
                     let line = String::from_utf8_lossy(&line_bytes);
                     println!("Sidecar stdout: {}", line);
-                    
+
                     // Emit the line to the frontend
                     app_handle
                         .emit("sidecar-stdout", line.to_string())
                         .expect("Failed to emit sidecar stdout event");
                 }
-                
+
                 CommandEvent::Stderr(line_bytes) => {
                     let line = String::from_utf8_lossy(&line_bytes);
                     eprintln!("Sidecar stderr: {}", line);
@@ -86,7 +86,7 @@ fn shutdown_sidecar(app_handle: tauri::AppHandle) -> Result<String, String> {
             // Attempt to write the command to the sidecar's stdin
             if let Err(err) = process.write(command.as_bytes()) {
                 println!("[tauri] Failed to write to sidecar stdin: {}", err);
-                
+
                 // Restore the process reference if shutdown fails
                 *child_process = Some(process);
                 return Err(format!("Failed to write to sidecar stdin: {}", err));
@@ -124,10 +124,7 @@ async fn main() {
             Ok(())
         })
         // Register the shutdown_server command
-        .invoke_handler(tauri::generate_handler![
-            start_sidecar,
-            shutdown_sidecar,
-        ])
+        .invoke_handler(tauri::generate_handler![start_sidecar, shutdown_sidecar,])
         .invoke_handler(router.into_handler())
         .build(tauri::generate_context!())
         .expect("Error while running tauri application")
@@ -144,9 +141,21 @@ async fn main() {
                             let buf: &[u8] = command.as_bytes();
                             let _ = process.write(buf);
 
-                            // *Important* `process.kill()` will only shutdown the parent sidecar (python process). Tauri doesnt know about the second process spawned by the "bootloader" script.
-                            // This only applies if you compile a "one-file" exe using PyInstaller. Otherwise, just use the line below to kill the process normally.
-                            // let _ = process.kill();
+                            // Force kill the process after a short delay to ensure cleanup
+                            std::thread::sleep(std::time::Duration::from_millis(500));
+                            if let Some(process) = child.take() {
+                                let _ = process.kill();
+                            }
+
+                            // TODO: This is kind of messy, find a better way to clear, preferably cross platform
+                            // Additional cleanup for Windows
+                            #[cfg(target_os = "windows")]
+                            {
+                                use std::process::Command;
+                                let _ = Command::new("taskkill")
+                                    .args(["/F", "/IM", "opencv.exe"])
+                                    .output();
+                            }
 
                             println!("[tauri] Sidecar closed.");
                         }
