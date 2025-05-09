@@ -105,13 +105,11 @@ impl RabbitMQConsumer {
                                 "latitude": json_data["current_latitude"].as_f64().unwrap_or(0.0),
                                 "longitude": json_data["current_longitude"].as_f64().unwrap_or(0.0)
                             },
-                            "last_updated": json_data["lastUpdated"].as_str()
-                                .map(|s| {
-                                    // Convert ISO 8601 timestamp to SystemTime
-                                    s.parse::<DateTime<Utc>>()
-    .map(|dt| SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(dt.timestamp() as u64))
-    .unwrap_or(SystemTime::UNIX_EPOCH)
-                                }).unwrap_or(SystemTime::UNIX_EPOCH),
+                            "last_updated": match json_data["lastUpdated"].as_i64() {
+                                Some(ts) => UNIX_EPOCH + std::time::Duration::from_secs(ts as u64),
+                                None => SystemTime::UNIX_EPOCH,
+                            },
+                            "patient_status": json_data["patient_status"].as_i64().unwrap_or(0) as i8,
                             "vehicle_status": json_data["vehicle_status"].as_i64().unwrap_or(0) as i8,
                             "request_coordinate": {
                                 "message_flag": json_data["message_flag"].as_i64().unwrap_or(0) as i32,
@@ -166,7 +164,7 @@ pub async fn init_telemetry_consumer(window: Window, vehicle_id: String) -> Resu
     }
 
     // Create a consumer specific to this vehicle
-    let consumer = RabbitMQConsumer::new("amqp://guest:guest@localhost:5672/%2f", window.clone())
+    let consumer = RabbitMQConsumer::new("amqp://admin:admin@localhost:5672/%2f", window.clone())
         .await
         .map_err(|e| e.to_string())?;
 
