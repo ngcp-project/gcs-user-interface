@@ -164,3 +164,23 @@ pub async fn update_stage_name(
 
     Ok(())
 }
+
+
+pub async fn update_auto_mode_vehicle(
+    db_conn: PgPool,
+    mission_id: i32,
+    vehicle_name: String,
+    is_auto: bool,
+) -> Result<(), sqlx::Error> {
+    query("
+        UPDATE vehicles SET auto_mode = $1 WHERE vehicle_name = $2 AND mission_id = $3
+    ")
+    .bind(is_auto)
+    .bind(vehicle_name)
+    .bind(mission_id)
+    .execute(&db_conn)
+    .await
+    .expect("Failed to update vehicle auto mode");
+
+    Ok(())
+}

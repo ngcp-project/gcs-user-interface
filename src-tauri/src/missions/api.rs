@@ -23,7 +23,6 @@ pub struct MissionApiImpl {
 
 impl MissionApiImpl {
     /// Create new instance with initial state
-    /// TODO: SQL
     pub async fn new() -> Self {
         let mut initial_state = MissionsStruct {    
             current_mission: 0,
@@ -429,7 +428,6 @@ impl MissionApi for MissionApiImpl {
     // ----------------------------------
     // Vehicle Operations Implementations
     // ----------------------------------
-    // TODO: SQL
     async fn set_auto_mode(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -450,6 +448,13 @@ impl MissionApi for MissionApiImpl {
             VehicleEnum::ERU => &mut mission.vehicles.ERU,
             VehicleEnum::MRA => return Err("MRA auto mode unsupported".into()),
         };
+
+        update_auto_mode_vehicle(
+            self.db.clone(),
+            mission.mission_id,
+            vehicle.vehicle_name.to_string(),
+            is_auto,
+        ).await.expect("Failed to update auto mode in database");
 
         vehicle.is_auto = Some(is_auto);
         self.emit_state_update(&app_handle, &state)
