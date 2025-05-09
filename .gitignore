@@ -8,6 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+build
+binaries
+*spec
 dist
 dist-ssr
 *.local
