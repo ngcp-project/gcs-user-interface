@@ -2,7 +2,7 @@
 # After that, run this command: bun run target:triple, which adds your architecture to the binary name
 # When running the program, go to http://127.0.0.1:5000/video_feed to see the camera
 
-from flask import Flask, render_template, Response
+from flask import Flask, Response, redirect
 import cv2
 
 import threading
@@ -40,12 +40,10 @@ def gen_frames():  # generate frame by frame from camera
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
 @app.route('/')
 def index():
-    """Video streaming home page."""
-    return render_template('index.html')
-
+    """Redirect to video feed."""
+    return redirect('/video_feed')
 
 if __name__ == '__main__':
     threading.Thread(target=listen_for_shutdown, daemon=True).start()
