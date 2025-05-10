@@ -569,6 +569,7 @@ impl MissionApi for MissionApiImpl {
         stage.stage_name = stage_name;
         self.emit_state_update(&app_handle, &state)
     }
+    
     // TODO: SQL
     async fn transition_stage(
         self,
@@ -591,6 +592,8 @@ impl MissionApi for MissionApiImpl {
             VehicleEnum::MRA => &mut mission.vehicles.MRA,
         };
 
+        println!("Current Stage: {:?}", vehicle.current_stage);
+
         // Mark current stage as complete
         vehicle.stages[vehicle.current_stage as usize].stage_status =
             MissionStageStatusEnum::Complete;
@@ -600,11 +603,12 @@ impl MissionApi for MissionApiImpl {
             self.db.clone(),
             mission.mission_id,
             vehicle.vehicle_name.to_string(),
-            vehicle.stages[vehicle.current_stage as usize].stage_id,
-        ).await.expect("Failed to update stage name");
+            vehicle.current_stage,
+        ).await.expect("Failed to transition stage");
+
+        println!("After Transition Stage: {:?}", transitioned_stage.unwrap_or(vehicle.current_stage));
 
         if (vehicle.current_stage as usize) < vehicle.stages.len() - 1 {
-            // vehicle.current_stage += 1;
             vehicle.current_stage = transitioned_stage.unwrap_or(vehicle.current_stage);
             vehicle.stages[vehicle.current_stage as usize].stage_status =
                 MissionStageStatusEnum::Active;

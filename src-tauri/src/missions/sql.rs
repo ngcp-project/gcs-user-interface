@@ -196,11 +196,11 @@ pub async fn transition_stage(
         SELECT stage_id
         FROM stages
         WHERE vehicle_id = (
-            SELECT id
+            SELECT vehicle_id
             FROM vehicles
             WHERE mission_id = $1 AND vehicle_name = $2
         )
-        ORDER BY stage_order
+        ORDER BY stage_id
     ")
     .bind(mission_id)
     .bind(vehicle_name.clone())
@@ -208,9 +208,10 @@ pub async fn transition_stage(
     .await
     .expect("Failed to select stage_id");
 
-    let stage_ids: Vec<i32> = rows.iter().map(|row| row.get("stage_id")).collect();
+    let stage_ids: Vec<i32> = rows.iter().map(|row| row.get("stage_id")).collect(); 
+
     // get next index
-    if let Some(pos) = stage_ids.iter().position(|&id| id == current_stage_id) {
+    if let Some(pos) = stage_ids.iter().position(|&id| id == current_stage_id) {    
         if let Some(&next_stage_id) = stage_ids.get(pos + 1) {
             query("
                 UPDATE vehicles
