@@ -184,3 +184,49 @@ pub async fn update_auto_mode_vehicle(
 
     Ok(())
 }
+
+
+pub async fn transition_stage(
+    db_conn: PgPool,
+    mission_id: i32,
+    vehicle_name: String,
+    current_stage_id: i32,
+) -> Result<Option<i32>, sqlx::Error> {
+    let rows = query("
+        SELECT stage_id
+        FROM stages
+        WHERE vehicle_id = (
+            SELECT id
+            FROM vehicles
+            WHERE mission_id = $1 AND vehicle_name = $2
+        )
+        ORDER BY stage_order
+    ")
+    .bind(mission_id)
+    .bind(vehicle_name.clone())
+    .fetch_all(&db_conn)
+    .await
+    .expect("Failed to select stage_id");
+
+    let stage_ids: Vec<i32> = rows.iter().map(|row| row.get("stage_id")).collect();
+    // get next index
+    if let Some(pos) = stage_ids.iter().position(|&id| id == current_stage_id) {
+        if let Some(&next_stage_id) = stage_ids.get(pos + 1) {
+            query("
+                UPDATE vehicles
+                SET current_stage_id = $1
+                WHERE mission_id = $2 AND vehicle_name = $3
+            ")
+            .bind(next_stage_id)
+            .bind(mission_id)
+            .bind(vehicle_name)
+            .execute(&db_conn)
+            .await
+            .expect("Failed to transition next stage");
+
+            return Ok(Some(next_stage_id));
+        }
+    }
+
+    Ok(None)
+}

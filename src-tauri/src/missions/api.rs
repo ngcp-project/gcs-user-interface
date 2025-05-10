@@ -575,6 +575,7 @@ impl MissionApi for MissionApiImpl {
         app_handle: AppHandle<impl Runtime>,
         mission_id: i32,
         vehicle_name: VehicleEnum,
+
     ) -> Result<(), String> {
         println!("Transitioning stage for vehicle: {:?}", vehicle_name);
         let mut state = self.state.lock().await;
@@ -595,8 +596,16 @@ impl MissionApi for MissionApiImpl {
             MissionStageStatusEnum::Complete;
 
         // Transition to next stage if available
+        let transitioned_stage = transition_stage(
+            self.db.clone(),
+            mission.mission_id,
+            vehicle.vehicle_name.to_string(),
+            vehicle.stages[vehicle.current_stage as usize].stage_id,
+        ).await.expect("Failed to update stage name");
+
         if (vehicle.current_stage as usize) < vehicle.stages.len() - 1 {
-            vehicle.current_stage += 1;
+            // vehicle.current_stage += 1;
+            vehicle.current_stage = transitioned_stage.unwrap_or(vehicle.current_stage);
             vehicle.stages[vehicle.current_stage as usize].stage_status =
                 MissionStageStatusEnum::Active;
         }
