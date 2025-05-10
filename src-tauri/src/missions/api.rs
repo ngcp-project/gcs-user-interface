@@ -50,7 +50,7 @@ impl MissionApiImpl {
                     SELECT 
                         missions.mission_id,
                         missions.mission_name,
-                        missions.status AS mission_status,
+                        missions.status,
                         missions.keep_in_zones,
                         missions.keep_out_zones,
                         vehicles.vehicle_name,
@@ -75,11 +75,7 @@ impl MissionApiImpl {
                 initial_state.missions.push(MissionStruct {
                     mission_name: mission[0].get("mission_name"),
                     mission_id: mission[0].get("mission_id"),
-                    mission_status: match mission[0]
-                        .try_get::<String, _>("mission_status")
-                        .unwrap_or_else(|_| "Inactive".to_string())
-                        .as_str()
-                    {
+                    mission_status: match mission[0].try_get::<String, _>("status").unwrap_or_else(|_| "Inactive".to_string()).as_str() {
                         "Active" => MissionStageStatusEnum::Active,
                         "Inactive" => MissionStageStatusEnum::Inactive,
                         "Complete" => MissionStageStatusEnum::Complete,
@@ -170,6 +166,8 @@ impl MissionApiImpl {
             }
         } 
         
+        println!("Initial state: {:?}", initial_state);
+
         Self {
             state: Arc::new(Mutex::new(initial_state)),
             db: database_connection,

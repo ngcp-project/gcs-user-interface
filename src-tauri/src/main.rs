@@ -54,7 +54,7 @@ async fn init_database_dummy_data() {
             (23.43258, -82.35821)
         ]"#.to_string()
     ])
-    .bind("Inactive")
+    .bind("Active")
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into missions");
@@ -518,22 +518,13 @@ async fn initialize_database() {
     DROP TABLE IF EXISTS stages CASCADE;
     ").execute(&mut db_conn).await.expect("Failed to execute query");
 
-    let _create_status_type = query("
-    DO $$
-    BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'status') THEN
-            CREATE TYPE status AS ENUM ('Active', 'Inactive', 'Complete', 'Failed');
-        END IF;
-    END $$;
-    ").execute(&mut db_conn).await.expect("Failed to create type 'status'");
-
     let _create_mission_table = query("
     CREATE TABLE IF NOT EXISTS missions (
         mission_id SERIAL PRIMARY KEY,
         mission_name VARCHAR(255),
         keep_in_zones TEXT[] NOT NULL,
         keep_out_zones TEXT[] NOT NULL,
-        status status DEFAULT 'Inactive'
+        status TEXT DEFAULT 'Inactive'
     );
     ").execute(&mut db_conn).await.expect("Failed to create table 'missions'");
 
@@ -557,7 +548,7 @@ async fn initialize_database() {
         search_area TEXT[],      
         stage_name VARCHAR(255) NOT NULL,
         target_coordinate TEXT,
-        status status DEFAULT 'Inactive'
+        status TEXT DEFAULT 'Inactive'
     );
     ").execute(&mut db_conn).await.expect("Failed to execute query");
 
