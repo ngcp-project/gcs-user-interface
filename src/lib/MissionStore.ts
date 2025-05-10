@@ -146,6 +146,15 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
     return await taurpc.mission.transition_stage(missionId, vehicleName);
   },
 
+  updateStageArea: async (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    stageId: number,
+    area: GeoCoordinateStruct[]
+  ) => {
+    return await taurpc.mission.update_stage_area(missionId, vehicleName, stageId, area);
+  },
+
   // --------------------------
   // Zone Data
   // --------------------------
@@ -159,12 +168,17 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
     ];
   },
 
-  updateZone: async (missionId: number, zoneType: ZoneType, zoneIndex: number, zoneCoords: GeoCoordinateStruct[]) => {
-    return await taurpc.mission.update_zone(missionId, zoneType, zoneIndex, zoneCoords)
+  updateZone: async (
+    missionId: number,
+    zoneType: ZoneType,
+    zoneIndex: number,
+    zoneCoords: GeoCoordinateStruct[]
+  ) => {
+    return await taurpc.mission.update_zone(missionId, zoneType, zoneIndex, zoneCoords);
   },
 
   addZone: async (missionId: number, zoneType: ZoneType) => {
-    return await taurpc.mission.add_zone(missionId, zoneType)
+    return await taurpc.mission.add_zone(missionId, zoneType);
   },
 
   deleteZone: async (missionId: number, zoneType: ZoneType, zoneIndex: number) =>

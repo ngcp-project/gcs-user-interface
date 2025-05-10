@@ -191,6 +191,14 @@ pub trait MissionApi {
         vehicle_name: VehicleEnum,
         stage_name: String,
     ) -> Result<(), String>;
+    async fn update_stage(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        vehicle_name: VehicleEnum,
+        stage_id: u32,
+        new_stage_name: Option<String>,
+        new_status: Option<MissionStageStatusEnum>,
+    ) -> Result<(), String>;
     async fn delete_stage(
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
@@ -208,6 +216,14 @@ pub trait MissionApi {
         app_handle: AppHandle<impl Runtime>,
         mission_id: u32,
         vehicle_name: VehicleEnum,
+    ) -> Result<(), String>;
+
+    async fn update_stage_area(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        vehicle_name: VehicleEnum,
+        stage_id: u32,
+        area: GeofenceType,
     ) -> Result<(), String>;
 
     // ----------------------------------
@@ -370,6 +386,74 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
 
+    async fn update_stage(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        vehicle_name: VehicleEnum,
+        stage_id: u32,
+        new_stage_name: Option<String>,
+        new_status: Option<MissionStageStatusEnum>,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found")?;
+        let vehicle = match vehicle_name {
+            VehicleEnum::MEA => &mut mission.vehicles.MEA,
+            VehicleEnum::ERU => &mut mission.vehicles.ERU,
+            VehicleEnum::MRA => &mut mission.vehicles.MRA,
+        };
+        let stage = vehicle
+            .stages
+            .iter_mut()
+            .find(|s| s.stage_id == stage_id)
+            .ok_or("Stage not found")?;
+
+        if let Some(name) = new_stage_name {
+            stage.stage_name = name;
+        }
+        if let Some(status) = new_status {
+            stage.stage_status = status;
+        }
+
+        self.emit_state_update(&app_handle, &state)
+    }
+
+    async fn update_stage_area(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: u32,
+        vehicle_name: VehicleEnum,
+        stage_id: u32,
+        area: GeofenceType,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found")?;
+
+        let vehicle = match vehicle_name {
+            VehicleEnum::MEA => &mut mission.vehicles.MEA,
+            VehicleEnum::ERU => &mut mission.vehicles.ERU,
+            VehicleEnum::MRA => &mut mission.vehicles.MRA,
+        };
+
+        let stage = vehicle
+            .stages
+            .iter_mut()
+            .find(|s| s.stage_id == stage_id)
+            .ok_or("Stage not found")?;
+
+        stage.search_area = area;
+
+        self.emit_state_update(&app_handle, &state)
+    }
+
     async fn delete_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -442,22 +526,29 @@ impl MissionApi for MissionApiImpl {
             .iter_mut()
             .find(|m| m.mission_id == mission_id)
             .ok_or("Mission not found")?;
-
         let vehicle = match vehicle_name {
             VehicleEnum::MEA => &mut mission.vehicles.MEA,
             VehicleEnum::ERU => &mut mission.vehicles.ERU,
             VehicleEnum::MRA => &mut mission.vehicles.MRA,
         };
 
-        // Mark current stage as complete
-        vehicle.stages[vehicle.current_stage as usize].stage_status =
-            MissionStageStatusEnum::Complete;
+        let current_stage_index = vehicle.current_stage as usize;
 
-        // Transition to next stage if available
-        if (vehicle.current_stage as usize) < vehicle.stages.len() - 1 {
-            vehicle.current_stage += 1;
-            vehicle.stages[vehicle.current_stage as usize].stage_status =
-                MissionStageStatusEnum::Active;
+        if current_stage_index >= vehicle.stages.len() {
+            return Err("Already at final stage".into());
+        }
+
+        // Mark current stage as complete
+        if let Some(current_stage) = vehicle.stages.get_mut(current_stage_index) {
+            current_stage.stage_status = MissionStageStatusEnum::Complete;
+        }
+
+        // Move to next stage
+        vehicle.current_stage += 1;
+
+        // Mark next stage as active
+        if let Some(next_stage) = vehicle.stages.get_mut(vehicle.current_stage as usize) {
+            next_stage.stage_status = MissionStageStatusEnum::Active;
         }
 
         self.emit_state_update(&app_handle, &state)
@@ -518,7 +609,7 @@ impl MissionApi for MissionApiImpl {
 
         self.emit_state_update(&app_handle, &state)
     }
-    
+
     async fn delete_zone(
         self,
         app_handle: AppHandle<impl Runtime>,

@@ -25,7 +25,9 @@ const zoneType = {
 }[String(props.zoneType) || "KeepIn"] as "In" | "Out";
 
 // Track zones
-const currentMissionId = missionStore.view.currentMissionId ? missionStore.view.currentMissionId : null;
+const currentMissionId = missionStore.view.currentMissionId
+  ? missionStore.view.currentMissionId
+  : null;
 const mission = currentMissionId !== null ? missionStore.getMissionData(currentMissionId) : null;
 
 const zones = computed(() =>
@@ -33,8 +35,7 @@ const zones = computed(() =>
 );
 
 const zoneLayer = computed(() => {
-  const a = mapStore.layerTracking
-  console.log("update")
+  console.log("update");
   if (currentMissionId === null) return null;
   return mapStore.getZoneLayers(currentMissionId, props.zoneType);
 });
@@ -48,25 +49,24 @@ const toggleVisibility = (zoneID: number) => {
 const handleNewZone = () => {
   if (currentMissionId === null) return;
   missionStore.addZone(currentMissionId, props.zoneType);
-  
 };
 
 const handleDeleteZone = (index: number) => {
   if (currentMissionId === null) return;
   missionStore.deleteZone(currentMissionId, props.zoneType, index);
-  mapStore.removeZoneLayer(currentMissionId, props.zoneType, index);
 };
 
-const testZoneFunc = (index: number) => {
+const handleCreateZone = (index: number) => {
   if (currentMissionId === null) return;
-  mapStore.updateZonePolygon(currentMissionId, props.zoneType, index)
+  mapStore.updateZonePolygon(currentMissionId, props.zoneType, index);
 };
 
-const zoneVisibility = (index: number) => computed(() => {
-  const test = mapStore;
-  console.log("zoneVisibility", zoneLayer.value, index)
-  return zoneLayer.value && zoneLayer.value[index]?.properties?.visibility 
-})
+const zoneVisibility = (index: number) =>
+  computed(() => {
+    const test = mapStore;
+    console.log("zoneVisibility", zoneLayer.value, index);
+    return zoneLayer.value && zoneLayer.value[index]?.properties?.visibility;
+  });
 </script>
 
 <template>
@@ -93,12 +93,12 @@ const zoneVisibility = (index: number) => computed(() => {
           <component
             :is="zone.length > 0 ? Pencil : Plus"
             class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500"
-            @click="testZoneFunc(index)"
+            @click="handleCreateZone(index)"
           />
           <component
             :is="zoneVisibility(index) ? Eye : EyeOff"
             @click="() => toggleVisibility(index)"
-            class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500" 
+            class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500"
           />
           <Trash2
             @click="handleDeleteZone(index)"
