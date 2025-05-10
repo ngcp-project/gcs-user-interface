@@ -1,13 +1,13 @@
-
 pub mod api;
-pub mod types;
-pub mod rabbitmq;
+pub mod geos;
 pub mod publisher;
+pub mod rabbitmq;
 pub mod test_rabbitmq;
+pub mod types;
 
 pub use api::*;
-pub use types::*;
-pub use rabbitmq::*;
+pub use geos::*;
 pub use publisher::*;
+pub use rabbitmq::*;
 pub use test_rabbitmq::*;
-
+pub use types::*;

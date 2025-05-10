@@ -4,6 +4,7 @@ import { onMounted, ref, Ref, onUnmounted } from "vue";
 import Map from "../components/Map.vue";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api";
+import { KeepOutZones } from "@/Functions/geofence";
 
 // Type definitions
 interface VehicleData {
@@ -177,9 +178,17 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
   vehicleMap[vehicleKey.toLowerCase()].value.inKeepOut = isInZone;
 }
 
+// function syncKeepOutZones(vehicle: string){
+//     const polygons = zoneOut
+// }
+
 // Lifecycle hooks
 onMounted(async () => {
+  // KeepOutZones("mra"); // or "eru", "fra", etc.
   await initializeTelemetryListeners();
+  KeepOutZones("mra");
+  KeepOutZones("eru");
+  KeepOutZones("fra");
 });
 
 onUnmounted(() => {

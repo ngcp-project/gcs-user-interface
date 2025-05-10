@@ -4,9 +4,13 @@ use tokio::sync::Mutex;
 
 mod telemetry;
 
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![telemetry::init_telemetry_consumer])
+        .invoke_handler(tauri::generate_handler![
+            telemetry::init_telemetry_consumer,
+            telemetry::update_keep_out_zone
+        ])
         .setup(|app| {
             // Create a background task using the Tauri runtime
             let app_handle = app.handle();

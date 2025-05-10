@@ -1,5 +1,7 @@
 use crate::telemetry::types::TelemetryData;
 use crate::telemetry::types::{AppData, Coordinate};
+use crate::telemetry::geos;
+use crate::telemetry::geos::*;
 use futures_util::stream::StreamExt;
 use lapin::{
     options::*, types::FieldTable, Channel, Connection, ConnectionProperties, Consumer, Queue,
@@ -11,6 +13,7 @@ use std::sync::Arc;
 use tauri::Window;
 use tokio::sync::Mutex;
 use tokio_amqp::*;
+// use crate::telemetry::geo::*; // Removed as the `geo` module does not exist
 
 //creating the structure of the rabbitMQ Consumer
 #[derive(Clone)]
@@ -94,6 +97,16 @@ impl RabbitMQConsumer {
                         if data.signal_string < -70 {
                             data.vehicle_status = "Bad Connection".to_string();
                         }
+                        let point = geos::Coordinate {
+                            latitude: data.current_position.latitude,
+                            longitude: data.current_position.longitude,
+                        };
+                        if is_near_keep_out_zone(&data.vehicle_id, &point, 1000.0){
+                            data.vehicle_status = "Approaching restricted area".to_string();
+                        }
+                        // if(checkKeepOutZone(data.current_position.latitude && data.current_position.longitude)){
+                        //     data.vehicle_status = "Dont go furthe,leave the zone".to_String();
+                        // }     
 
                         let payload = json!({
                             "vehicle_id": data.vehicle_id,
@@ -136,6 +149,13 @@ impl RabbitMQConsumer {
         Ok(())
     }
 
+
+    // pub async fn checkKeepOutZone(mut latitude : f32 , mut longitud : f32) -> Boolean {
+    //     return true;
+        
+    // }
+    }
+
     // pub async fn lost_vehicle_connection(mut string_signal:f32) -> boolean{
     //         if string_signal < -40.0  {
     //             string_signal = "Disconnect";
@@ -147,7 +167,6 @@ impl RabbitMQConsumer {
     // if not just wait n second, pass that we send an alert/ trigger the
     // function failedconnectioninit()?? }
     //
-}
 #[tauri::command]
 pub async fn init_telemetry_consumer(window: Window, vehicle_id: String) -> Result<(), String> {
     // Validate vehicle ID
@@ -168,7 +187,7 @@ pub async fn init_telemetry_consumer(window: Window, vehicle_id: String) -> Resu
     tokio::spawn({
         let consumer = consumer.clone();
         let queue = queue_name.clone();
-        async move {
+        async move {        
             if let Err(e) = consumer.start_consuming(&queue).await {
                 eprintln!("Failed to consume from queue {}: {}", queue, e);
 

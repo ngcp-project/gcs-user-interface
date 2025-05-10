@@ -1,12 +1,13 @@
 import { LatLngExpression } from "leaflet";
+import { invoke } from "@tauri-apps/api";
 
 interface Coordinates {
   latitude: number;
   longitude: number;
 }
 
-let zoneInPolygons = [] as LatLngExpression[];
-let zoneOutPolygons = [] as LatLngExpression[];
+let zoneInPolygons: Coordinates[][] = [];
+let zoneOutPolygons: Coordinates[][] = [];
 let ERU_coords: number[];
 let MEA_coords: number[];
 let MRA_coords: number[];
@@ -79,6 +80,20 @@ export function isInKeepOutZone(coordinate: number[]) {
   }
   // console.log("IS IN KEEP OUT ZONE: " + isInZone);
   return isInZone;
+}
+
+export function KeepOutZones(vehicle: string) {
+  const polygons = zoneOutPolygons.map((poly) => ({
+    vehicle_id: vehicle.toLowerCase(),
+    polygon: Array.isArray(poly) ? poly.map((coord) => [coord.latitude, coord.longitude]) : []
+  }));
+
+  console.log("📤 Syncing polygons for:", vehicle);
+  console.log("🧱 Payload:", polygons);
+
+  invoke("update_keep_out_zone", { data: polygons }).catch((e) =>
+    console.error("❌ Failed to sync zones:", e)
+  );
 }
 
 function isPointInPolygon(point: number[], polygons: LatLngExpression) {
