@@ -3,7 +3,7 @@
   <div class="h-full w-full">
     <l-map
       ref="mapRef"
-      v-model:zoom="mapStore.zoom"
+      :zoom=16
       :use-global-leaflet="true"
       :center="[mapStore.mapOrigin[0] as LatLng[0], mapStore.mapOrigin[1] as LatLng[1]]"
       @ready="handleReady"

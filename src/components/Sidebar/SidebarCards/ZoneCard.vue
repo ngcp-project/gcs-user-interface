@@ -32,9 +32,17 @@ const zones = computed(() =>
   currentMissionId !== null ? missionStore.getZoneData(currentMissionId, props.zoneType) : []
 );
 
+const zoneLayer = computed(() => {
+  const a = mapStore.layerTracking
+  console.log("update")
+  if (currentMissionId === null) return null;
+  return mapStore.getZoneLayers(currentMissionId, props.zoneType);
+});
+
 // Toggle Eye Icon for specific zone
 const toggleVisibility = (zoneID: number) => {
-  // implement
+  if (currentMissionId === null) return;
+  mapStore.setLayerVisibility(currentMissionId, props.zoneType);
 };
 
 const handleNewZone = () => {
@@ -50,37 +58,15 @@ const handleDeleteZone = (index: number) => {
 };
 
 const testZoneFunc = (index: number) => {
-  // console.log(mapStore)
   if (currentMissionId === null) return;
   mapStore.updateZonePolygon(currentMissionId, props.zoneType, index)
 };
 
-const checkEditMode = (index: number) => {
-  if (currentMissionId === null) return false;
-  const zoneLayers = mapStore.getZoneLayers(currentMissionId, props.zoneType);
-  const zone = zoneLayers[index];
-  return zone.layer.once("pm:edit", () => {
-    return true
-  })
-}
-
-const editToggle = async (zone: GeoCoordinateStruct[], index: number) => {
-  if (currentMissionId === null) return;
-  const zoneLayers = mapStore.getZoneLayers(currentMissionId, props.zoneType);
-  const zoneLayer = zoneLayers[index];
-
-  zoneLayer.layer.on("pm:edit", () => {
-    return Check
-  })
-
-  if (zone.length > 0) {
-    return Pencil
-  } else {
-    return Plus
-  }
-  
-}
-
+const zoneVisibility = (index: number) => computed(() => {
+  const test = mapStore;
+  console.log("zoneVisibility", zoneLayer.value, index)
+  return zoneLayer.value && zoneLayer.value[index]?.properties?.visibility 
+})
 </script>
 
 <template>
@@ -109,8 +95,9 @@ const editToggle = async (zone: GeoCoordinateStruct[], index: number) => {
             class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500"
             @click="testZoneFunc(index)"
           />
-          <Eye 
-            @click="() => {}"
+          <component
+            :is="zoneVisibility(index) ? Eye : EyeOff"
+            @click="() => toggleVisibility(index)"
             class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500" 
           />
           <Trash2

@@ -63,7 +63,6 @@ const LAYER_STYLING = {
 } as const;
 
 const DEFAULT_MAP_ORIGIN: LatLng = [35.33004319829399, -120.75064544958856];
-const DEFAULT_ZOOM = 16;
 const TILE_URL = "http://localhost:8080/tile/{z}/{x}/{y}.png";
 
 // =============================================
@@ -72,7 +71,6 @@ const TILE_URL = "http://localhost:8080/tile/{z}/{x}/{y}.png";
 interface MapStore {
   map: LeafletMapGeoman | null;
   mapOrigin: LatLng;
-  zoom: number;
   layers: L.FeatureGroup<L.Polygon>;
   localTileURL: string;
   layerTracking: LayerTracking;
@@ -84,12 +82,12 @@ interface MapStore {
   logMapStore: () => void;
   
   // Layer Management
-  addStageLayer: (missionId: number, vehicle: VehicleEnum, stageId: number, polygon: L.Polygon) => void;
+  updateStagePolygon: (missionId: number, vehicle: VehicleEnum, stageId: number) => void;
   updateZonePolygon: (missionId: number, type: ZoneType, zoneIndex: number) => void;
   removeStageLayer: (missionId: number, vehicle: VehicleEnum, stageId: number) => void;
-  removeZoneLayer: (missionId: number, type: ZoneType, index: number) => void;
   getStageLayer: (missionId: number, vehicle: VehicleEnum, stageId: number) => StageLayer | undefined;
   getZoneLayers: (missionId: number, type: ZoneType) => ZoneLayer[];
+  setLayerVisibility: (missionId: number, type: ZoneType) => void;
   // TODO: fix it so that theres no as declaration when reading from missionStore
   updateLayerTracking: (state: MissionsStruct) => void;
 }
@@ -100,7 +98,6 @@ interface MapStore {
 const mapStore = createStore<MapStore>((set, get) => ({
   map: null,
   mapOrigin: DEFAULT_MAP_ORIGIN,
-  zoom: DEFAULT_ZOOM,
   localTileURL: TILE_URL,
   layerTracking: { missions: {} },
   layers: L.featureGroup([]),
@@ -122,14 +119,7 @@ const mapStore = createStore<MapStore>((set, get) => ({
     get().map?.leafletObject?.pm.enableDraw("Polygon");
   },
 
-  rerenderLayers: () => {
-    // Clears all layers and rerenders them
-    const map = get().map?.leafletObject;
-    if (!map) return;
 
-    get().layers.clearLayers();
-    // TODO: Implement layer rerendering logic
-  },
 
   logMapStore: () => {
     console.log(get());
@@ -197,9 +187,45 @@ const mapStore = createStore<MapStore>((set, get) => ({
     }
   },
 
+  setLayerVisibility: (missionId: number, type: ZoneType) => {
+    // Get all layers in layerTracking
+    const layers = get().layerTracking.missions[missionId];
+    const zoneLayers = layers.zones[type];
+  
+    zoneLayers.forEach((zone) => {
+      // check if is a valid zone layer and not empty
+      if (!("layer" in zone)) return;
+      
+      const zoneLayer = zone as ZoneLayer;
+      const currentVisibility = zoneLayer.properties.visibility;
+
+      // Toggle visibility of zoneLayer
+      zoneLayer.properties.visibility = !currentVisibility;
+
+      // Update polygon style based on visibility
+      zoneLayer.layer.setStyle({
+        opacity: zoneLayer.properties.visibility ? 1 : 0,
+        fillOpacity: zoneLayer.properties.visibility ? 0.2 : 0
+      });
+    });
+
+    // Update state (optional since we're mutating directly, but good practice)
+    set({ layerTracking: get().layerTracking });
+  },
+
+  rerenderLayers: () => {
+    // Clears all layers and rerenders them
+    const map = get().map?.leafletObject;
+    if (!map) return;
+
+    get().layers.clearLayers();
+    // TODO: Implement layer rerendering logic
+  },
+
   updateLayerTracking: (newState) => {
     const newLayerTracking: LayerTracking = { missions: {} };
-    get().rerenderLayers();
+
+    get().layers.clearLayers();
 
     newState.missions.forEach((mission) => {
       newLayerTracking.missions[mission.mission_id] = {
@@ -214,32 +240,43 @@ const mapStore = createStore<MapStore>((set, get) => ({
         }
       };
 
-
+      // Update Zone In and Zone Out
       Object.keys(mission.zones).forEach((zoneType) => {
-        const keepInZones = newLayerTracking.missions[mission.mission_id].zones.KeepIn;
+        // zoneType from mission.zones will be keep_in_zones or keep_out_zones
+        const zoneMapping: Record<keyof typeof mission.zones, ZoneType> = {
+          keep_in_zones: "KeepIn",
+          keep_out_zones: "KeepOut"
+        }
+        const layerTrackedZones = newLayerTracking.missions[mission.mission_id].zones[zoneMapping[zoneType as keyof typeof mission.zones]];
+        const missionZone = mission.zones[zoneType as keyof typeof mission.zones];
         
-        mission.zones.keep_in_zones.forEach(zone => {
+        missionZone.forEach(zone => {
+          // If no geofence in zone then push empty object
           if (zone.length < 1) {
-            keepInZones.push({});
+            layerTrackedZones.push({});
             return;
           }
 
+          // Map each geocoordinate to leaflet latlng and add it to map as polygon
           const latlngs = zone.map(({lat, long}) => L.latLng([lat, long]));
           const polygon = L.polygon(latlngs).addTo(get().layers);
+          
           const zoneLayer: ZoneLayer = {
             layer: polygon,
             properties: {
               color: "#000",
               visibility: true
-            }
+            } as LayerProperties
           };
+
+          // Set color of zone polygon based on zoneType
           polygon.setStyle({
-            color: "#000",
-            fillOpacity: 0.2,
-            opacity: 1
+            color: zoneType == "keep_in_zones" ? "#1a0" : "#a20",
+            fillOpacity: zoneLayer.properties.visibility ? 0.2 : 0,
+            opacity: zoneLayer.properties.visibility ? 1 : 0
           })
 
-          keepInZones.push(zoneLayer);
+          layerTrackedZones.push(zoneLayer);
         });
 
         set({ layerTracking: newLayerTracking });
@@ -247,11 +284,77 @@ const mapStore = createStore<MapStore>((set, get) => ({
     });
   },
 
-  // Unimplemented methods
-  addStageLayer: () => {},
+  updateStagePolygon: (missionId: number, vehicle: VehicleEnum, stageId: number) => {
+    // const map = get().map?.leafletObject;
+    // if (!map) return;
+
+    // const layerTrackedStage = get().layerTracking.missions[missionId].vehicles[vehicle].stages[stageId];
+
+    // // not pushing in zonelayer type, pushing in empty object or L.Polygon layer
+    // if (!layerTrackedStage || Object.keys(layerTrackedStage).length === 0) {
+    //   // If layerTrackedZone isnt initialized enable Geoman draw mode
+    //   map.pm.enableDraw("Polygon");
+    //   // .once will ensure that theres only 1 create event listener per function call 
+    //   map.once("pm:create", (e) => {
+    //     // Store newly created Geoman layer
+    //     const layer = e.layer as L.Polygon;
+
+    //     // Get latLngs of create polygon
+    //     const latlngs = layer.getLatLngs()[0] as L.LatLng[];
+    
+    //     // Convert leaflet latlng to our GeoCoordinateStruct[]
+    //     const geoCoordinateStructs: GeoCoordinateStruct[] = latlngs.map(latlng => ({
+    //       lat: latlng.lat,
+    //       long: latlng.lng
+    //     }));
+
+    //     // Update the zone in the mission store with new geoCoordinates
+    //     missionStore.updateZone(missionId, type, zoneIndex, geoCoordinateStructs);
+    //     // Delete newly created layer since we want to create polygons from layerTracking 
+    //     layer.remove();
+    //   });
+      
+    // } else {
+    //   // Zone has Polygon, so we can edit it
+    //   const editedLayer = (layerTrackedZone as ZoneLayer).layer
+
+    //   // TODO: possibly add another ui element to explicitly mark when editing is done
+    //   // toggle the edit mode to allow show completing the zone
+    //   if (editedLayer.pm.enabled()) {
+    //     editedLayer.pm.disable();
+    //     return
+    //   }
+      
+    //   // enable edit mode on the selected polygon
+    //   editedLayer.pm.enable();
+
+    //   // listen to when the layer edit is complete
+    //   editedLayer.once("pm:update", (e) => {
+    //     const layer = e.layer as L.Polygon
+    //     const latlngs = layer.getLatLngs()[0] as L.LatLng[];
+        
+    //     const geoCoordinateStructs: GeoCoordinateStruct[] = latlngs.map(latlng => ({
+    //       lat: latlng.lat,
+    //       long: latlng.lng
+    //     }));
+
+    //     missionStore.updateZone(missionId, type, zoneIndex, geoCoordinateStructs);
+    //   });
+
+    // }
+    
+  },
   removeStageLayer: () => {},
-  removeZoneLayer: () => {},
-  getStageLayer: () => undefined,
+  getStageLayer: (missionId: number | null, vehicle: VehicleEnum, stageId: number) => {
+    if (missionId === null) return undefined;
+    const mission = get().layerTracking.missions[missionId];
+    if (!mission) return undefined;
+
+    const vehicleLayers = mission.vehicles[vehicle];
+    if (!vehicleLayers) return undefined;
+
+    return vehicleLayers.stages[stageId];
+  },
   getZoneLayers: (missionId: number | null, type: ZoneType) => {
     if (missionId === null) return [];
     const mission = get().layerTracking.missions[missionId];
