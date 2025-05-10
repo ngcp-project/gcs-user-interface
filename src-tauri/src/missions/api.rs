@@ -75,14 +75,17 @@ impl MissionApiImpl {
                 initial_state.missions.push(MissionStruct {
                     mission_name: mission[0].get("mission_name"),
                     mission_id: mission[0].get("mission_id"),
-                    // mission_status: match mission[0].get::<String, _>("mission_status").as_str() {
-                    //     "active" => MissionStageStatusEnum::Active,
-                    //     "inactive" => MissionStageStatusEnum::Inactive,
-                    //     "complete" => MissionStageStatusEnum::Complete,
-                    //     "failed" => MissionStageStatusEnum::Failed,
-                    //     _ => MissionStageStatusEnum::Inactive,
-                    // },
-                    mission_status: MissionStageStatusEnum::Inactive,
+                    mission_status: match mission[0]
+                        .try_get::<String, _>("mission_status")
+                        .unwrap_or_else(|_| "Inactive".to_string())
+                        .as_str()
+                    {
+                        "Active" => MissionStageStatusEnum::Active,
+                        "Inactive" => MissionStageStatusEnum::Inactive,
+                        "Complete" => MissionStageStatusEnum::Complete,
+                        "Failed" => MissionStageStatusEnum::Failed,
+                        _ => MissionStageStatusEnum::Inactive,
+                    },
                     vehicles: VehiclesStruct {
                         MEA: VehicleStruct {
                             vehicle_name: VehicleEnum::MEA,
@@ -570,7 +573,6 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
     
-    // TODO: SQL
     async fn transition_stage(
         self,
         app_handle: AppHandle<impl Runtime>,

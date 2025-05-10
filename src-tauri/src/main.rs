@@ -533,7 +533,7 @@ async fn initialize_database() {
         mission_name VARCHAR(255),
         keep_in_zones TEXT[] NOT NULL,
         keep_out_zones TEXT[] NOT NULL,
-        status status
+        status status DEFAULT 'Inactive'
     );
     ").execute(&mut db_conn).await.expect("Failed to create table 'missions'");
 
@@ -556,7 +556,8 @@ async fn initialize_database() {
         vehicle_id INTEGER REFERENCES vehicles(vehicle_id) ON DELETE CASCADE,
         search_area TEXT[],      
         stage_name VARCHAR(255) NOT NULL,
-        target_coordinate TEXT
+        target_coordinate TEXT,
+        status status DEFAULT 'Inactive'
     );
     ").execute(&mut db_conn).await.expect("Failed to execute query");
 

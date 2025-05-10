@@ -18,7 +18,7 @@ pub struct MissionStruct {
 }
 
 #[derive(Debug, serde::Deserialize, serde::Serialize, Clone, specta::Type, sqlx::Type)]
-#[sqlx(type_name = "mission_stage_status_enum")]
+#[sqlx(type_name = "status")]
 pub enum MissionStageStatusEnum {
     Active,
     Inactive,
