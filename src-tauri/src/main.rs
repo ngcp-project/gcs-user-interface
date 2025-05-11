@@ -4,7 +4,7 @@
 use taurpc::Router;
 use sqlx::postgres::PgConnection;
 use sqlx::Connection;
-
+use std::env;
 use sqlx::{query, Row};
 mod missions;
 
@@ -503,8 +503,7 @@ async fn init_database_dummy_data() {
     db_conn.close().await.expect("Failed to close database connection");
 }
 
-// init db
-async fn initialize_database() {
+async fn clear_database() {
     let mut db_conn = PgConnection::connect(DB_URL).await.expect("Failed to connect to the database");
 
     let _cleanup_mission = query("
@@ -518,6 +517,12 @@ async fn initialize_database() {
     let _cleanup_stage = query("
     DROP TABLE IF EXISTS stages CASCADE;
     ").execute(&mut db_conn).await.expect("Failed to execute query");
+
+    db_conn.close().await.expect("Failed to close database connection");
+}
+
+async fn initialize_database() {
+    let mut db_conn = PgConnection::connect(DB_URL).await.expect("Failed to connect to the database");
 
     let _create_mission_table = query("
     CREATE TABLE IF NOT EXISTS missions (
@@ -558,11 +563,40 @@ async fn initialize_database() {
 
 
 #[tokio::main]
-async fn main() {    
-    initialize_database().await;
-    init_database_dummy_data().await;
+async fn main() {
+    dotenvy::dotenv().expect("Failed to load .env file");
 
-    // let router = setup_router();
+    let clear_db_everytime = env::var("CLEAR_DATABASE_EVERYTIME")
+        .unwrap_or_else(|_| "false".to_string())
+        .to_lowercase() == "true";
+    if clear_db_everytime {
+        println!("Clearing database");
+        clear_database().await;
+    } else {
+        println!("Database not cleared");
+    }
+    
+    let db_enabled = env::var("DATABASE_ENABLED")
+        .unwrap_or_else(|_| "true".to_string())
+        .to_lowercase() == "true";
+    if db_enabled {
+        println!("Database enabled");
+        initialize_database().await;
+    } else {
+        println!("Database disabled");
+    }
+
+    let dummy_data_enabled = env::var("DUMMY_DATA_ENABLED")
+        .unwrap_or_else(|_| "true".to_string())
+        .to_lowercase() == "true";
+
+    if dummy_data_enabled {
+        println!("Dummy data enabled");
+        init_database_dummy_data().await;
+    } else {
+        println!("Dummy data disabled");
+    }
+
     let missions_api = MissionApiImpl::new().await;
     let router = Router::new()
         .merge(missions_api.into_handler());
