@@ -128,6 +128,28 @@ pub async fn insert_new_stage(
 
     let new_stage_id: i32 = new_stage.get::<i32, _>("stage_id");
 
+    // set current stage id if previously didn't exitst (-1)
+    let current_stage = query("
+        SELECT current_stage_id FROM vehicles WHERE vehicle_id = $1
+    ")
+    .bind(vehicle_id)
+    .fetch_one(&db_conn)
+    .await
+    .expect("Failed to find vehicle in mission");
+
+    if current_stage.get::<i32, _>("current_stage_id") == -1 {
+        query("
+            UPDATE vehicles SET current_stage_id = $1 WHERE vehicle_id = $2
+        ")
+        .bind(new_stage_id)
+        .bind(vehicle_id)
+        .execute(&db_conn)
+        .await
+        .expect("Failed to update vehicle current stage id");
+
+        println!("Updated vehicle current stage id to {}", new_stage_id);
+    }
+
     return Ok(new_stage_id);
 }
 

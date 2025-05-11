@@ -570,7 +570,6 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
     
-    // TODO: SQL
     async fn transition_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
