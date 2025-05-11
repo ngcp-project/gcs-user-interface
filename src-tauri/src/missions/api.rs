@@ -50,7 +50,7 @@ impl MissionApiImpl {
                     SELECT 
                         missions.mission_id,
                         missions.mission_name,
-                        missions.status AS mission_status,
+                        missions.status,
                         missions.keep_in_zones,
                         missions.keep_out_zones,
                         vehicles.vehicle_name,
@@ -60,7 +60,8 @@ impl MissionApiImpl {
                         stages.stage_id,
                         stages.stage_name,
                         stages.search_area,
-                        stages.target_coordinate
+                        stages.target_coordinate,
+                        stages.status AS stage_status
                     FROM missions
                     INNER JOIN vehicles ON missions.mission_id = vehicles.mission_id
                     INNER JOIN stages ON vehicles.vehicle_id = stages.vehicle_id
@@ -75,14 +76,13 @@ impl MissionApiImpl {
                 initial_state.missions.push(MissionStruct {
                     mission_name: mission[0].get("mission_name"),
                     mission_id: mission[0].get("mission_id"),
-                    // mission_status: match mission[0].get::<String, _>("mission_status").as_str() {
-                    //     "active" => MissionStageStatusEnum::Active,
-                    //     "inactive" => MissionStageStatusEnum::Inactive,
-                    //     "complete" => MissionStageStatusEnum::Complete,
-                    //     "failed" => MissionStageStatusEnum::Failed,
-                    //     _ => MissionStageStatusEnum::Inactive,
-                    // },
-                    mission_status: MissionStageStatusEnum::Inactive,
+                    mission_status: match mission[0].try_get::<String, _>("status").unwrap_or_else(|_| "Inactive".to_string()).as_str() {
+                        "Active" => MissionStageStatusEnum::Active,
+                        "Inactive" => MissionStageStatusEnum::Inactive,
+                        "Complete" => MissionStageStatusEnum::Complete,
+                        "Failed" => MissionStageStatusEnum::Failed,
+                        _ => MissionStageStatusEnum::Inactive,
+                    },
                     vehicles: VehiclesStruct {
                         MEA: VehicleStruct {
                             vehicle_name: VehicleEnum::MEA,
@@ -94,7 +94,13 @@ impl MissionApiImpl {
                                 .map(|row| StageStruct {
                                     stage_name: row.get("stage_name"),
                                     stage_id: row.get("stage_id"),
-                                    stage_status: MissionStageStatusEnum::Inactive,
+                                    stage_status: match row.try_get::<String, _>("stage_status").unwrap_or_else(|_| "Inactive".to_string()).as_str() {
+                                        "Active" => MissionStageStatusEnum::Active,
+                                        "Inactive" => MissionStageStatusEnum::Inactive,
+                                        "Complete" => MissionStageStatusEnum::Complete,
+                                        "Failed" => MissionStageStatusEnum::Failed,
+                                        _ => MissionStageStatusEnum::Inactive,
+                                    },
                                     search_area: row.try_get::<Vec<String>, _>("search_area")
                                         .unwrap_or_else(|_| Vec::new())
                                         .into_iter()
@@ -113,7 +119,13 @@ impl MissionApiImpl {
                                 .map(|row| StageStruct {
                                     stage_name: row.get("stage_name"),
                                     stage_id: row.get("stage_id"),
-                                    stage_status: MissionStageStatusEnum::Inactive,
+                                    stage_status: match row.try_get::<String, _>("stage_status").unwrap_or_else(|_| "Inactive".to_string()).as_str() {
+                                        "Active" => MissionStageStatusEnum::Active,
+                                        "Inactive" => MissionStageStatusEnum::Inactive,
+                                        "Complete" => MissionStageStatusEnum::Complete,
+                                        "Failed" => MissionStageStatusEnum::Failed,
+                                        _ => MissionStageStatusEnum::Inactive,
+                                    },
                                     search_area: row.try_get::<Vec<String>, _>("search_area")
                                         .unwrap_or_else(|_| Vec::new())
                                         .into_iter()
@@ -132,7 +144,13 @@ impl MissionApiImpl {
                                 .map(|row| StageStruct {
                                     stage_name: row.get("stage_name"),
                                     stage_id: row.get("stage_id"),
-                                    stage_status: MissionStageStatusEnum::Inactive,
+                                    stage_status: match row.try_get::<String, _>("stage_status").unwrap_or_else(|_| "Inactive".to_string()).as_str() {
+                                        "Active" => MissionStageStatusEnum::Active,
+                                        "Inactive" => MissionStageStatusEnum::Inactive,
+                                        "Complete" => MissionStageStatusEnum::Complete,
+                                        "Failed" => MissionStageStatusEnum::Failed,
+                                        _ => MissionStageStatusEnum::Inactive,
+                                    },
                                     search_area: row.try_get::<Vec<String>, _>("search_area")
                                         .unwrap_or_else(|_| Vec::new())
                                         .into_iter()
@@ -166,7 +184,7 @@ impl MissionApiImpl {
                 });
             }
         } 
-        
+
         Self {
             state: Arc::new(Mutex::new(initial_state)),
             db: database_connection,

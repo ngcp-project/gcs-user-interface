@@ -4,7 +4,7 @@
 use taurpc::Router;
 use sqlx::postgres::PgConnection;
 use sqlx::Connection;
-
+use std::env;
 use sqlx::{query, Row};
 mod missions;
 
@@ -54,7 +54,7 @@ async fn init_database_dummy_data() {
             (23.43258, -82.35821)
         ]"#.to_string()
     ])
-    .bind("Inactive")
+    .bind("Active")
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into missions");
@@ -105,8 +105,8 @@ async fn init_database_dummy_data() {
     println!("Discover MEA Vehicle ID: {}", insert_dummy_discover_mea_id);
 
     let _insert_dummy_init_stage = query("
-        INSERT INTO stages(vehicle_id, search_area, stage_name, target_coordinate)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO stages(vehicle_id, search_area, stage_name, target_coordinate, status)
+        VALUES ($1, $2, $3, $4, $5)
     ")
     .bind(insert_dummy_discover_mra_id) 
     .bind(&vec![
@@ -120,6 +120,7 @@ async fn init_database_dummy_data() {
     ])
     .bind("Initial Stage")
     .bind(r#"(37.33285,-122.34302)"#.to_string())
+    .bind("Active")
     .execute(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into stages");
@@ -502,8 +503,7 @@ async fn init_database_dummy_data() {
     db_conn.close().await.expect("Failed to close database connection");
 }
 
-// init db
-async fn initialize_database() {
+async fn clear_database() {
     let mut db_conn = PgConnection::connect(DB_URL).await.expect("Failed to connect to the database");
 
     let _cleanup_mission = query("
@@ -518,14 +518,11 @@ async fn initialize_database() {
     DROP TABLE IF EXISTS stages CASCADE;
     ").execute(&mut db_conn).await.expect("Failed to execute query");
 
-    let _create_status_type = query("
-    DO $$
-    BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'status') THEN
-            CREATE TYPE status AS ENUM ('Active', 'Inactive', 'Complete', 'Failed');
-        END IF;
-    END $$;
-    ").execute(&mut db_conn).await.expect("Failed to create type 'status'");
+    db_conn.close().await.expect("Failed to close database connection");
+}
+
+async fn initialize_database() {
+    let mut db_conn = PgConnection::connect(DB_URL).await.expect("Failed to connect to the database");
 
     let _create_mission_table = query("
     CREATE TABLE IF NOT EXISTS missions (
@@ -533,7 +530,7 @@ async fn initialize_database() {
         mission_name VARCHAR(255),
         keep_in_zones TEXT[] NOT NULL,
         keep_out_zones TEXT[] NOT NULL,
-        status status
+        status TEXT DEFAULT 'Inactive'
     );
     ").execute(&mut db_conn).await.expect("Failed to create table 'missions'");
 
@@ -556,7 +553,8 @@ async fn initialize_database() {
         vehicle_id INTEGER REFERENCES vehicles(vehicle_id) ON DELETE CASCADE,
         search_area TEXT[],      
         stage_name VARCHAR(255) NOT NULL,
-        target_coordinate TEXT
+        target_coordinate TEXT,
+        status TEXT DEFAULT 'Inactive'
     );
     ").execute(&mut db_conn).await.expect("Failed to execute query");
 
@@ -565,11 +563,31 @@ async fn initialize_database() {
 
 
 #[tokio::main]
-async fn main() {    
-    initialize_database().await;
-    init_database_dummy_data().await;
+async fn main() {
+    dotenvy::dotenv().expect("Failed to load .env file");
 
-    // let router = setup_router();
+    let clear_db_everytime = env::var("CLEAR_DATABASE_EVERYTIME")
+        .unwrap_or_else(|_| "false".to_string())
+        .to_lowercase() == "true";
+    if clear_db_everytime {
+        println!("Clearing database");
+        clear_database().await;
+    } else {
+        println!("Database not cleared");
+    }
+    initialize_database().await;
+
+    let dummy_data_enabled = env::var("DUMMY_DATA_ENABLED")
+        .unwrap_or_else(|_| "true".to_string())
+        .to_lowercase() == "true";
+
+    if dummy_data_enabled {
+        println!("Dummy data enabled");
+        init_database_dummy_data().await;
+    } else {
+        println!("Dummy data disabled");
+    }
+
     let missions_api = MissionApiImpl::new().await;
     let router = Router::new()
         .merge(missions_api.into_handler());
