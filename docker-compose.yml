@@ -19,6 +19,17 @@ services:
     volumes:
       - osm-data:/data/database/
     command: "run"
+    
+  db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: ngcp
+      POSTGRES_USER: ngcp
+      POSTGRES_DB: ngcpdb
+    ports:
+      - 5433:5432
 
 volumes:
   osm-data:

@@ -39,3 +39,7 @@ Run the Map Server container.
 ```bash
 bun run osm:run
 ```
+
+
+## Map Server Debugging Notes
+- If you get an error "Error: role renderer already exists" when running the map server, go into Docker Desktop and delete the volume installed. Re-run the setup command to install the volume again.
