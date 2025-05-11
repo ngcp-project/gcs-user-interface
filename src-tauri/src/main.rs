@@ -105,8 +105,8 @@ async fn init_database_dummy_data() {
     println!("Discover MEA Vehicle ID: {}", insert_dummy_discover_mea_id);
 
     let _insert_dummy_init_stage = query("
-        INSERT INTO stages(vehicle_id, search_area, stage_name, target_coordinate)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO stages(vehicle_id, search_area, stage_name, target_coordinate, status)
+        VALUES ($1, $2, $3, $4, $5)
     ")
     .bind(insert_dummy_discover_mra_id) 
     .bind(&vec![
@@ -120,6 +120,7 @@ async fn init_database_dummy_data() {
     ])
     .bind("Initial Stage")
     .bind(r#"(37.33285,-122.34302)"#.to_string())
+    .bind("Active")
     .execute(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into stages");

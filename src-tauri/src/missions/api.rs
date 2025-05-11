@@ -60,7 +60,8 @@ impl MissionApiImpl {
                         stages.stage_id,
                         stages.stage_name,
                         stages.search_area,
-                        stages.target_coordinate
+                        stages.target_coordinate,
+                        stages.status AS stage_status
                     FROM missions
                     INNER JOIN vehicles ON missions.mission_id = vehicles.mission_id
                     INNER JOIN stages ON vehicles.vehicle_id = stages.vehicle_id
@@ -93,7 +94,13 @@ impl MissionApiImpl {
                                 .map(|row| StageStruct {
                                     stage_name: row.get("stage_name"),
                                     stage_id: row.get("stage_id"),
-                                    stage_status: MissionStageStatusEnum::Inactive,
+                                    stage_status: match row.try_get::<String, _>("stage_status").unwrap_or_else(|_| "Inactive".to_string()).as_str() {
+                                        "Active" => MissionStageStatusEnum::Active,
+                                        "Inactive" => MissionStageStatusEnum::Inactive,
+                                        "Complete" => MissionStageStatusEnum::Complete,
+                                        "Failed" => MissionStageStatusEnum::Failed,
+                                        _ => MissionStageStatusEnum::Inactive,
+                                    },
                                     search_area: row.try_get::<Vec<String>, _>("search_area")
                                         .unwrap_or_else(|_| Vec::new())
                                         .into_iter()
@@ -112,7 +119,13 @@ impl MissionApiImpl {
                                 .map(|row| StageStruct {
                                     stage_name: row.get("stage_name"),
                                     stage_id: row.get("stage_id"),
-                                    stage_status: MissionStageStatusEnum::Inactive,
+                                    stage_status: match row.try_get::<String, _>("stage_status").unwrap_or_else(|_| "Inactive".to_string()).as_str() {
+                                        "Active" => MissionStageStatusEnum::Active,
+                                        "Inactive" => MissionStageStatusEnum::Inactive,
+                                        "Complete" => MissionStageStatusEnum::Complete,
+                                        "Failed" => MissionStageStatusEnum::Failed,
+                                        _ => MissionStageStatusEnum::Inactive,
+                                    },
                                     search_area: row.try_get::<Vec<String>, _>("search_area")
                                         .unwrap_or_else(|_| Vec::new())
                                         .into_iter()
@@ -131,7 +144,13 @@ impl MissionApiImpl {
                                 .map(|row| StageStruct {
                                     stage_name: row.get("stage_name"),
                                     stage_id: row.get("stage_id"),
-                                    stage_status: MissionStageStatusEnum::Inactive,
+                                    stage_status: match row.try_get::<String, _>("stage_status").unwrap_or_else(|_| "Inactive".to_string()).as_str() {
+                                        "Active" => MissionStageStatusEnum::Active,
+                                        "Inactive" => MissionStageStatusEnum::Inactive,
+                                        "Complete" => MissionStageStatusEnum::Complete,
+                                        "Failed" => MissionStageStatusEnum::Failed,
+                                        _ => MissionStageStatusEnum::Inactive,
+                                    },
                                     search_area: row.try_get::<Vec<String>, _>("search_area")
                                         .unwrap_or_else(|_| Vec::new())
                                         .into_iter()
