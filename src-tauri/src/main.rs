@@ -575,16 +575,6 @@ async fn main() {
     } else {
         println!("Database not cleared");
     }
-    
-    let db_enabled = env::var("DATABASE_ENABLED")
-        .unwrap_or_else(|_| "true".to_string())
-        .to_lowercase() == "true";
-    if db_enabled {
-        println!("Database enabled");
-        initialize_database().await;
-    } else {
-        println!("Database disabled");
-    }
 
     let dummy_data_enabled = env::var("DUMMY_DATA_ENABLED")
         .unwrap_or_else(|_| "true".to_string())
