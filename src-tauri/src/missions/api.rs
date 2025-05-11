@@ -184,8 +184,6 @@ impl MissionApiImpl {
                 });
             }
         } 
-        
-        println!("Initial state: {:?}", initial_state);
 
         Self {
             state: Arc::new(Mutex::new(initial_state)),

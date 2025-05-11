@@ -575,6 +575,7 @@ async fn main() {
     } else {
         println!("Database not cleared");
     }
+    initialize_database().await;
 
     let dummy_data_enabled = env::var("DUMMY_DATA_ENABLED")
         .unwrap_or_else(|_| "true".to_string())
