@@ -9,7 +9,6 @@ import {
 import { missionStore } from "@/lib/MissionStore";
 
 
-
 const currentView = computed(() => missionStore.view.currentView);
 
 const handleClick = (targetView: "mission" | "vehicle" | "stage") => {
