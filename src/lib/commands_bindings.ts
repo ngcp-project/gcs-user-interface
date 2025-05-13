@@ -28,12 +28,11 @@ export type ZoneType = "KeepIn" | "KeepOut"
 
 export type ZonesStruct = { keep_in_zones: GeoCoordinateStruct[][]; keep_out_zones: GeoCoordinateStruct[][] }
 
-const ARGS_MAP = { 'telem':'{"get_default_telemetry":[]}', 'mission':'{"set_mission_data":["mission_data"],"set_auto_mode":["mission_id","vehicle_name","is_auto"],"delete_stage":["mission_id","vehicle_name","stage_id"],"add_zone":["mission_id","zone_type"],"get_default_data":[],"create_mission":["mission_name"],"get_all_missions":[],"get_mission_data":["mission_id"],"on_updated":["new_data"],"transition_stage":["mission_id","vehicle_name"],"add_stage":["mission_id","vehicle_name","stage_name"],"delete_zone":["mission_id","zone_type","zone_index"],"delete_mission":["mission_id"]}', 'commands':'{"send_emergency_stop":["vehicle_id"],"send_zone_update":["vehicle_id","zone_id"],"send_autonomous_mode":["vehicle_id","enabled"],"send_mission_update":["vehicle_id","mission_id"]}' }
+const ARGS_MAP = { 'mission':'{"on_updated":["new_data"],"get_default_data":[],"set_auto_mode":["mission_id","vehicle_name","is_auto"],"transition_stage":["mission_id","vehicle_name"],"delete_zone":["mission_id","zone_type","zone_index"],"create_mission":["mission_name"],"get_all_missions":[],"get_mission_data":["mission_id"],"delete_mission":["mission_id"],"add_stage":["mission_id","vehicle_name","stage_name"],"delete_stage":["mission_id","vehicle_name","stage_id"],"add_zone":["mission_id","zone_type"],"set_mission_data":["mission_data"]}', 'commands':'{"send_emergency_stop":["vehicle_id"],"send_mission_update":["vehicle_id","mission_id"],"send_zone_update":["vehicle_id","zone_id"]}', 'telem':'{"get_default_telemetry":[]}' }
 export type Router = { 'telem': { get_default_telemetry: () => Promise<TelemetryStruct> },
 'commands': { send_emergency_stop: (vehicleId: string) => Promise<null>, 
 send_mission_update: (vehicleId: string, missionId: string) => Promise<null>, 
-send_zone_update: (vehicleId: string, zoneId: string) => Promise<null>, 
-send_autonomous_mode: (vehicleId: string, enabled: boolean) => Promise<null> },
+send_zone_update: (vehicleId: string, zoneId: string) => Promise<null> },
 'mission': { on_updated: (newData: MissionsStruct) => Promise<void>, 
 get_default_data: () => Promise<MissionsStruct>, 
 get_all_missions: () => Promise<MissionsStruct>, 
