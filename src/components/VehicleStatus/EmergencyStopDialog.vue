@@ -2,7 +2,7 @@
   <Dialog>
     <DialogTrigger as-child>
       <slot>
-        <NgButton variant="destructive">Stop All</NgButton>
+        <Button variant="destructive">EMERGENCY STOP ALL</Button>
       </slot>
     </DialogTrigger>
     <DialogContent>
@@ -29,15 +29,15 @@
       </slot>
 
       <DialogFooter>
-        <DialogClose><NgButton variant="destructive">No</NgButton></DialogClose>
-        <DialogClose><NgButton @click="sendStopCommand">Yes</NgButton></DialogClose>
+        <DialogClose><Button variant="destructive">No</Button></DialogClose>
+        <DialogClose><Button @click="sendStopCommand">Yes</Button></DialogClose>
       </DialogFooter>
     </DialogContent>
   </Dialog>
 </template>
 
 <script setup lang="ts">
-import { NgButton } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,

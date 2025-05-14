@@ -1,0 +1,35 @@
+services:
+  osm-setup:
+    image: overv/openstreetmap-tile-server
+    volumes:
+      - osm-data:/data/database/
+    environment:
+      DOWNLOAD_PBF: https://download.geofabrik.de/north-america/us/california/socal-latest.osm.pbf
+      DOWNLOAD_POLY: https://download.geofabrik.de/north-america/us/california/socal.poly
+    command: "import"
+    restart: "no"
+
+  osm-server:
+    image: overv/openstreetmap-tile-server
+    shm_size: 1gb
+    depends_on:
+      - osm-setup
+    ports:
+      - "8080:80"
+    volumes:
+      - osm-data:/data/database/
+    command: "run"
+    
+  db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: ngcp
+      POSTGRES_USER: ngcp
+      POSTGRES_DB: ngcpdb
+    ports:
+      - 5433:5432
+
+volumes:
+  osm-data:
