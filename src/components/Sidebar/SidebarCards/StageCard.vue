@@ -8,6 +8,7 @@ import mapStore from "@/lib/MapStore";
 
 const props = defineProps<{
   stageID: number;
+  stageIndex: number;
 }>();
 
 // Status Styles
@@ -25,33 +26,49 @@ const isVisible = ref(true); // Track visibility state
 
 const toggleVisibility = () => {
   isVisible.value = !isVisible.value;
-  const currentMissionId = missionStore.view.currentMissionId;
-  const currentVehicleName = missionStore.view.currentVehicleName;
-  
-  if (currentMissionId === null || currentVehicleName === null) return;
-  
-  // const stageLayer = mapStore.getStageLayer(currentMissionId, currentVehicleName, props.stageID);
-  // if (stageLayer) {
-  //   if (isVisible.value) {
-  //     stageLayer.polygon.setStyle({ opacity: 1, fillOpacity: 0.2 });
-  //   } else {
-  //     stageLayer.polygon.setStyle({ opacity: 0, fillOpacity: 0 });
-  //   }
-  // }
 };
 
+// Get id of the current mission
 const currentMissionId = missionStore.view.currentMissionId;
-const currentVehicleName = missionStore.view.currentVehicleName;
 
-const stage = computed(() => {
-  if (currentMissionId !== null && currentVehicleName !== null)
-    return missionStore.getStageData(currentMissionId, currentVehicleName, props.stageID);
-});
+// Get the current vehicle name
+const currentVehicleName = currentMissionId !== null ? missionStore.view.currentVehicleName : null;
 
+// Get stage data
+const stage = currentMissionId !== null && currentVehicleName !== null ? missionStore.getStageData(
+  currentMissionId, 
+  currentVehicleName, 
+  props.stageID
+) : null;
+
+// Get vehicle data
+const vehicleData = currentMissionId !== null && currentVehicleName !== null ? missionStore.getVehicleData(
+  currentMissionId, 
+  currentVehicleName
+) : null;
+
+// Get list of stages from vehicle data
+const stageList = vehicleData !== undefined && vehicleData !== null ? vehicleData.stages : null;
+
+// Get index of active stage
+const currStageIndex = vehicleData !== undefined && vehicleData !== null ? vehicleData.current_stage : null;
+
+// Compare current stage index with active stage index
+const searchAreaEditable =
+stageList !== undefined && stageList !== null && 
+currStageIndex !== undefined && currStageIndex !== null ? 
+props.stageIndex >= currStageIndex : null;
+
+// Handle stage name change
 const handleStageNameChange = (event: Event) => {
   if (currentMissionId === null || currentVehicleName === null) return;
   const newName = (event.target as HTMLInputElement).value;
-  missionStore.renameStage(currentMissionId, currentVehicleName, props.stageID, newName);
+  missionStore.renameStage(
+    currentMissionId, 
+    currentVehicleName, 
+    props.stageID, 
+    newName
+  );
 };
 
 const handleDeleteStage = () => {
@@ -66,13 +83,19 @@ const handleDeleteStage = () => {
     <!-- Stage Title -->
     <CardTitle class="flex items-center gap-2">
       <Input
+        v-if="stage.stage_status === 'Inactive'"
         @blur="handleStageNameChange"
         @keyup.enter="handleStageNameChange"
         v-model="stage.stage_name"
         class="flex-1"
       />
+      <span v-else class="flex-1">
+        {{ stage.stage_name }}
+      </span>
+
       <!-- Trash Icon -->
       <Trash2
+        v-if="stage.stage_status === 'Inactive' && currentMissionId !== null && currentVehicleName !== null"
         @click="handleDeleteStage"
         class="h-5 w-5 cursor-pointer text-foreground hover:text-destructive"
       />
@@ -88,7 +111,8 @@ const handleDeleteStage = () => {
         <span class="font-semibold">Search Area</span>
         <div class="flex gap-x-2">
           <Pencil
-            class="h-5 w-5 cursor-pointer text-secondary-foreground hover:text-secondary-foreground/80"
+          v-if="searchAreaEditable"
+          class="h-5 w-5 cursor-pointer text-secondary-foreground hover:text-secondary-foreground/80"
           />
           <component
             :is="isVisible ? Eye : EyeOff"

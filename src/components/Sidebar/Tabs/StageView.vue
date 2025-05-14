@@ -16,7 +16,7 @@ const stages = currentMissionId !== null && currentVehicleName !== null ? missio
   <SidebarContent class="bg-sidebar-background">
     <div class="flex w-full flex-col items-center">
       <div v-if="stages && stages.length > 0" class="w-full space-y-4">
-        <StageCard v-for="(stage, index) in stages" :key="index" :stageID="stage.stage_id" />
+        <StageCard v-for="(stage, index) in stages" :key="index" :stageID="stage.stage_id" :stageIndex="index" />
       </div>
       <div v-else class="w-full text-center">
         <span>No Stages Created</span>

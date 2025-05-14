@@ -11,13 +11,13 @@ const props = defineProps<{
   zoneType: ZoneType;
 }>();
 
-// Title Styles
-const titleStyles = computed(() => ({
+// Title Color Styles
+const titleStyles = {
   titleColor: {
     In: "bg-chart-2",
     Out: "bg-destructive"
   }
-}));
+}
 
 const zoneType = {
   KeepIn: "In",
@@ -71,7 +71,7 @@ const zoneVisibility = (index: number) =>
 
 <template>
   <Card class="relative m-2 p-2">
-    <!-- Mission Title -->
+    <!-- Zone Card Title -->
     <CardTitle class="text-x2 flex items-center font-bold">
       Keep {{ zoneType }}
       <Square
@@ -88,12 +88,14 @@ const zoneVisibility = (index: number) =>
         class="flex w-full items-center justify-between pb-1 pt-1"
       >
         <span class="font-semibold">Zone {{ index }}</span>
-        <div v-if="mission?.mission_status === 'Inactive'" class="flex gap-x-2">
+        <div class="flex gap-x-2">
           <!-- TODO: Add ui to confirm an edit -->
           <component
             :is="zone.length > 0 ? Pencil : Plus"
+            v-if="mission?.mission_status !== 'Complete'"
             class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500"
             @click="handleCreateZone(index)"
+          
           />
           <component
             :is="zoneVisibility(index) ? Eye : EyeOff"
@@ -101,8 +103,11 @@ const zoneVisibility = (index: number) =>
             class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500"
           />
           <Trash2
+           
+            v-if="mission?.mission_status !== 'Complete' && currentMissionId !== null"
             @click="handleDeleteZone(index)"
             class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500"
+          
           />
         </div>
       </div>
@@ -110,10 +115,12 @@ const zoneVisibility = (index: number) =>
 
     <!-- Add Zone Button -->
     <CardFooter
-      v-if="mission?.mission_status === 'Inactive'"
+      v-if="mission?.mission_status !== 'Complete'"
       class="mt-4 items-center justify-center"
     >
       <Button
+        
+        v-if="currentMissionId !== null"
         @click="handleNewZone()"
         class="text-fg flex flex-col items-center bg-transparent shadow-none hover:bg-transparent"
       >
