@@ -5,13 +5,12 @@ pub async fn insert_new_mission(
     mission_name: &str,
 ) -> Result<i32, sqlx::Error> {
     let new_mission = query("
-        INSERT INTO missions(mission_name, keep_in_zones, keep_out_zones, status) 
-        VALUES ($1, $2, $3, $4::status) RETURNING mission_id
+        INSERT INTO missions(mission_name, keep_in_zones, keep_out_zones) 
+        VALUES ($1, $2, $3) RETURNING mission_id
     ")
     .bind(mission_name)
     .bind(&Vec::<String>::new())
     .bind(&Vec::<String>::new())
-    .bind("Inactive")
     .fetch_one(&db_conn)
     .await
     .expect("Failed to insert dummy data into missions");
