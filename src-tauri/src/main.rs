@@ -17,7 +17,7 @@ async fn init_database_dummy_data() {
 
     let insert_dummy_discover_mission = query("
         INSERT INTO missions(mission_name, keep_in_zones, keep_out_zones, status) 
-        VALUES ($1, $2, $3, $4::status) RETURNING mission_id
+        VALUES ($1, $2, $3, $4) RETURNING mission_id
     ")
     .bind("Discover Mission")
     .bind(&vec![
@@ -252,7 +252,7 @@ async fn init_database_dummy_data() {
 
     let _insert_dummy_retrieve_mission = query("
         INSERT INTO missions(mission_name, keep_in_zones, keep_out_zones, status) 
-        VALUES ($1, $2, $3, $4::status) RETURNING mission_id
+        VALUES ($1, $2, $3, $4) RETURNING mission_id
     ") 
     .bind("Retrieve Mission")
     .bind(&vec![
