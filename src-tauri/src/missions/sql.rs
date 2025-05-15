@@ -254,23 +254,41 @@ pub async fn transition_stage(
 }
 
 
-pub async fn update_complete_stage(
+// pub async fn update_complete_stage(
+//     db_conn: PgPool,
+//     mission_id: i32,
+//     vehicle_name: String,
+//     stage_id: i32,
+// ) -> Result<(), sqlx::Error> {
+//     query("
+//         UPDATE stages SET completed = TRUE WHERE stage_id = $1 AND vehicle_id = (
+//             SELECT vehicle_id FROM vehicles WHERE mission_id = $2 AND vehicle_name = $3
+//         )
+//     ")
+//     .bind(stage_id)
+//     .bind(mission_id)
+//     .bind(vehicle_name)
+//     .execute(&db_conn)
+//     .await
+//     .expect("Failed to update stage completion");
+
+//     Ok(())
+// }
+
+
+pub async fn update_mission_status(
     db_conn: PgPool,
     mission_id: i32,
-    vehicle_name: String,
-    stage_id: i32,
+    status: &str,
 ) -> Result<(), sqlx::Error> {
     query("
-        UPDATE stages SET completed = TRUE WHERE stage_id = $1 AND vehicle_id = (
-            SELECT vehicle_id FROM vehicles WHERE mission_id = $2 AND vehicle_name = $3
-        )
+        UPDATE missions SET status = $1 WHERE mission_id = $2
     ")
-    .bind(stage_id)
+    .bind(status)
     .bind(mission_id)
-    .bind(vehicle_name)
     .execute(&db_conn)
     .await
-    .expect("Failed to update stage completion");
+    .expect("Failed to update mission completion");
 
     Ok(())
 }

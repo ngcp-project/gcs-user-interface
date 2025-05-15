@@ -459,9 +459,13 @@ impl MissionApi for MissionApiImpl {
         
         if idx !=0 {
             state.missions[idx-1].mission_status = MissionStageStatusEnum::Complete;
+            update_mission_status(self.db.clone(), state.missions[idx-1].mission_id, "Complete").await.expect("Failed to update mission status");
         }
-        
+                
         state.missions[idx].mission_status = MissionStageStatusEnum::Active;
+        state.current_mission = mission_id;
+        update_mission_status(self.db.clone(), mission_id, "Active").await.expect("Failed to update mission status");
+
         
         self.emit_state_update(&app_handle, &state)
     }
