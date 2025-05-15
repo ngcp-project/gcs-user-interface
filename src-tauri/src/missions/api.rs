@@ -506,11 +506,19 @@ impl MissionApi for MissionApiImpl {
             vehicle.vehicle_name.to_string(),
         ).await.expect("Failed to find vehicle mission");
 
-        vehicle.stages.push(Self::create_default_stage(
+        let default_stage = Self::create_default_stage(
             self.clone(),
             &stage_name,
             vehicle_id
-        ).await);
+        ).await;
+        println!("Default stage created: {:?}", &default_stage);
+        let stage_id = default_stage.stage_id;
+        vehicle.stages.push(default_stage);
+
+        if vehicle.current_stage == -1 {
+            vehicle.current_stage = stage_id;
+        }
+
         self.emit_state_update(&app_handle, &state)
     }
 
@@ -609,11 +617,17 @@ impl MissionApi for MissionApiImpl {
             VehicleEnum::MRA => &mut mission.vehicles.MRA,
         };
 
+        // println!("\n\nStart vehicle rust state: {:?}\n\n\n", vehicle);
         println!("Current Stage: {:?}", vehicle.current_stage);
 
         // Mark current stage as complete
-        vehicle.stages[vehicle.current_stage as usize].stage_status =
-            MissionStageStatusEnum::Complete;
+        if let Some(stage) = vehicle.stages.iter_mut().find(|s| s.stage_id == vehicle.current_stage) {
+            println!("Stage found: {:?}", stage);
+            stage.stage_status = MissionStageStatusEnum::Complete;
+            println!("Stage status updated: {:?}", stage.stage_status);
+        } else {
+            println!("Stage with ID not found");
+        }
 
         // Transition to next stage if available
         let transitioned_stage = transition_stage(
@@ -627,9 +641,11 @@ impl MissionApi for MissionApiImpl {
 
         if (vehicle.current_stage as usize) < vehicle.stages.len() - 1 {
             vehicle.current_stage = transitioned_stage.unwrap_or(vehicle.current_stage);
-            vehicle.stages[vehicle.current_stage as usize].stage_status =
-                MissionStageStatusEnum::Active;
+            vehicle.stages[vehicle.current_stage as usize].stage_status = MissionStageStatusEnum::Active;
+            vehicle.stages.iter_mut().find(|s| s.stage_id == vehicle.current_stage).unwrap().stage_status = MissionStageStatusEnum::Active;
         }
+
+        // println!("\n\n\nEnd vehicle rust state: {:?}", vehicle);
 
         self.emit_state_update(&app_handle, &state)
     }
