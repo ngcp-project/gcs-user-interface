@@ -716,4 +716,8 @@ impl MissionApi for MissionApiImpl {
 
         self.emit_state_update(&app_handle, &state)
     }
+    
+    // async fn on_updated(new_data: MissionsStruct) {
+    //     todo!()
+    // }
 }
