@@ -72,7 +72,7 @@ impl RabbitMQConsumer {
     }
     pub async fn start_consuming(&self, queue_name: &str) -> LapinResult<()> {
         //Declare queue
-        self.queue_declare(queue_name).await?;
+        // self.queue_declare(queue_name).await?;
         //Create consumer
         let consumer = self.create_consumer(queue_name).await?;
         //Start processing

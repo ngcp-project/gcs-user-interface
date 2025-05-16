@@ -646,46 +646,20 @@ async fn initialize_database() {
 
 #[tokio::main]
 async fn main() {
-    // … database init code …
-
-    let missions_api = MissionApiImpl::new().await;
-    let router = Router::new().merge(missions_api.into_handler());
-
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(router.into_handler())
+        // only your telemetry command
+        .invoke_handler(tauri::generate_handler![telemetry::init_telemetry_consumer])
         .setup(|app| {
-            // Grab your window once
-            let window = app
-                .get_webview_window("main")
-                .expect("failed to get main window")
-                .clone();
-
-            // 1️⃣ Publisher task (runs independently)
+            // publisher runs independently
             tauri::async_runtime::spawn(async move {
-                println!("🚀 Starting RabbitMQ test publisher…");
-                match telemetry::publisher::test_publisher().await {
-                    Ok(_) => println!("✅ Publisher test completed"),
-                    Err(e) => eprintln!("❌ Publisher test failed: {}", e),
+                println!("Starting RabbitMQ test publisher");
+                if let Err(e) = telemetry::publisher::test_publisher().await {
+                    eprintln!("Test failed: {}", e);
                 }
             });
-
-            // 2️⃣ Consumer task (runs independently)
-            tauri::async_runtime::spawn(async move {
-                // if you need a tiny pause to let the queue get declared:
-                // tokio::time::sleep(Duration::from_millis(50)).await;
-
-                println!("🎧 Starting RabbitMQ consumer…");
-                if let Err(e) =
-                    telemetry::rabbitmq::init_telemetry_consumer(window, "main".to_string()).await
-                {
-                    eprintln!("❌ RabbitMQ consumer error: {}", e);
-                }
-            });
-
             Ok(())
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-
