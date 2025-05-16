@@ -68,7 +68,7 @@ async fn init_database_dummy_data() {
     ")
     .bind(discover_mission_id)
     .bind("MRA")
-    .bind(-1) // change back to -1 after testing
+    .bind(1) // change back to -1 after testing
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");

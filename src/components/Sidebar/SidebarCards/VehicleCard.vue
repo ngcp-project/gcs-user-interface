@@ -20,7 +20,7 @@ const vehicle =
 const currentVehicleStage =
   vehicle === undefined || vehicle === null || missionId === null
     ? null
-    : vehicle.stages[vehicle.current_stage];
+    : vehicle.stages.find((stage) => stage.stage_id === vehicle.current_stage);
 
 const patientStatusStyles = {
   statusColor: {

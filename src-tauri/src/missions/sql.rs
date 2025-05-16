@@ -246,6 +246,28 @@ pub async fn transition_stage(
             .await
             .expect("Failed to transition next stage");
 
+            // query to update completed stage status
+            query("
+                UPDATE stages
+                SET status = 'Complete'
+                WHERE stage_id = $1
+            ")
+            .bind(current_stage_id)
+            .execute(&db_conn)
+            .await
+            .expect("Failed to update stage status");
+
+            // query to update active stage status
+            query("
+                UPDATE stages
+                SET status = 'Active'
+                WHERE stage_id = $1
+            ")
+            .bind(next_stage_id)
+            .execute(&db_conn)
+            .await
+            .expect("Failed to update stage status");
+
             return Ok(Some(next_stage_id));
         }
     }
