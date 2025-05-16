@@ -30,6 +30,9 @@ lapin = { version = "2.3", features = ["native-tls"] }
 tokio-amqp = { version = "0.1.0-rc6" }
 lazy_static = "1.4.0"
 
+
+
+
 [dependencies.ntapi]
 version = "0.4.1"
 
