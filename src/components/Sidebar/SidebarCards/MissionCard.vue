@@ -21,7 +21,7 @@ const statusStyles = {
   }
 };
 
-const mission = computed(() => missionStore.getMissionData(props.missionId));
+const mission = missionStore.getMissionData(props.missionId);
 
 const handleZoneButtonClick = () => {
   missionStore.setCurrentView("zone");
@@ -71,7 +71,11 @@ const handleMissionNameChange = (event: Event) => {
 
     <!-- Submit Button -->
     <CardFooter class="mt-4 justify-start">
-      <Button class="mr-2" :disabled="mission.mission_status != 'Inactive'" @click.stop>
+      <Button 
+        class="mr-2" 
+        :disabled="mission.mission_status != 'Inactive'"
+        @click.stop="missionStore.startMission(mission.mission_id)"
+      >
         Start
       </Button>
       <Button @click.stop="handleZoneButtonClick"> Zones </Button>
