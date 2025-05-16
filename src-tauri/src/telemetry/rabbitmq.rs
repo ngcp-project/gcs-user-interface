@@ -1,7 +1,7 @@
-use crate::telemetry::types::TelemetryData;
-use crate::telemetry::types::{AppData, Coordinate};
 use crate::telemetry::geos;
 use crate::telemetry::geos::*;
+use crate::telemetry::types::TelemetryData;
+use crate::telemetry::types::{AppData, Coordinate};
 use futures_util::stream::StreamExt;
 use lapin::{
     options::*, types::FieldTable, Channel, Connection, ConnectionProperties, Consumer, Queue,
@@ -10,7 +10,7 @@ use lapin::{
 use serde_json::json;
 use std::ptr::null;
 use std::sync::Arc;
-use tauri::Window;
+use tauri::{Emitter, WebviewWindow, Window};
 use tokio::sync::Mutex;
 use tokio_amqp::*;
 // use crate::telemetry::geo::*; // Removed as the `geo` module does not exist
@@ -20,7 +20,7 @@ use tokio_amqp::*;
 pub struct RabbitMQConsumer {
     connection: Arc<Mutex<Connection>>,
     channel: Channel,
-    window: Window,
+    window: WebviewWindow,
 }
 
 // impl RabbitMQConsumer{
@@ -28,7 +28,7 @@ pub struct RabbitMQConsumer {
 // }
 
 impl RabbitMQConsumer {
-    pub async fn new(addr: &str, window: Window) -> LapinResult<Self> {
+    pub async fn new(addr: &str, window: WebviewWindow) -> LapinResult<Self> {
         let connection = Connection::connect(
             // let connection = Arc::new(Mutex::new(Connection::connect(
             addr, // certain address
@@ -72,7 +72,7 @@ impl RabbitMQConsumer {
     }
     pub async fn start_consuming(&self, queue_name: &str) -> LapinResult<()> {
         //Declare queue
-        // self.queue_declare(queue_name).await?;
+        self.queue_declare(queue_name).await?;
         //Create consumer
         let consumer = self.create_consumer(queue_name).await?;
         //Start processing
@@ -101,12 +101,12 @@ impl RabbitMQConsumer {
                             latitude: data.current_position.latitude,
                             longitude: data.current_position.longitude,
                         };
-                        if is_near_keep_out_zone(&data.vehicle_id, &point, 1000.0){
+                        if is_near_keep_out_zone(&data.vehicle_id, &point, 1000.0) {
                             data.vehicle_status = "Approaching restricted area".to_string();
                         }
                         // if(checkKeepOutZone(data.current_position.latitude && data.current_position.longitude)){
                         //     data.vehicle_status = "Dont go furthe,leave the zone".to_String();
-                        // }     
+                        // }
 
                         let payload = json!({
                             "vehicle_id": data.vehicle_id,
@@ -149,31 +149,33 @@ impl RabbitMQConsumer {
         Ok(())
     }
 
-
     // pub async fn checkKeepOutZone(mut latitude : f32 , mut longitud : f32) -> Boolean {
     //     return true;
-        
-    // }
-    }
 
-    // pub async fn lost_vehicle_connection(mut string_signal:f32) -> boolean{
-    //         if string_signal < -40.0  {
-    //             string_signal = "Disconnect";
-    //         }
     // }
+}
 
-    // pub async
-    //create function that check if the signal string is inside the range.
-    // if not just wait n second, pass that we send an alert/ trigger the
-    // function failedconnectioninit()?? }
-    //
+// pub async fn lost_vehicle_connection(mut string_signal:f32) -> boolean{
+//         if string_signal < -40.0  {
+//             string_signal = "Disconnect";
+//         }
+// }
+
+// pub async
+//create function that check if the signal string is inside the range.
+// if not just wait n second, pass that we send an alert/ trigger the
+// function failedconnectioninit()?? }
+//
 #[tauri::command]
-pub async fn init_telemetry_consumer(window: Window, vehicle_id: String) -> Result<(), String> {
+pub async fn init_telemetry_consumer(
+    window: WebviewWindow,
+    vehicle_id: String,
+) -> Result<(), String> {
     // Validate vehicle ID
     let valid_vehicle_ids = vec!["eru", "fra", "mea", "mra"];
-    if !valid_vehicle_ids.contains(&vehicle_id.as_str()) {
-        return Err(format!("Invalid vehicle ID: {}", vehicle_id));
-    }
+    // if !valid_vehicle_ids.contains(&vehicle_id.as_str()) {
+    //     return Err(format!("Invalid vehicle ID: {}", vehicle_id));
+    // }
 
     // Create a consumer specific to this vehicle
     let consumer = RabbitMQConsumer::new("amqp://guest:guest@localhost:5672/%2f", window.clone())
@@ -187,7 +189,7 @@ pub async fn init_telemetry_consumer(window: Window, vehicle_id: String) -> Resu
     tokio::spawn({
         let consumer = consumer.clone();
         let queue = queue_name.clone();
-        async move {        
+        async move {
             if let Err(e) = consumer.start_consuming(&queue).await {
                 eprintln!("Failed to consume from queue {}: {}", queue, e);
 

@@ -24,11 +24,13 @@ tauri-plugin-shell = "2"
 rand = "0.9"
 sqlx = { version = "0.8", features = [ "runtime-tokio", "tls-native-tls", "postgres" ] }
 dotenvy = "0.15.7"
-futures-util = "0.3.31"
-lapin = { version = "2.3", features = ["native-tls"] }
-# Fix for tokio-amqp dependency - use the specific prerelease version
-tokio-amqp = { version = "0.1.0-rc6" }
+lapin = "2.3.0"
+tokio-amqp = "2.0.0"
 lazy_static = "1.4.0"
+futures-util = "0.3"
+
+
+
 
 
 
