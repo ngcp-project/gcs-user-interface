@@ -73,6 +73,11 @@ impl MissionApiImpl {
                 .await
                 .expect("Failed to execute query");
 
+                // Set current mission ID if a mission has a status of "Active"
+                if mission[0].try_get::<String, _>("status").unwrap_or_else(|_| "Inactive".to_string()) == "Active" {
+                    initial_state.current_mission = mission_id;
+                }
+
                 initial_state.missions.push(MissionStruct {
                     mission_name: mission[0].get("mission_name"),
                     mission_id: mission[0].get("mission_id"),
@@ -453,16 +458,16 @@ impl MissionApi for MissionApiImpl {
         mission_id: i32,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
-        
-        let idx = state.missions.iter().position(|m| m.mission_id == mission_id)
-            .ok_or("Mission not found")?;
-        
-        if idx !=0 {
-            state.missions[idx-1].mission_status = MissionStageStatusEnum::Complete;
-            update_mission_status(self.db.clone(), state.missions[idx-1].mission_id, "Complete").await.expect("Failed to update mission status");
+
+        if let Some(prev_mission_index) = state.missions.iter().position(|m| m.mission_id == state.current_mission) {
+            state.missions[prev_mission_index].mission_status = MissionStageStatusEnum::Complete;
+            update_mission_status(self.db.clone(), state.missions[prev_mission_index].mission_id, "Complete").await.expect("Failed to update mission status");
         }
+
+        let start_mission_index = state.missions.iter().position(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found")?;
                 
-        state.missions[idx].mission_status = MissionStageStatusEnum::Active;
+        state.missions[start_mission_index].mission_status = MissionStageStatusEnum::Active;
         state.current_mission = mission_id;
         update_mission_status(self.db.clone(), mission_id, "Active").await.expect("Failed to update mission status");
 
