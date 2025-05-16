@@ -1,5 +1,5 @@
 import { LatLngExpression } from "leaflet";
-import { invoke } from "@tauri-apps/api";
+import { core } from "@tauri-apps/api";
 
 interface Coordinates {
   latitude: number;
@@ -91,7 +91,7 @@ export function KeepOutZones(vehicle: string) {
   console.log("📤 Syncing polygons for:", vehicle);
   console.log("🧱 Payload:", polygons);
 
-  invoke("update_keep_out_zone", { data: polygons }).catch((e) =>
+  core.invoke("update_keep_out_zone", { data: polygons }).catch((e) =>
     console.error("❌ Failed to sync zones:", e)
   );
 }
