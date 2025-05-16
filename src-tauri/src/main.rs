@@ -7,8 +7,12 @@ use sqlx::Connection;
 use std::env;
 use sqlx::{query, Row};
 mod missions;
+mod telemetry;
 
 use missions::api::{MissionApiImpl, MissionApi};
+use telemetry::publisher::{RabbitMQPublisher};
+use telemetry::rabbitmq::{RabbitMQConsumer};
+
 
 const DB_URL: &str = "postgres://ngcp:ngcp@localhost:5433/ngcpdb";
 
@@ -594,8 +598,34 @@ async fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(router.into_handler())
-        .setup(|_app| Ok(()))
-        .run(tauri::generate_context!())
-        .expect("Error while running Tauri application");
+        .invoke_handler(router.into_handler()) // <-- router is for your taurpc API
+        .setup(|app| {
+            let app_handle = app.handle();
+
+            tauri::async_runtime::spawn(async move {
+            if let Err(e) = telemetry::consumer::init_telemetry_consumer(app_handle.clone()).await {
+                eprintln!("❌ RabbitMQ consumer error: {}", e);
+            }
+            });
+
+        tauri::async_runtime::spawn(async move {
+            println!("🚀 Starting RabbitMQ test publisher...");
+            match telemetry::publisher::test_publisher().await {
+                Ok(_) => println!("✅ Publisher test completed"),
+                Err(e) => eprintln!("❌ Publisher test failed: {}", e),
+            }
+        });
+
+        Ok(())
+    })
+    .run(tauri::generate_context!())
+    .expect("❌ Failed to run Tauri application");
+
 }
+
+
+
+
+
+
+
