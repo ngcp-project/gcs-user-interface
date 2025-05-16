@@ -73,7 +73,7 @@ const handleMissionNameChange = (event: Event) => {
     <CardFooter class="mt-4 justify-start">
       <Button 
         class="mr-2" 
-        :disabled="mission.mission_status != 'Inactive'""
+        :disabled="mission.mission_status != 'Inactive'"
         @click.stop="missionStore.startMission(mission.mission_id)"
       >
         Start
