@@ -644,62 +644,40 @@ async fn initialize_database() {
         .expect("Failed to close database connection");
 }
 
-// ... your existing imports and async main above ...
+#[tokio::main]
+async fn main() {
+    dotenvy::dotenv().expect("Failed to load .env file");
 
+    if env::var("CLEAR_DATABASE_EVERYTIME").unwrap_or_default().to_lowercase() == "true" {
+        println!("Clearing database");
+        clear_database().await;
+    }
 
-//   // Load dummy data if enabled
-//     let dummy_data = env::var("DUMMY_DATA_ENABLED")
-//         .unwrap_or_default()
-//         .to_lowercase() == "true";
-//     if dummy_data {
-//         println!("Seeding dummy data...");
-//         init_database_dummy_data().await;
-//     } else {
-//         println!("Dummy data disabled");
-//     }
+    initialize_database().await;
 
-//     // Set up taurpc router
-//     let missions_api = MissionApiImpl::new().await;
-//     let router = Router::<tauri::Wry>::new().merge(missions_api.into_handler());
-//     let router_handler = router.into_handler();
+    if env::var("DUMMY_DATA_ENABLED").unwrap_or_default().to_lowercase() == "true" {
+        println!("Seeding dummy data...");
+        init_database_dummy_data().await;
+    }
 
-//     // Final combined invoke_handler
-//     tauri::Builder::default()
-//         .plugin(tauri_plugin_shell::init())
-//         .invoke_handler(move |invoke: tauri::Invoke| {
-//             router_handler(invoke.clone())
-//                 || tauri::generate_handler![telemetry::init_telemetry_consumer](invoke)
-//         })
-//         .setup(|_app| {
-//             // Spawn publisher
-//             tauri::async_runtime::spawn(async {
-//                 println!("Starting RabbitMQ test publisher...");
-//                 if let Err(e) = RabbitMQPublisher::test_publisher().await {
-//                     eprintln!("Test failed: {}", e);
-//                 }
-//             });
-//             Ok(())
-//         })
-//         .run(tauri::generate_context!())
-//         .expect("Error while running Tauri application");
-// }
+    tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
+        .invoke_handler(tauri::generate_handler![
+            telemetry::rabbitmq::init_telemetry_consumer
+        ])
+        .setup(|_app| {
+            // Publisher runs in background
+            tauri::async_runtime::spawn(async move {
+                println!("🚀 Starting RabbitMQ test publisher");
+                if let Err(e) = telemetry::publisher::test_publisher().await {
+                    eprintln!("❌ Test publisher failed: {}", e);
+                } else {
+                    println!("✅ Test publisher finished");
+                }
+            });
+            Ok(())
+        })
+        .run(tauri::generate_context!())
+        .expect("Error running Tauri application");
+}
 
-// #[tokio::main]
-// async fn main() {
-//     tauri::Builder::default()
-//         .plugin(tauri_plugin_shell::init())
-//         // only your telemetry command
-//         .invoke_handler(tauri::generate_handler![telemetry::init_telemetry_consumer])
-//         .setup(|app| {
-//             // publisher runs independently
-//             tauri::async_runtime::spawn(async move {
-//                 println!("Starting RabbitMQ test publisher");
-//                 if let Err(e) = telemetry::publisher::test_publisher().await {
-//                     eprintln!("Test failed: {}", e);
-//                 }
-//             });
-//             Ok(())
-//         })
-//         .run(tauri::generate_context!())
-//         .expect("error while running tauri application");
-// }
