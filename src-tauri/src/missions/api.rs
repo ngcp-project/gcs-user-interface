@@ -203,7 +203,7 @@ impl MissionApiImpl {
             }
         } 
 
-        println!("Initial state: {:?}", initial_state);
+        // println!("Initial state: {:?}", initial_state);
 
         Self {
             state: Arc::new(Mutex::new(initial_state)),
@@ -664,7 +664,7 @@ impl MissionApi for MissionApiImpl {
             VehicleEnum::MRA => &mut mission.vehicles.MRA,
         };
 
-        println!("\n\nStart vehicle rust state: {:?}\n\n\n", vehicle);
+        // println!("\n\nStart vehicle rust state: {:?}\n\n\n", vehicle);
         println!("Current Stage: {:?}", vehicle.current_stage);
 
         // Mark current stage as complete
@@ -686,13 +686,13 @@ impl MissionApi for MissionApiImpl {
 
         if let Some(stage) = vehicle.stages.iter_mut().find(|s| s.stage_id == transitioned_stage.unwrap_or(vehicle.current_stage)) {
             vehicle.current_stage = transitioned_stage.unwrap_or(vehicle.current_stage);
-            println!("Current Stage after transition: {:?}", vehicle.current_stage);
+            // println!("Rust state current Stage after transition: {:?}", vehicle.current_stage);
             stage.stage_status = MissionStageStatusEnum::Active;
         } else {
             println!("No next stage available");
         }
 
-        println!("\n\n\nEnd vehicle rust state: {:?}", vehicle);
+        // println!("\n\n\nEnd vehicle rust state: {:?}", vehicle);
 
         self.emit_state_update(&app_handle, &state)
     }
