@@ -3,7 +3,7 @@ use std::{num::ParseFloatError, str::FromStr};
 #[taurpc::ipc_type]
 #[derive(Debug)]
 pub struct MissionsStruct {
-    pub current_mission: i32,
+    pub current_mission: i32, // -1 for no mission
     pub missions: Vec<MissionStruct>,
 }
 
@@ -17,8 +17,7 @@ pub struct MissionStruct {
     pub zones: ZonesStruct,
 }
 
-#[derive(Debug, serde::Deserialize, serde::Serialize, Clone, specta::Type, sqlx::Type)]
-#[sqlx(type_name = "status")]
+#[derive(Debug, serde::Deserialize, serde::Serialize, Clone, specta::Type)]
 pub enum MissionStageStatusEnum {
     Active,
     Inactive,

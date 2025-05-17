@@ -72,6 +72,24 @@ impl MissionApiImpl {
                 .await
                 .expect("Failed to execute query");
 
+                // Set current mission ID if a mission has a status of "Active"
+                if mission[0].try_get::<String, _>("status").unwrap_or_else(|_| "Inactive".to_string()) == "Active" {
+                    initial_state.current_mission = mission_id;
+                }
+
+                let mea_row = mission.iter()
+                    .find(|row| row.get::<String, _>("vehicle_name") == "MEA")
+                    .expect("Expected MEA row");
+
+                let eru_row = mission.iter()
+                    .find(|row| row.get::<String, _>("vehicle_name") == "ERU")
+                    .expect("Expected ERU row");
+
+                let mra_row = mission.iter()
+                    .find(|row| row.get::<String, _>("vehicle_name") == "MRA")
+                    .expect("Expected MRA row");
+
+
                 initial_state.missions.push(MissionStruct {
                     mission_name: mission[0].get("mission_name"),
                     mission_id: mission[0].get("mission_id"),
@@ -89,11 +107,10 @@ impl MissionApiImpl {
                     vehicles: VehiclesStruct {
                         MEA: VehicleStruct {
                             vehicle_name: VehicleEnum::MEA,
-                            current_stage: mission[0].get("current_stage"),
-                            is_auto: mission[0].get("is_auto"),
-                            patient_status: mission[0].get("patient_status"),
-                            stages: mission
-                                .iter()
+                            current_stage: mea_row.get("current_stage"),
+                            is_auto: mea_row.get("is_auto"),
+                            patient_status: mea_row.get("patient_status"),
+                            stages: mission.iter()
                                 .filter(|row| row.get::<String, _>("vehicle_name") == "MEA")
                                 .map(|row| StageStruct {
                                     stage_name: row.get("stage_name"),
@@ -120,11 +137,10 @@ impl MissionApiImpl {
                         },
                         ERU: VehicleStruct {
                             vehicle_name: VehicleEnum::ERU,
-                            current_stage: mission[0].get("current_stage"),
-                            is_auto: mission[0].get("is_auto"),
-                            patient_status: mission[0].get("patient_status"),
-                            stages: mission
-                                .iter()
+                            current_stage: eru_row.get("current_stage"),
+                            is_auto: eru_row.get("is_auto"),
+                            patient_status: eru_row.get("patient_status"),
+                            stages: mission.iter()
                                 .filter(|row| row.get::<String, _>("vehicle_name") == "ERU")
                                 .map(|row| StageStruct {
                                     stage_name: row.get("stage_name"),
@@ -151,11 +167,10 @@ impl MissionApiImpl {
                         },
                         MRA: VehicleStruct {
                             vehicle_name: VehicleEnum::MRA,
-                            current_stage: mission[0].get("current_stage"),
-                            is_auto: mission[0].get("is_auto"),
-                            patient_status: mission[0].get("patient_status"),
-                            stages: mission
-                                .iter()
+                            current_stage: mra_row.get("current_stage"),
+                            is_auto: mra_row.get("is_auto"),
+                            patient_status: mra_row.get("patient_status"),
+                            stages: mission.iter()
                                 .filter(|row| row.get::<String, _>("vehicle_name") == "MRA")
                                 .map(|row| StageStruct {
                                     stage_name: row.get("stage_name"),
@@ -205,7 +220,9 @@ impl MissionApiImpl {
                     },
                 });
             }
-        }
+        } 
+
+        // println!("Initial state: {:?}", initial_state);
 
         Self {
             state: Arc::new(Mutex::new(initial_state)),
@@ -314,6 +331,10 @@ pub trait MissionApi {
         mission_name: String,
     ) -> Result<(), String>;
     async fn delete_mission(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: i32,
+    ) -> Result<(), String>;
+    async fn start_mission(
         app_handle: AppHandle<impl Runtime>,
         mission_id: i32,
     ) -> Result<(), String>;
@@ -460,6 +481,29 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
 
+    async fn start_mission(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: i32,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+
+        if let Some(prev_mission_index) = state.missions.iter().position(|m| m.mission_id == state.current_mission) {
+            state.missions[prev_mission_index].mission_status = MissionStageStatusEnum::Complete;
+            update_mission_status(self.db.clone(), state.missions[prev_mission_index].mission_id, "Complete").await.expect("Failed to update mission status");
+        }
+
+        let start_mission_index = state.missions.iter().position(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found")?;
+                
+        state.missions[start_mission_index].mission_status = MissionStageStatusEnum::Active;
+        state.current_mission = mission_id;
+        update_mission_status(self.db.clone(), mission_id, "Active").await.expect("Failed to update mission status");
+
+        
+        self.emit_state_update(&app_handle, &state)
+    }
+
     // ----------------------------------
     // Vehicle Operations Implementations
     // ----------------------------------
@@ -527,9 +571,19 @@ impl MissionApi for MissionApiImpl {
         .await
         .expect("Failed to find vehicle mission");
 
-        vehicle
-            .stages
-            .push(Self::create_default_stage(self.clone(), &stage_name, vehicle_id).await);
+        let default_stage = Self::create_default_stage(
+            self.clone(),
+            &stage_name,
+            vehicle_id
+        ).await;
+        println!("Default stage created: {:?}", &default_stage);
+        let stage_id = default_stage.stage_id;
+        vehicle.stages.push(default_stage);
+
+        if vehicle.current_stage == -1 {
+            vehicle.current_stage = stage_id;
+        }
+
         self.emit_state_update(&app_handle, &state)
     }
 
@@ -624,11 +678,15 @@ impl MissionApi for MissionApiImpl {
             VehicleEnum::MRA => &mut mission.vehicles.MRA,
         };
 
+        // println!("\n\nStart vehicle rust state: {:?}\n\n\n", vehicle);
         println!("Current Stage: {:?}", vehicle.current_stage);
 
         // Mark current stage as complete
-        vehicle.stages[vehicle.current_stage as usize].stage_status =
-            MissionStageStatusEnum::Complete;
+        if let Some(stage) = vehicle.stages.iter_mut().find(|s| s.stage_id == vehicle.current_stage) {
+            stage.stage_status = MissionStageStatusEnum::Complete;
+        } else {
+            println!("Stage with ID not found");
+        }
 
         // Transition to next stage if available
         let transitioned_stage = transition_stage(
@@ -645,11 +703,15 @@ impl MissionApi for MissionApiImpl {
             transitioned_stage.unwrap_or(vehicle.current_stage)
         );
 
-        if (vehicle.current_stage as usize) < vehicle.stages.len() - 1 {
+        if let Some(stage) = vehicle.stages.iter_mut().find(|s| s.stage_id == transitioned_stage.unwrap_or(vehicle.current_stage)) {
             vehicle.current_stage = transitioned_stage.unwrap_or(vehicle.current_stage);
-            vehicle.stages[vehicle.current_stage as usize].stage_status =
-                MissionStageStatusEnum::Active;
+            // println!("Rust state current Stage after transition: {:?}", vehicle.current_stage);
+            stage.stage_status = MissionStageStatusEnum::Active;
+        } else {
+            println!("No next stage available");
         }
+
+        // println!("\n\n\nEnd vehicle rust state: {:?}", vehicle);
 
         self.emit_state_update(&app_handle, &state)
     }

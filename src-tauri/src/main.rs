@@ -26,9 +26,8 @@ async fn init_database_dummy_data() {
     let insert_dummy_discover_mission = query(
         "
         INSERT INTO missions(mission_name, keep_in_zones, keep_out_zones, status) 
-        VALUES ($1, $2, $3, $4::status) RETURNING mission_id
-    ",
-    )
+        VALUES ($1, $2, $3, $4) RETURNING mission_id
+    ")
     .bind("Discover Mission")
     .bind(&vec![
         // how the data is gonna look --> array of tuples:
@@ -84,7 +83,7 @@ async fn init_database_dummy_data() {
     )
     .bind(discover_mission_id)
     .bind("MRA")
-    .bind(-1) // change back to -1 after testing
+    .bind(1) 
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");
@@ -100,7 +99,7 @@ async fn init_database_dummy_data() {
     )
     .bind(discover_mission_id)
     .bind("ERU")
-    .bind(-1)
+    .bind(4)
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");
@@ -116,7 +115,7 @@ async fn init_database_dummy_data() {
     )
     .bind(discover_mission_id)
     .bind("MEA")
-    .bind(-1)
+    .bind(6)
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");
@@ -278,9 +277,8 @@ async fn init_database_dummy_data() {
     let _insert_dummy_retrieve_mission = query(
         "
         INSERT INTO missions(mission_name, keep_in_zones, keep_out_zones, status) 
-        VALUES ($1, $2, $3, $4::status) RETURNING mission_id
-    ",
-    )
+        VALUES ($1, $2, $3, $4) RETURNING mission_id
+    ") 
     .bind("Retrieve Mission")
     .bind(&vec![
         r#"[
@@ -333,7 +331,7 @@ async fn init_database_dummy_data() {
     )
     .bind(retrieve_mission_id)
     .bind("MRA")
-    .bind(-1)
+    .bind(8)
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");
@@ -349,7 +347,7 @@ async fn init_database_dummy_data() {
     )
     .bind(retrieve_mission_id)
     .bind("ERU")
-    .bind(-1)
+    .bind(11)
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");
@@ -365,7 +363,7 @@ async fn init_database_dummy_data() {
     )
     .bind(retrieve_mission_id)
     .bind("MEA")
-    .bind(-1)
+    .bind(13)
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");
@@ -674,17 +672,17 @@ async fn main() {
         .setup(|app| {
             // Publisher runs in background
 
-            let window = app.handle().get_window("main").expect("Failed to get main window");
+            // let window = app.handle().get_window("main").expect("Failed to get main window");
 
-            let window_consumer = window.clone();
-            tauri::async_runtime::spawn(async move {
-                println!("Starting consumer rabbitmq");
-                if let Err(e) = telemetry::rabbitmq::init_telemetry_consumer(window_consumer, "eru".to_string()) {
-                    eprintln!("Test consumer failed: {}", e);
-                } else {
-                    println!("consumer works");
-                }
-            });
+            // let window_consumer = window.clone();
+            // tauri::async_runtime::spawn(async move {
+            //     println!("Starting consumer rabbitmq");
+            //     if let Err(e) = telemetry::rabbitmq::init_telemetry_consumer(window_consumer, "eru".to_string()) {
+            //         eprintln!("Test consumer failed: {}", e);
+            //     } else {
+            //         println!("consumer works");
+            //     }
+            // });
             tauri::async_runtime::spawn(async move {
                 println!("🚀 Starting RabbitMQ test publisher");
                 if let Err(e) = telemetry::publisher::test_publisher().await {

@@ -39,6 +39,7 @@ export interface MissionStore {
   renameMission: (missionId: number, missionName: string) => Promise<null>;
   createNewMission: (missionName: string) => Promise<null>;
   deleteMission: (missionId: number) => Promise<null>;
+  startMission: (missionId: number) => Promise<null>;
 
   // Vehicle Data
   getVehicleData: (missionId: number, vehicleName: VehicleEnum) => VehicleStruct | undefined;
@@ -50,7 +51,7 @@ export interface MissionStore {
     vehicleName: VehicleEnum,
     stageId: number
   ) => StageStruct | undefined;
-  addStage: (missionId: number, vehicleName: VehicleEnum, stageName: string) => Promise<null>;
+  addStage: (missionId: number, vehicleName: VehicleEnum) => Promise<null>;
   deleteStage: (missionId: number, vehicleName: VehicleEnum, stageId: number) => Promise<null>;
   renameStage: (
     missionId: number,

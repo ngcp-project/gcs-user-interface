@@ -5,13 +5,12 @@ pub async fn insert_new_mission(
     mission_name: &str,
 ) -> Result<i32, sqlx::Error> {
     let new_mission = query("
-        INSERT INTO missions(mission_name, keep_in_zones, keep_out_zones, status) 
-        VALUES ($1, $2, $3, $4::status) RETURNING mission_id
+        INSERT INTO missions(mission_name, keep_in_zones, keep_out_zones) 
+        VALUES ($1, $2, $3) RETURNING mission_id
     ")
     .bind(mission_name)
     .bind(&Vec::<String>::new())
     .bind(&Vec::<String>::new())
-    .bind("Inactive")
     .fetch_one(&db_conn)
     .await
     .expect("Failed to insert dummy data into missions");
@@ -247,9 +246,71 @@ pub async fn transition_stage(
             .await
             .expect("Failed to transition next stage");
 
+            // query to update completed stage status
+            query("
+                UPDATE stages
+                SET status = 'Complete'
+                WHERE stage_id = $1
+            ")
+            .bind(current_stage_id)
+            .execute(&db_conn)
+            .await
+            .expect("Failed to update stage status");
+
+            // query to update active stage status
+            query("
+                UPDATE stages
+                SET status = 'Active'
+                WHERE stage_id = $1
+            ")
+            .bind(next_stage_id)
+            .execute(&db_conn)
+            .await
+            .expect("Failed to update stage status");
+
             return Ok(Some(next_stage_id));
         }
     }
 
     Ok(None)
+}
+
+
+// pub async fn update_complete_stage(
+//     db_conn: PgPool,
+//     mission_id: i32,
+//     vehicle_name: String,
+//     stage_id: i32,
+// ) -> Result<(), sqlx::Error> {
+//     query("
+//         UPDATE stages SET completed = TRUE WHERE stage_id = $1 AND vehicle_id = (
+//             SELECT vehicle_id FROM vehicles WHERE mission_id = $2 AND vehicle_name = $3
+//         )
+//     ")
+//     .bind(stage_id)
+//     .bind(mission_id)
+//     .bind(vehicle_name)
+//     .execute(&db_conn)
+//     .await
+//     .expect("Failed to update stage completion");
+
+//     Ok(())
+// }
+
+
+pub async fn update_mission_status(
+    db_conn: PgPool,
+    mission_id: i32,
+    status: &str,
+) -> Result<(), sqlx::Error> {
+    query("
+        UPDATE missions SET status = $1 WHERE mission_id = $2
+    ")
+    .bind(status)
+    .bind(mission_id)
+    .execute(&db_conn)
+    .await
+    .expect("Failed to update mission completion");
+
+    Ok(())
 }
