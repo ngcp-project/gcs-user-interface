@@ -1,76 +1,40 @@
 <script setup lang="ts">
 import VehicleStatus from "../components/VehicleStatusComponent.vue";
-import { onMounted, ref, Ref, onUnmounted } from "vue";
+import { onMounted, ref, Ref } from "vue";
 import Map from "../components/Map.vue";
-import { listen, UnlistenFn } from "@tauri-apps/api/event";
-import { core } from "@tauri-apps/api";
-import { KeepOutZones } from "@/Functions/geofence";
+import MapSidebar from "../components/MapSidebar.vue";
 
-// Type definitions
-interface VehicleData {
-  batteryPct: number;
-  //Signal String
-  signal_string: number;
-  coordinates: { longitude: number; latitude: number };
-  status: string;
-  yaw: number;
-  inKeepIn: boolean;
-  inKeepOut: boolean;
-  fire_coordinates?: { longitude: number; latitude: number };
-}
-
-interface TelemetryEvent {
-  vehicleKey: string;
-  data: {
-    batteryLife: number;
-    vehicleStatus: string;
-    currentPosition: {
-      latitude: number;
-      longitude: number;
-    };
-    lastUpdated: number;
-    yaw: number;
-    fireCoordinates?: {
-      latitude: number;
-      longitude: number;
-    };
-  };
-}
-
-// Initialize reactive variables for each vehicle's telemetry data
-const ERU_data = ref<VehicleData>({
+// initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
+const ERU_data = ref({
   batteryPct: 0,
-  signal_string: 0,
+  lastUpdated: 0,
   coordinates: { longitude: 0, latitude: 0 },
   status: "Standby",
   yaw: 0,
   inKeepIn: false,
   inKeepOut: false
 });
-
-const MEA_data = ref<VehicleData>({
+const MEA_data = ref({
   batteryPct: 0,
-  signal_string: 0,
+  lastUpdated: 0,
   coordinates: { longitude: 0, latitude: 0 },
   status: "Standby",
   yaw: 0,
   inKeepIn: false,
   inKeepOut: false
 });
-
-const MRA_data = ref<VehicleData>({
+const MRA_data = ref({
   batteryPct: 0,
-  signal_string: 0,
+  lastUpdated: 0,
   coordinates: { longitude: 0, latitude: 0 },
   status: "Standby",
   yaw: 0,
   inKeepIn: false,
   inKeepOut: false
 });
-
-const FRA_data = ref<VehicleData>({
+const FRA_data = ref({
   batteryPct: 0,
-  signal_string: 0,
+  lastUpdated: 0,
   coordinates: { longitude: 0, latitude: 0 },
   fire_coordinates: { longitude: 0, latitude: 0 },
   status: "Standby",
@@ -79,97 +43,50 @@ const FRA_data = ref<VehicleData>({
   inKeepOut: false
 });
 
-// Map vehicle names to their corresponding reactive refs
-const vehicleMap: { [key: string]: Ref<VehicleData> } = {
+// maps vehicle name to corresponding reactive variable so that addListeners can more easily set EventListeners to update variables
+const vehicleMap: { [key: string]: Ref<any> } = {
   eru: ERU_data,
   mea: MEA_data,
   mra: MRA_data,
   fra: FRA_data
 };
 
-// Store unlisten functions to clean up event listeners
-const unlistenFunctions: UnlistenFn[] = [];
+// let wsConnections: { [key: string]: WebSocket } = {};
+// // this function runs once (in mounted) and adds event listeners for each vehicle WS connection, so that the reactive variables update whenever new data is received
+// function addListeners() {
 
-// Handle incoming telemetry data
-function handleTelemetryUpdate(event: any) {
-  console.log("Received telemetry update:", event);
+//   for (const [vehicleKey, webSocketConnection] of Object.entries(wsConnections)) {
+//     // loops through each WS connection and adds an event listener to it
+//     webSocketConnection.addEventListener("message", (event) => {
+//       const receivedData = JSON.parse(event.data);
 
-  // Handle both direct payload and event wrapper formats
-  const payload = event.payload || event;
-  const vehicleKey = payload.vehicle_id?.toLowerCase();
-  const telemetryData = payload.telemetry;
-  const vehicle = vehicleMap[vehicleKey];
-  if (!telemetryData) {
-    console.error("No telemetry data found in the payload:", payload);
-    return;
-  }
-  console.log("Processing update for vehicle:", vehicleKey, "with data:", telemetryData);
+//       vehicleMap[vehicleKey].value.status = getVehicleStatus(receivedData.vehicleStatus);
+//       vehicleMap[vehicleKey].value.batteryPct = parseFloat(receivedData.batteryLife);
+//       vehicleMap[vehicleKey].value.coordinates.latitude = parseFloat(
+//         receivedData.currentPosition.latitude
+//       );
+//       vehicleMap[vehicleKey].value.coordinates.longitude = parseFloat(
+//         receivedData.currentPosition.longitude
+//       );
+//       // vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.dummyConnection);   // <-- uncomment to use dummyConnection value from mockWebsock.cjs
+//       vehicleMap[vehicleKey].value.lastUpdated = parseInt(receivedData.lastUpdated);
+//       vehicleMap[vehicleKey].value.yaw = parseInt(receivedData.yaw);
 
-  if (vehicle) {
-    console.log(telemetryData.signal_string);
-    // Update vehicle data with the new format
-    vehicle.value = {
-      ...vehicle.value,
-      status: telemetryData.vehicle_status || "Standby",
-      batteryPct: telemetryData.battery_life || vehicle.value.batteryPct,
-      signal_string: telemetryData.signal_string || vehicle.value.signal_string,
-      coordinates: {
-        latitude:
-          telemetryData.currentPosition?.latitude ||
-          telemetryData.current_position?.latitude ||
-          telemetryData.coordinates?.latitude ||
-          vehicle.value.coordinates.latitude,
-        longitude:
-          telemetryData.currentPosition?.longitude ||
-          telemetryData.current_position?.longitude ||
-          telemetryData.coordinates?.longitude ||
-          vehicle.value.coordinates.longitude
-      },
+//       // FRA is sending additional fire coordinates
+//       if (vehicleKey == "fra") {
+//         vehicleMap[vehicleKey].value.fire_coordinates.latitude = parseFloat(
+//           receivedData.fireCoordinates.latitude
+//         );
+//         vehicleMap[vehicleKey].value.fire_coordinates.longitude = parseFloat(
+//           receivedData.fireCoordinates.longitude
+//         );
+//       }
+//     });
+//   } // end for loop
+// } // end addListeners
 
-      yaw: telemetryData.yaw || vehicle.value.yaw,
-      inKeepIn: vehicle.value.inKeepIn,
-      inKeepOut: vehicle.value.inKeepOut
-    };
+// gets all 4 websocket connections and adds event listeners to each of them once Static Screen finishes initial rendering
 
-    // Handle FRA fire coordinates
-    if (vehicleKey === "fra" && telemetryData.fireCoordinate) {
-      vehicle.value.fire_coordinates = {
-        latitude: telemetryData.fireCoordinate.latitude || 0,
-        longitude: telemetryData.fireCoordinate.longitude || 0
-      };
-    }
-
-    console.log(`Updated ${vehicleKey} data:`, vehicle.value);
-  } else {
-    console.error("Vehicle not found:", vehicleKey);
-  }
-}
-
-// Modify the event listener setup
-async function initializeTelemetryListeners() {
-  const unlisten = await listen("telemetry_update", (event: any) => {
-    console.log("Received telemetry event:", JSON.stringify(event));
-    handleTelemetryUpdate(event.payload);
-    console.log(event.payload);
-  });
-
-  unlistenFunctions.push(unlisten);
-
-  // Initial telemetry fetch for each vehicle
-  for (const vehicleKey of Object.keys(vehicleMap)) {
-    try {
-      console.log(`Initializing telemetry for ${vehicleKey}`);
-      await core.invoke("init_telemetry_consumer", { vehicleId: vehicleKey });
-      console.log(`Initial telemetry data: for ${vehicleKey}`);
-
-      // handleTelemetryUpdate(data);
-    } catch (error) {
-      console.error(`Failed to fetch initial telemetry for ${vehicleKey}:`, error);
-    }
-  }
-}
-
-// Update zone status functions
 function updateIsInKeepIn(vehicleKey: string, isInZone: boolean) {
   vehicleMap[vehicleKey.toLowerCase()].value.inKeepIn = isInZone;
 }
@@ -177,29 +94,12 @@ function updateIsInKeepIn(vehicleKey: string, isInZone: boolean) {
 function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
   vehicleMap[vehicleKey.toLowerCase()].value.inKeepOut = isInZone;
 }
-
-// function syncKeepOutZones(vehicle: string){
-//     const polygons = zoneOut
-// }
-
-// Lifecycle hooks
-onMounted(async () => {
-  // KeepOutZones("mra"); // or "eru", "fra", etc.
-  await initializeTelemetryListeners();
-  KeepOutZones("mra");
-  KeepOutZones("eru");
-  KeepOutZones("fra");
-});
-
-onUnmounted(() => {
-  // Clean up all event listeners
-  unlistenFunctions.forEach((unlisten) => unlisten());
-});
 </script>
 
 <template>
-  <div class="flex h-full w-[100dvw]">
+  <div class="flex flex-row h-full w-[100dvw]">
     <div class="flex-grow">
+      <!-- should be fire coords -->
       <Map
         :ERU_coords="ERU_data.coordinates"
         :ERU_yaw="ERU_data.yaw"
@@ -212,34 +112,22 @@ onUnmounted(() => {
         :FRA_yaw="FRA_data.yaw"
         @keepIn="updateIsInKeepIn"
         @keepOut="updateIsInKeepOut"
-      />
+      ></Map>
     </div>
 
-    <div
-      class="flex h-full w-fit max-w-[300px] flex-none flex-col gap-[6px] overflow-y-scroll bg-background p-[6px]"
-    >
-      <VehicleStatus
-        v-for="(data, key) in vehicleMap"
-        :key="key"
-        :batteryPct="data.value.batteryPct"
-        :signal_string="data.value.signal_string"
-        :coordinates="data.value.coordinates"
-        :vehicleName="String(key).toUpperCase()"
-        :vehicleStatus="data.value.status"
-        :isInKeepInZone="data.value.inKeepIn"
-        :isInKeepOutZone="data.value.inKeepOut"
-      />
+    <div>
+      <MapSidebar side="right"/>
     </div>
   </div>
 </template>
 
 <style scoped>
 .camera-container {
-  height: 90vh;
+  height: 90vh; /* Set the height of the container to 100% of the viewport height */
   width: 75%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: flex; /* Use flexbox to align items vertically */
+  justify-content: center; /* Center the child element horizontally */
+  align-items: center; /* Center the child element vertically */
 }
 
 .screen_div {
