@@ -89,7 +89,7 @@ impl RabbitMQPublisher {
 // }
 
 pub async fn test_publisher() -> Result<(), Box<dyn std::error::Error>> {
-    let publisher = RabbitMQPublisher::new("amqp://guest:guest@localhost:5672/%2f").await?;
+    let publisher = RabbitMQPublisher::new("amqp://admin:admin@localhost:5672/%2f").await?;
     let vehicle_ids = vec!["eru", "fra", "mea", "mra"];
     for _ in 0..20 {
         for vehicle_id in &vehicle_ids {

@@ -178,7 +178,7 @@ pub async fn init_telemetry_consumer(
     }
 
     // Create a consumer specific to this vehicle
-    let consumer = RabbitMQConsumer::new("amqp://guest:guest@localhost:5672/%2f", window.clone())
+    let consumer = RabbitMQConsumer::new("amqp://admin:admin@localhost:5672/%2f", window.clone())
         .await
         .map_err(|e| e.to_string())?;
 
