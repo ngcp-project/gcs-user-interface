@@ -173,9 +173,9 @@ pub async fn init_telemetry_consumer(
 ) -> Result<(), String> {
     // Validate vehicle ID
     let valid_vehicle_ids = vec!["eru", "fra", "mea", "mra"];
-    // if !valid_vehicle_ids.contains(&vehicle_id.as_str()) {
-    //     return Err(format!("Invalid vehicle ID: {}", vehicle_id));
-    // }
+    if !valid_vehicle_ids.contains(&vehicle_id.as_str()) {
+        return Err(format!("Invalid vehicle ID: {}", vehicle_id));
+    }
 
     // Create a consumer specific to this vehicle
     let consumer = RabbitMQConsumer::new("amqp://guest:guest@localhost:5672/%2f", window.clone())

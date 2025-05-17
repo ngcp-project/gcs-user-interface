@@ -661,13 +661,30 @@ async fn main() {
         init_database_dummy_data().await;
     }
 
+    
+    let missions_api = MissionApiImpl::new().await;
+    let router = Router::new()
+        .merge(missions_api.into_handler());
+
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![
-            telemetry::rabbitmq::init_telemetry_consumer,
-        ])
-        .setup(|_app| {
+        .invoke_handler(
+            router.into_handler(),
+        )
+        .setup(|app| {
             // Publisher runs in background
+
+            let window = app.handle().get_window("main").expect("Failed to get main window");
+
+            let window_consumer = window.clone();
+            tauri::async_runtime::spawn(async move {
+                println!("Starting consumer rabbitmq");
+                if let Err(e) = telemetry::rabbitmq::init_telemetry_consumer(window_consumer, "eru".to_string()) {
+                    eprintln!("Test consumer failed: {}", e);
+                } else {
+                    println!("consumer works");
+                }
+            });
             tauri::async_runtime::spawn(async move {
                 println!("🚀 Starting RabbitMQ test publisher");
                 if let Err(e) = telemetry::publisher::test_publisher().await {
@@ -682,3 +699,15 @@ async fn main() {
         .expect("Error running Tauri application");
 }
 
+
+
+    // let missions_api = MissionApiImpl::new().await;
+    // let router = Router::new()
+    //     .merge(missions_api.into_handler());
+
+    // tauri::Builder::default()
+    //     .plugin(tauri_plugin_shell::init())
+    //     .invoke_handler(router.into_handler())
+    //     .setup(|_app| Ok(()))
+    //     .run(tauri::generate_context!())
+    //     .expect("Error while running Tauri application");
