@@ -644,6 +644,7 @@ async fn initialize_database() {
         .expect("Failed to close database connection");
 }
 
+//problmem 1 regarding, router,taurpc
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().expect("Failed to load .env file");
@@ -663,7 +664,7 @@ async fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
-            telemetry::rabbitmq::init_telemetry_consumer
+            telemetry::rabbitmq::init_telemetry_consumer,
         ])
         .setup(|_app| {
             // Publisher runs in background
