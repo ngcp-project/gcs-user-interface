@@ -674,18 +674,20 @@ async fn main() {
 
             let window = app.handle().get_webview_window("main").expect("Failed to get main window");
 
-            let window_consumer = window.clone();
-            tauri::async_runtime::spawn(async move {
-                println!("Starting consumer rabbitmq");
-                match telemetry::rabbitmq::init_telemetry_consumer(window_consumer, "eru".to_string()).await {
-                    Ok(_) => {
-                        println!("consumer works");
+            let vehicle_ids = vec!["eru","mra", "mea"];
+            for vehicle_id in vehicle_ids{
+                let window_clone = window.clone();
+                let vehicle_id = vehicle_id.to_string();
+                tauri::async_runtime::spawn(async move{
+                    println!("Starting consumer for {}", vehicle_id);
+                    if let Err(e) = telemetry::rabbitmq::init_telemetry_consumer(
+                        window_clone,
+                        vehicle_id.clone()
+                    ).await{
+                        eprintln!("Failee to initialize telemetry consumer for {}: {}", vehicle_id ,e);
                     }
-                    Err(e) => {
-                        eprintln!("Failed to initialize telemetry consumer: {}", e);
-                    }
-                }
-            });
+                });
+            }
             tauri::async_runtime::spawn(async move {
                 println!("🚀 Starting RabbitMQ test publisher");
                 if let Err(e) = telemetry::publisher::test_publisher().await {
@@ -699,6 +701,7 @@ async fn main() {
         .run(tauri::generate_context!())
         .expect("Error running Tauri application");
 }
+
 
 
 

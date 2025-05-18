@@ -220,7 +220,6 @@ onUnmounted(() => {
   // Clean up all event listeners
   unlistenFunctions.forEach((unlisten) => unlisten());
 });
-
 </script>
 
 <template>

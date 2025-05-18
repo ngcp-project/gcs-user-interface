@@ -19,7 +19,7 @@ services:
     volumes:
       - osm-data:/data/database/
     command: "run"
-    
+
   db:
     image: postgres
     restart: always
@@ -30,7 +30,7 @@ services:
       POSTGRES_DB: ngcpdb
     ports:
       - 5433:5432
-  
+
   rabbitmq:
     image: rabbitmq:3.12-management
     environment:
