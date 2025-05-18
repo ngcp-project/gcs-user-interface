@@ -101,7 +101,7 @@ pub async fn test_publisher() -> Result<(), Box<dyn std::error::Error>> {
                 roll: rand::random::<f32>() * 100.0,
                 speed: rand::random::<f32>() * 100.0,
                 altitude: rand::random::<f32>() * 100.0,
-                battery_life: rand::random::<i32>() % 40+20,
+                battery_life: rand::random::<i32>() % 40 + 20,
                 current_position: Coordinate {
                     latitude: rand::random::<f64>() * 100.0,
                     longitude: rand::random::<f64>() * 100.0,

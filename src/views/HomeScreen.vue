@@ -37,7 +37,9 @@ const ERU_data = ref({
   cameraID: 12345,
   batteryPct: 0,
   connection: 0,
-  coordinates: { longitude: 0, latitude: 0 }
+  coordinates: { longitude: 0, latitude: 0 },
+  altitude: 0,
+  airspeed: 0
   // status: "Standby",
   // yaw: 0,
   // inKeepIn: false,
@@ -50,7 +52,9 @@ const MEA_data = ref({
   batteryPct: 0,
   connection: 0,
   coordinates: { longitude: 0, latitude: 0 },
-  status: "Standby"
+  altitude: 0,
+  airspeed: 0
+  // status: "Standby"
   // yaw: 0,
   // inKeepIn: false,
   // inKeepOut: false
@@ -62,34 +66,35 @@ const MRA_data = ref({
   batteryPct: 0,
   connection: 0,
   coordinates: { longitude: 0, latitude: 0 },
-  status: "Standby"
+  altitude: 0,
+  airspeed: 0
+  // status: "Standby"
   // yaw: 0,
   // inKeepIn: false,
   // inKeepOut: false
 });
 
-const FRA_data = ref({
-  vehicleName: "FRA" as const,
-  cameraID: 54321,
-  batteryPct: 0,
-  connection: 0,
-  coordinates: { longitude: 0, latitude: 0 },
-  fire_coordinates: { longitude: 0, latitude: 0 },
-  status: "Standby"
-  // yaw: 0,
-  // inKeepIn: false,
-  // inKeepOut: false
-});
+// const FRA_data = ref({
+//   vehicleName: "FRA" as const,
+//   cameraID: 54321,
+//   batteryPct: 0,
+//   connection: 0,
+//   coordinates: { longitude: 0, latitude: 0 },
+//   fire_coordinates: { longitude: 0, latitude: 0 },
+//   // status: "Standby"
+//   // yaw: 0,
+//   // inKeepIn: false,
+//   // inKeepOut: false
+// });
 
 // Create an array of the vehicle data for the sidebar
-const vehicleData = ref([ERU_data.value, MEA_data.value, MRA_data.value, FRA_data.value]);
+const vehicleData = ref([ERU_data.value, MEA_data.value, MRA_data.value]);
 
 // Maps vehicle name to corresponding reactive variable
 const vehicleMap: { [key: string]: Ref<any> } = {
   eru: ERU_data,
   mea: MEA_data,
-  mra: MRA_data,
-  fra: FRA_data
+  mra: MRA_data
 };
 
 function handleTelemetryUpdate(event: any) {
@@ -118,17 +123,19 @@ function handleTelemetryUpdate(event: any) {
       connection: telemetryData.signal_string || vehicle.value.signal_string,
       coordinates: {
         latitude:
-          telemetryData.currentPosition?.latitude ||
-          telemetryData.current_position?.latitude ||
-          telemetryData.coordinates?.latitude ||
-          vehicle.value.coordinates.latitude,
+          telemetryData.currentPosition?.latitude.toFixed(2) ||
+          telemetryData.current_position?.latitude.toFixed(2) ||
+          telemetryData.coordinates?.latitude.toFixed(2) ||
+          vehicle.value.coordinates.latitude.toFixed(2),
 
         longitude:
-          telemetryData.currentPosition?.longitude ||
-          telemetryData.current_position?.longitude ||
-          telemetryData.coordinates?.longitude ||
-          vehicle.value.coordinates.longitude
-      }
+          telemetryData.currentPosition?.longitude.toFixed(2) ||
+          telemetryData.current_position?.longitude.toFixed(2) ||
+          telemetryData.coordinates?.longitude.toFixed(2) ||
+          vehicle.value.coordinates.longitude.toFixed(2)
+      },
+      altitude: telemetryData.altitude.toFixed(2) || vehicle.value.altitude.toFixed(2),
+      airspeed: telemetryData.speed.toFixed(2) || vehicle.value.speed.toFixed(2)
       // yaw: telemetryData.yaw || vehicle.value.yaw,
       // inKeepIn: vehicle.value.inKeepIn,
       // inKeepOut: vehicle.value.inKeepOut
@@ -143,7 +150,7 @@ function handleTelemetryUpdate(event: any) {
     }
 
     // Update the vehicleData array to reflect changes
-    vehicleData.value = [ERU_data.value, MEA_data.value, MRA_data.value, FRA_data.value];
+    vehicleData.value = [ERU_data.value, MEA_data.value, MRA_data.value];
 
     console.log(`Updated ${vehicleKey} data:`, vehicle.value);
   } else {
