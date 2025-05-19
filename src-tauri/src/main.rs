@@ -1,6 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+
+
 use sqlx::postgres::PgConnection;
 use sqlx::Connection;
 use sqlx::{query, Row};
@@ -10,11 +12,12 @@ use taurpc::Router; // Add this import for the Manager trait
 mod missions;
 mod telemetry;
 // add this import
-
+use crate::telemetry::rabbitmq::RabbitMQAPI;
 use missions::api::{MissionApi, MissionApiImpl};
 use tauri::ipc::Invoke;
+use tauri::Runtime;
 use telemetry::publisher::RabbitMQPublisher;
-use telemetry::rabbitmq::{init_telemetry_consumer, RabbitMQConsumer};
+// use telemetry::rabbitmq::{init_telemetry_consumer, RabbitMQConsumer};
 
 const DB_URL: &str = "postgres://ngcp:ngcp@localhost:5433/ngcpdb";
 
@@ -27,7 +30,8 @@ async fn init_database_dummy_data() {
         "
         INSERT INTO missions(mission_name, keep_in_zones, keep_out_zones, status) 
         VALUES ($1, $2, $3, $4) RETURNING mission_id
-    ")
+    ",
+    )
     .bind("Discover Mission")
     .bind(&vec![
         // how the data is gonna look --> array of tuples:
@@ -83,7 +87,7 @@ async fn init_database_dummy_data() {
     )
     .bind(discover_mission_id)
     .bind("MRA")
-    .bind(1) 
+    .bind(1)
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");
@@ -278,7 +282,8 @@ async fn init_database_dummy_data() {
         "
         INSERT INTO missions(mission_name, keep_in_zones, keep_out_zones, status) 
         VALUES ($1, $2, $3, $4) RETURNING mission_id
-    ") 
+    ",
+    )
     .bind("Retrieve Mission")
     .bind(&vec![
         r#"[
@@ -647,56 +652,56 @@ async fn initialize_database() {
 async fn main() {
     dotenvy::dotenv().expect("Failed to load .env file");
 
-    if env::var("CLEAR_DATABASE_EVERYTIME").unwrap_or_default().to_lowercase() == "true" {
+    // Database initialization
+    if env::var("CLEAR_DATABASE_EVERYTIME")
+        .unwrap_or_default()
+        .to_lowercase()
+        == "true"
+    {
         println!("Clearing database");
         clear_database().await;
     }
 
     initialize_database().await;
 
-    if env::var("DUMMY_DATA_ENABLED").unwrap_or_default().to_lowercase() == "true" {
+    if env::var("DUMMY_DATA_ENABLED")
+        .unwrap_or_default()
+        .to_lowercase()
+        == "true"
+    {
         println!("Seeding dummy data...");
         init_database_dummy_data().await;
     }
 
-    
-    // async fn get_default_data(self) -> MissionsStruct {
-    //     Self::new().await.state.lock().await.clone()
-    // }
-
-    // async fn get_all_missions(self) -> MissionsStruct {
-    //     self.state.lock().await.clone()
-    // }
+    // Initialize APIs outside of Tauri setup
+     let rabbitmq_api = telemetry::rabbitmq::RabbitMQAPIImpl::new()
+        .await
+        .unwrap();
     
     let missions_api = MissionApiImpl::new().await;
+    
+    // Create router with both handlers
     let router = Router::new()
-        .merge(missions_api.into_handler());
+        .merge(missions_api.into_handler())
+        .merge(rabbitmq_api.clone().into_handler());
+
+    let router_handler = router.into_handler();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(
-            router.into_handler(),
-        )
-        .setup(|app| {
-            // Publisher runs in background
+        .setup(move |app| {
+            let app_handle = app.handle().clone();
+            let rabbitmq = rabbitmq_api.with_app_handle(app_handle);
 
-            let window = app.handle().get_webview_window("main").expect("Failed to get main window");
+            // Initialize consumers
+             tauri::async_runtime::spawn(async move {
+                if let Err(e) = rabbitmq.init_consumers().await {
+                    eprintln!("Failed to initialize telemetry consumers: {}", e);
+                }
+            });
 
-            let vehicle_ids = vec!["eru","mra", "mea"];
-            for vehicle_id in vehicle_ids{
-                let window_clone = window.clone();
-                let vehicle_id = vehicle_id.to_string();
-                tauri::async_runtime::spawn(async move{
-                    println!("Starting consumer for {}", vehicle_id);
-                    if let Err(e) = telemetry::rabbitmq::init_telemetry_consumer(
-                        window_clone,
-                        vehicle_id.clone()
-                    ).await{
-                        eprintln!("Failee to initialize telemetry consumer for {}: {}", vehicle_id ,e);
-                    }
-                });
-            }
-            tauri::async_runtime::spawn(async move {
+            // Start test publisher
+            tauri::async_runtime::spawn(async {
                 println!("🚀 Starting RabbitMQ test publisher");
                 if let Err(e) = telemetry::publisher::test_publisher().await {
                     eprintln!("❌ Test publisher failed: {}", e);
@@ -704,22 +709,22 @@ async fn main() {
                     println!("✅ Test publisher finished");
                 }
             });
+
             Ok(())
+        })
+        .invoke_handler(move |invoke| {
+            router_handler(invoke)
         })
         .run(tauri::generate_context!())
         .expect("Error running Tauri application");
 }
+// let missions_api = MissionApiImpl::new().await;
+// let router = Router::new()
+//     .merge(missions_api.into_handler());
 
-
-
-
-    // let missions_api = MissionApiImpl::new().await;
-    // let router = Router::new()
-    //     .merge(missions_api.into_handler());
-
-    // tauri::Builder::default()
-    //     .plugin(tauri_plugin_shell::init())
-    //     .invoke_handler(router.into_handler())
-    //     .setup(|_app| Ok(()))
-    //     .run(tauri::generate_context!())
-    //     .expect("Error while running Tauri application");
+// tauri::Builder::default()
+//     .plugin(tauri_plugin_shell::init())
+//     .invoke_handler(router.into_handler())
+//     .setup(|_app| Ok(()))
+//     .run(tauri::generate_context!())
+//     .expect("Error while running Tauri application");

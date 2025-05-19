@@ -10,7 +10,7 @@ use std::time::SystemTime;
 pub struct TelemetryData {
     pub vehicle_id: String, // Added vehicle_id
     // pub localIP: String
-    pub signal_string: i32,
+    pub signal_strength: i32,
     pub pitch: f32,
     pub yaw: f32,
     pub roll: f32,
@@ -18,7 +18,7 @@ pub struct TelemetryData {
     pub altitude: f32,
     pub battery_life: i32, //f32
     pub current_position: Coordinate,
-    pub last_updated: SystemTime, //what is the exact format we have to follow timestamp 8 bytes
+    // pub last_updated: SystemTime, //what is the exact format we have to follow timestamp 8 bytes
     // pub fire_found: bool,
     // pub fire_coordinate: Coordinate,
     pub vehicle_status: String,
@@ -26,6 +26,7 @@ pub struct TelemetryData {
 }#[taurpc::ipc_type]
 //Change vehicleStatus : i8 1 byte 0 - 255
 #[derive(Debug)]
+#[derive(Default)]
 pub struct RequestCoordinate {
     pub message_flag: i32,
     pub request_location: Coordinate,
@@ -34,6 +35,7 @@ pub struct RequestCoordinate {
 }
 #[taurpc::ipc_type]
 #[derive(Debug)]
+#[derive(Default)]
 //change this to f64
 pub struct Coordinate {
     pub latitude: f64,
@@ -41,6 +43,7 @@ pub struct Coordinate {
 }
 #[taurpc::ipc_type]
 #[derive(Debug)]
+#[derive(Default)]
 pub struct AppData {
     pub telemetryx: HashMap<String, TelemetryData>,
 }

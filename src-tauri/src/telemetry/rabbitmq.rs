@@ -129,7 +129,7 @@ impl RabbitMQAPIImpl {
                     Ok(mut data) => {
                         failure_count = 0; // reset on success
 
-                        if data.signal_string < -70 {
+                        if data.signal_strength < -70 {
                             data.vehicle_status = "Bad Connection".to_string();
                         }
                         
@@ -215,7 +215,7 @@ impl RabbitMQAPIImpl {
 #[taurpc::procedures(
     event_trigger = TelemetryEventTrigger,
     export_to = "../src/lib/bindings.ts",
-    path = "mission"
+    path = "telemetry"
 )]
 pub trait RabbitMQAPI {
     #[taurpc(event)]
