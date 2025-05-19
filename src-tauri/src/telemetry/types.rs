@@ -4,8 +4,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::SystemTime;
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
-
+#[taurpc::ipc_type]
+#[derive(Debug)]
+#[derive(Default)]
 pub struct TelemetryData {
     pub vehicle_id: String, // Added vehicle_id
     // pub localIP: String
@@ -22,23 +23,24 @@ pub struct TelemetryData {
     // pub fire_coordinate: Coordinate,
     pub vehicle_status: String,
     pub request_coordinate: RequestCoordinate,
-}
+}#[taurpc::ipc_type]
 //Change vehicleStatus : i8 1 byte 0 - 255
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug)]
 pub struct RequestCoordinate {
     pub message_flag: i32,
     pub request_location: Coordinate,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub patient_secured: Option<bool>,
 }
-
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[taurpc::ipc_type]
+#[derive(Debug)]
 //change this to f64
 pub struct Coordinate {
     pub latitude: f64,
     pub longitude: f64,
 }
-
+#[taurpc::ipc_type]
+#[derive(Debug)]
 pub struct AppData {
-    pub telemetry: HashMap<String, TelemetryData>,
+    pub telemetryx: HashMap<String, TelemetryData>,
 }

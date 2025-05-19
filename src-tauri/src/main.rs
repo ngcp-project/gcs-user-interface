@@ -660,6 +660,14 @@ async fn main() {
     }
 
     
+    // async fn get_default_data(self) -> MissionsStruct {
+    //     Self::new().await.state.lock().await.clone()
+    // }
+
+    // async fn get_all_missions(self) -> MissionsStruct {
+    //     self.state.lock().await.clone()
+    // }
+    
     let missions_api = MissionApiImpl::new().await;
     let router = Router::new()
         .merge(missions_api.into_handler());
