@@ -4,8 +4,8 @@ use crate::telemetry::types::TelemetryData;
 use crate::telemetry::types::{AppData, Coordinate};
 use futures_util::stream::StreamExt;
 use lapin::{
-    options::*, types::FieldTable, Channel, Connection, ConnectionProperties, Consumer, Error as LapinError, Queue,
-    Result as LapinResult,
+    options::*, types::FieldTable, Channel, Connection, ConnectionProperties, Consumer,
+    Error as LapinError, Queue, Result as LapinResult,
 };
 use serde_json::json;
 use std::sync::Arc;
@@ -28,59 +28,49 @@ const VALID_VEHICLE_IDS: [&str; 4] = ["eru", "fra", "mea", "mra"];
 
 impl RabbitMQAPIImpl {
     pub async fn new() -> LapinResult<Self> {
-        let connection = Connection::connect(
-            RABBITMQ_ADDR,
-            ConnectionProperties::default().with_tokio(),
-        )
-        .await?;
-        
+        let connection =
+            Connection::connect(RABBITMQ_ADDR, ConnectionProperties::default().with_tokio())
+                .await?;
+
         let connection = Arc::new(Mutex::new(connection));
         let channel = connection.lock().await.create_channel().await?;
-        
+
         let consumer = Self {
             connection,
             channel,
             state: Arc::new(Mutex::new(TelemetryData::default())),
             app_handle: None,
         };
-        
+
         Ok(consumer)
     }
-    
+
     // Method to set the app handle after initialization
     pub fn with_app_handle(mut self, app_handle: AppHandle) -> Self {
         self.app_handle = Some(app_handle);
         self
     }
-    
+
     // Initialize all consumers
     pub async fn init_consumers(&self) -> LapinResult<()> {
         for vehicle_id in VALID_VEHICLE_IDS.iter() {
             let queue_name = format!("telemetry_{}", vehicle_id);
-            
+            println!("Initializing consumer for queue: {}", queue_name);
+
+            // Declare queue first
+            self.queue_declare(&queue_name).await?;
+
             tokio::spawn({
                 let consumer = self.clone();
                 let queue = queue_name.clone();
-                let vehicle_id = vehicle_id.to_string();
                 async move {
                     if let Err(e) = consumer.start_consuming(&queue).await {
                         eprintln!("Failed to consume from queue {}: {}", queue, e);
-                        
-                        // Emit error if app_handle is available
-                        if let Some(app_handle) = &consumer.app_handle {
-                            let _ = app_handle.emit(
-                                "telemetry_error",
-                                json!({
-                                    "vehicle_id": vehicle_id,
-                                    "error": e.to_string()
-                                }),
-                            );
-                        }
                     }
                 }
             });
         }
-        
+
         Ok(())
     }
 
@@ -102,16 +92,25 @@ impl RabbitMQAPIImpl {
 
     // Create a consumer for a specific queue
     pub async fn create_consumer(&self, queue_name: &str) -> LapinResult<Consumer> {
+        // Generate unique consumer tag using queue name and timestamp
+        let timestamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_millis();
+        let consumer_tag = format!("consumer_{}_{}", queue_name, timestamp);
+
+        println!("Creating consumer with tag: {}", consumer_tag);
+
         self.channel
             .basic_consume(
                 queue_name,
-                "telemetry_consumer",
+                &consumer_tag,
                 BasicConsumeOptions::default(),
                 FieldTable::default(),
             )
             .await
     }
-    
+
     // Start consuming from a specific queue
     pub async fn start_consuming(&self, queue_name: &str) -> LapinResult<()> {
         let consumer = self.create_consumer(queue_name).await?;
@@ -132,12 +131,12 @@ impl RabbitMQAPIImpl {
                         if data.signal_strength < -70 {
                             data.vehicle_status = "Bad Connection".to_string();
                         }
-                        
+
                         let point = geos::Coordinate {
                             latitude: data.current_position.latitude,
                             longitude: data.current_position.longitude,
                         };
-                        
+
                         if is_near_keep_out_zone(&data.vehicle_id, &point, 1000.0) {
                             data.vehicle_status = "Approaching restricted area".to_string();
                         }
@@ -158,14 +157,18 @@ impl RabbitMQAPIImpl {
                         if let Some(app_handle) = &self.app_handle {
                             match TelemetryEventTrigger::new(app_handle.clone())
                                 .on_updated(data.clone())
-                                
                             {
                                 Ok(_) => {
-                                    println!("Successfully emitted telemetry update via event trigger");
+                                    println!(
+                                        "Successfully emitted telemetry update via event trigger"
+                                    );
                                 }
                                 Err(e) => {
-                                    println!("Failed to emit telemetry update via event trigger: {}", e);
-                                    
+                                    println!(
+                                        "Failed to emit telemetry update via event trigger: {}",
+                                        e
+                                    );
+
                                     // Fallback to regular app_handle emit
                                     if let Err(e) = app_handle.emit("telemetry_update", &payload) {
                                         println!("Failed to emit telemetry update: {}", e);
@@ -220,7 +223,7 @@ impl RabbitMQAPIImpl {
 pub trait RabbitMQAPI {
     #[taurpc(event)]
     async fn on_updated(new_data: TelemetryData);
-    
+
     // State Management
     async fn get_default_data() -> TelemetryData;
     async fn get_telemetry() -> TelemetryData;
@@ -228,22 +231,17 @@ pub trait RabbitMQAPI {
 
 // Implementation of the TauRPC trait for our API
 impl RabbitMQAPI for RabbitMQAPIImpl {
-    
-    type get_default_dataFut = std::pin::Pin<Box<dyn std::future::Future<Output = TelemetryData> + Send>>;
-    type get_telemetryFut = std::pin::Pin<Box<dyn std::future::Future<Output = TelemetryData> + Send>>;
+    type get_default_dataFut =
+        std::pin::Pin<Box<dyn std::future::Future<Output = TelemetryData> + Send>>;
+    type get_telemetryFut =
+        std::pin::Pin<Box<dyn std::future::Future<Output = TelemetryData> + Send>>;
 
-   fn get_default_data(self) -> Self::get_default_dataFut {
-        Box::pin(async move {
-            Self::new().await.unwrap().state.lock().await.clone()
-        })
+    fn get_default_data(self) -> Self::get_default_dataFut {
+        Box::pin(async move { Self::new().await.unwrap().state.lock().await.clone() })
     }
 
-
-    
     fn get_telemetry(self) -> Self::get_telemetryFut {
-        Box::pin(async move {
-            self.state.lock().await.clone()
-        })
+        Box::pin(async move { self.state.lock().await.clone() })
     }
 }
 
@@ -252,12 +250,12 @@ impl RabbitMQAPI for RabbitMQAPIImpl {
 //     let api_impl = RabbitMQAPIImpl::new()
 //         .await
 //         .map_err(|e| format!("Failed to create RabbitMQ API: {}", e))?;
-    
+
 //     let api_with_handle = api_impl.with_app_handle(app_handle);
-    
+
 //     api_with_handle.init_consumers()
 //         .await
 //         .map_err(|e| format!("Failed to initialize consumers: {}", e))?;
-        
+
 //     Ok(api_with_handle)
 // }
