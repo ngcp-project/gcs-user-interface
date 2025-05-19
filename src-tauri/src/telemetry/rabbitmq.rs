@@ -17,8 +17,11 @@ use tokio_amqp::*;
 
 //creating the structure of the rabbitMQ Consumer
 #[derive(Clone)]
+// TODO: Transform this struct into one that's compatible with TaRPC
+// TODO: Struct name = RabbitMQAPIImpl
 pub struct RabbitMQConsumer {
     connection: Arc<Mutex<Connection>>,
+    // TODO: state : Arc<Mutex<TelemetryType>>,
     channel: Channel,
     window: WebviewWindow,
 }
@@ -27,6 +30,10 @@ pub struct RabbitMQConsumer {
 //     self.connection =
 // }
 
+
+// TODO: impl RabbitMQAPIImpl
+// TODO: Adjust new() to have no parameters
+// TODO: make addr const variable, remove window parameter
 impl RabbitMQConsumer {
     pub async fn new(addr: &str, window: WebviewWindow) -> LapinResult<Self> {
         let connection = Connection::connect(
@@ -75,6 +82,7 @@ impl RabbitMQConsumer {
         // self.queue_declare(queue_name).await?;
         //Create consumer
         let consumer = self.create_consumer(queue_name).await?;
+        // TODO: No need for create_consumer here because it's only being called once
         //Start processing
         self.process_telemetry(consumer).await?;
 
@@ -82,7 +90,7 @@ impl RabbitMQConsumer {
     }
 
     //In this part we should emit to the frontend, ads
-
+    // TODO: contents of emit_state_update() should be here
     pub async fn process_telemetry(&self, mut consumer: Consumer) -> LapinResult<()> {
         use futures_util::StreamExt;
 
@@ -116,6 +124,7 @@ impl RabbitMQConsumer {
                         if let Err(e) = self.window.emit("telemetry_update", payload.clone()) {
                             println!("Failed to emit telemetry update: {}", e);
                         }
+                        // TODO: Instead of window.emit, use contents of emit_state_update()
 
                         println!("Received telemetry data: {:?}", payload);
                         println!("Signal status: {:?}", data.vehicle_status);
@@ -166,6 +175,20 @@ impl RabbitMQConsumer {
 // if not just wait n second, pass that we send an alert/ trigger the
 // function failedconnectioninit()?? }
 //
+
+
+
+// TODO: Trait binding for taurpc (taurpc::procedures)
+// TODO: pub trait RabbitMQAPI {
+
+
+// TODO: impl RabbitMQAPI for RabbitMQAPIImpl
+// TODO: Functions to add: on_updated(new_data: TelemetryType), get_default_data(), get_telemetry() 
+// TODO: get_default_data() => Self::new().await.state.lock().await.clone()
+    // TODO: get_default_data() initializes default data 
+// TODO: get_telemetry() => self.state.lock().await.clone()
+
+// TODO: Move init_telemetry_consumer to be within new()
 #[tauri::command]
 pub async fn init_telemetry_consumer(
     window: WebviewWindow,
