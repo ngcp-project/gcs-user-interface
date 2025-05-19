@@ -9,6 +9,7 @@ use lapin::{
 };
 use serde_json::json;
 use std::sync::Arc;
+use taurpc;
 use tauri::{AppHandle, Emitter, Manager};
 use tokio::sync::Mutex;
 use tokio_amqp::*;
@@ -226,24 +227,16 @@ pub trait RabbitMQAPI {
     async fn get_telemetry() -> TelemetryData;
 }
 
-// Implementation of the TauRPC trait for our API
-impl RabbitMQAPI for RabbitMQAPIImpl {
-    
-    type get_default_dataFut = std::pin::Pin<Box<dyn std::future::Future<Output = TelemetryData> + Send>>;
-    type get_telemetryFut = std::pin::Pin<Box<dyn std::future::Future<Output = TelemetryData> + Send>>;
 
-   fn get_default_data(self) -> Self::get_default_dataFut {
-        Box::pin(async move {
-            Self::new().await.unwrap().state.lock().await.clone()
-        })
+// Implementation of the TauRPC trait for our API
+#[taurpc::resolvers]
+impl RabbitMQAPI for RabbitMQAPIImpl {
+    async fn get_default_data(self) -> TelemetryData {
+        Self::new().await.unwrap().state.lock().await.clone()
     }
 
-
-    
-    fn get_telemetry(self) -> Self::get_telemetryFut {
-        Box::pin(async move {
-            self.state.lock().await.clone()
-        })
+    async fn get_telemetry(self) -> TelemetryData {
+        self.state.lock().await.clone()
     }
 }
 
