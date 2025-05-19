@@ -91,7 +91,7 @@ interface MapStore {
     stageId: number
   ) => StageLayer | undefined;
   getZoneLayers: (missionId: number, type: ZoneType) => ZoneLayer[];
-  setLayerVisibility: (missionId: number, type: ZoneType) => void;
+  setLayerVisibility: (missionId: number, type: ZoneType, zoneIndex: number) => void;
   // TODO: fix it so that theres no as declaration when reading from missionStore
   updateLayerTracking: (state: MissionsStruct) => void;
 }
@@ -186,26 +186,24 @@ const mapStore = createStore<MapStore>((set, get) => ({
     }
   },
 
-  setLayerVisibility: (missionId: number, type: ZoneType) => {
+  setLayerVisibility: (missionId: number, type: ZoneType, zoneIndex: number) => {
     // Get all layers in layerTracking
     const layers = get().layerTracking.missions[missionId];
     const zoneLayers = layers.zones[type];
 
-    zoneLayers.forEach((zone) => {
-      // check if is a valid zone layer and not empty
-      if (!("layer" in zone)) return;
+    // Get the zone layer to update
+    const zoneLayer = zoneLayers[zoneIndex];
+    if (!("layer" in zoneLayer)) return;
 
-      const zoneLayer = zone as ZoneLayer;
-      const currentVisibility = zoneLayer.properties.visibility;
+    const currentVisibility = zoneLayer.properties.visibility;
 
-      // Toggle visibility of zoneLayer
-      zoneLayer.properties.visibility = !currentVisibility;
+    // Toggle visibility of zoneLayer
+    zoneLayer.properties.visibility = !currentVisibility;
 
-      // Update polygon style based on visibility
-      zoneLayer.layer.setStyle({
-        opacity: zoneLayer.properties.visibility ? 1 : 0,
-        fillOpacity: zoneLayer.properties.visibility ? 0.2 : 0
-      });
+    // Update polygon style based on visibility
+    zoneLayer.layer.setStyle({
+      opacity: zoneLayer.properties.visibility ? 1 : 0,
+      fillOpacity: zoneLayer.properties.visibility ? 0.2 : 0
     });
 
     // Update state (optional since we're mutating directly, but good practice)
@@ -248,8 +246,10 @@ const mapStore = createStore<MapStore>((set, get) => ({
             layerTrackedZones.push({});
             return;
           } else {
+            const latLngs: LatLng[] = zone.map((GeoCoord) => [GeoCoord.lat, GeoCoord.long]);
+
             layerTrackedZones.push({
-              layer: {} as L.Polygon,
+              layer: L.polygon(latLngs) as L.Polygon,
               properties: {
                 color:
                   zoneType === "keep_in_zones"
@@ -272,6 +272,8 @@ const mapStore = createStore<MapStore>((set, get) => ({
 
     // Clear the existing layers first
     get().layers.clearLayers();
+
+    // console.log("layerTracking", get().layerTracking);
 
     // Iterate over layerTracking and add polygons to the map
     Object.entries(get().layerTracking.missions).forEach(([missionId, missionData]) => {
