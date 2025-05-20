@@ -60,9 +60,21 @@ export interface MissionStore {
     stageName: string
   ) => Promise<null>;
   transitionStage: (missionId: number, vehicleName: VehicleEnum) => Promise<null>;
+  updateStageArea: (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    stageId: number,
+    area: GeoCoordinateStruct[]
+  ) => Promise<null>;
 
   // Zone Data
   getZoneData: (missionId: number, zoneType: ZoneType) => GeoCoordinateStruct[][] | undefined;
   addZone: (missionId: number, zoneType: ZoneType) => Promise<null>;
+  updateZone: (
+    missionId: number,
+    zoneType: ZoneType,
+    zoneIndex: number,
+    polygon: GeoCoordinateStruct[]
+  ) => Promise<null>;
   deleteZone: (missionId: number, zoneType: ZoneType, zoneIndex: number) => Promise<null>;
 }
