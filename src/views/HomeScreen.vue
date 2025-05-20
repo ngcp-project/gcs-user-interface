@@ -158,25 +158,25 @@ function handleTelemetryUpdate(event: any) {
   }
 }
 
-async function initializeTelemetryListeners() {
-  const unlisten = await listen("telemetry_update", (event: any) => {
-    console.log("Received telemetry event:", JSON.stringify(event));
-    handleTelemetryUpdate(event.payload);
-    console.log(event.payload);
-  });
+// async function initializeTelemetryListeners() {
+//   const unlisten = await listen("telemetry_update", (event: any) => {
+//     console.log("Received telemetry event:", JSON.stringify(event));
+//     handleTelemetryUpdate(event.payload);
+//     console.log(event.payload);
+//   });
 
-  unlistenFunctions.push(unlisten);
+//   unlistenFunctions.push(unlisten);
 
-  // Initial telemetry fetch for each vehicle
-  for (const vehicleKey of Object.keys(vehicleMap)) {
-    try {
-      console.log(`Initializing telemetry for ${vehicleKey}`);
-      console.log(`Initial telemetry data: for ${vehicleKey}`);
-    } catch (error) {
-      console.error(`Failed to fetch initial telemetry for ${vehicleKey}:`, error);
-    }
-  }
-}
+//   // Initial telemetry fetch for each vehicle
+//   for (const vehicleKey of Object.keys(vehicleMap)) {
+//     try {
+//       console.log(`Initializing telemetry for ${vehicleKey}`);
+//       console.log(`Initial telemetry data: for ${vehicleKey}`);
+//     } catch (error) {
+//       console.error(`Failed to fetch initial telemetry for ${vehicleKey}:`, error);
+//     }
+//   }
+// }
 
 function updateIsInKeepIn(vehicleKey: string, isInZone: boolean) {
   vehicleMap[vehicleKey.toLowerCase()].value.inKeepIn = isInZone;
@@ -187,8 +187,8 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
 }
 
 onMounted(async () => {
-  await initializeTelemetryListeners();
-  console.log("Telemetry listeners initialized");
+  // await initializeTelemetryListeners();
+  // console.log("Telemetry listeners initialized");
 });
 
 onUnmounted(() => {

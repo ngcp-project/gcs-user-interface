@@ -39,7 +39,7 @@ interface TelemetryEvent {
 const unlistenFunctions: UnlistenFn[] = [];
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
 const ERU_data = ref({
-  batteryPct: 0,
+  batteryPct: 5,
   signal_string: 0,
   lastUpdated: 0,
   coordinates: { longitude: 0, latitude: 0 },
@@ -49,7 +49,7 @@ const ERU_data = ref({
   inKeepOut: false
 });
 const MEA_data = ref({
-  batteryPct: 0,
+  batteryPct: 5,
   signal_string: 0,
   lastUpdated: 0,
   coordinates: { longitude: 0, latitude: 0 },
@@ -59,7 +59,7 @@ const MEA_data = ref({
   inKeepOut: false
 });
 const MRA_data = ref({
-  batteryPct: 0,
+  batteryPct: 5,
   signal_string: 0,
   lastUpdated: 0,
   coordinates: { longitude: 0, latitude: 0 },
@@ -69,7 +69,7 @@ const MRA_data = ref({
   inKeepOut: false
 });
 const FRA_data = ref({
-  batteryPct: 0,
+  batteryPct: 5,
   signal_string: 0,
   lastUpdated: 0,
   coordinates: { longitude: 0, latitude: 0 },
@@ -178,26 +178,26 @@ function handleTelemetryUpdate(event: any) {
 
 // Modify the event listener setup
 
-async function initializeTelemetryListeners() {
-  const unlisten = await listen("telemetry_update", (event: any) => {
-    console.log("Received telemetry event:", JSON.stringify(event));
+// async function initializeTelemetryListeners() {
+//   const unlisten = await listen("telemetry_update", (event: any) => {
+//     console.log("Received telemetry event:", JSON.stringify(event));
 
-    handleTelemetryUpdate(event.payload);
+//     handleTelemetryUpdate(event.payload);
 
-    console.log(event.payload);
-  });
-  unlistenFunctions.push(unlisten);
-  // Initial telemetry fetch for each vehicle
-  for (const vehicleKey of Object.keys(vehicleMap)) {
-    try {
-      console.log(`Initializing telemetry for ${vehicleKey}`);
-      console.log(`Initial telemetry data: for ${vehicleKey}`);
-      // handleTelemetryUpdate(data);
-    } catch (error) {
-      console.error(`Failed to fetch initial telemetry for ${vehicleKey}:`, error);
-    }
-  }
-}
+//     console.log(event.payload);
+//   });
+//   unlistenFunctions.push(unlisten);
+//   // Initial telemetry fetch for each vehicle
+//   for (const vehicleKey of Object.keys(vehicleMap)) {
+//     try {
+//       console.log(`Initializing telemetry for ${vehicleKey}`);
+//       console.log(`Initial telemetry data: for ${vehicleKey}`);
+//       // handleTelemetryUpdate(data);
+//     } catch (error) {
+//       console.error(`Failed to fetch initial telemetry for ${vehicleKey}:`, error);
+//     }
+//   }
+// }
 
 function updateIsInKeepIn(vehicleKey: string, isInZone: boolean) {
   vehicleMap[vehicleKey.toLowerCase()].value.inKeepIn = isInZone;
@@ -208,8 +208,8 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
 }
 
 onMounted(async () => {
-  await initializeTelemetryListeners();
-  console.log("Telemetry listeners initialized");
+  // await initializeTelemetryListeners();
+  // console.log("Telemetry listeners initialized");
   // KeepOutZones("mra");
   // KeepOutZones("eru");
   // KeepOutZones("fra");
