@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Card, CardContent, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { Trash2, Eye, EyeOff, Pencil, Square, Plus, Check } from "lucide-vue-next";
 import { missionStore } from "@/lib/MissionStore";
-import { GeoCoordinateStruct, ZoneType } from "@/lib/bindings";
+import { ZoneType } from "@/lib/bindings";
 import mapStore from "@/lib/MapStore";
 
 const props = defineProps<{
@@ -35,15 +35,31 @@ const zones = computed(() =>
 );
 
 const zoneLayer = computed(() => {
-  console.log("update");
   if (currentMissionId === null) return null;
   return mapStore.getZoneLayers(currentMissionId, props.zoneType);
 });
 
+// Add zone visibility state tracking
+const visibilityStates = ref(new Map<number, boolean>());
+
+// Initialize visibility states when zones change
+watch(zones, (newZones) => {
+  if (!newZones) return;
+  newZones.forEach((_, index) => {
+    if (!visibilityStates.value.has(index)) {
+      visibilityStates.value.set(index, false);
+    }
+  });
+}, { immediate: true });
+
 // Toggle Eye Icon for specific zone
 const toggleVisibility = (zoneID: number) => {
   if (currentMissionId === null) return;
-  mapStore.setLayerVisibility(currentMissionId, props.zoneType);
+  const currentVisibility = visibilityStates.value.get(zoneID) ?? false;
+  visibilityStates.value.set(zoneID, !currentVisibility);
+  mapStore.setZoneLayerVisibility(currentMissionId, props.zoneType, zoneID);
+  // Exit edit mode when toggling visibility
+  editingZoneIndex.value = null;
 };
 
 const handleNewZone = () => {
@@ -56,17 +72,15 @@ const handleDeleteZone = (index: number) => {
   missionStore.deleteZone(currentMissionId, props.zoneType, index);
 };
 
+// Add editing state tracking
+const editingZoneIndex = ref<number | null>(null);
+
 const handleCreateZone = (index: number) => {
   if (currentMissionId === null) return;
+  // If already editing zone, stop editing otherwise start editing
+  editingZoneIndex.value = (editingZoneIndex.value === index) ? null : index;
   mapStore.updateZonePolygon(currentMissionId, props.zoneType, index);
 };
-
-const zoneVisibility = (index: number) =>
-  computed(() => {
-    const test = mapStore;
-    console.log("zoneVisibility", zoneLayer.value, index);
-    return zoneLayer.value && zoneLayer.value[index]?.properties?.visibility;
-  });
 </script>
 
 <template>
@@ -87,19 +101,26 @@ const zoneVisibility = (index: number) =>
         :key="props.zoneType"
         class="flex w-full items-center justify-between pb-1 pt-1"
       >
-        <span class="font-semibold">Zone {{ index }}</span>
+        <span class="font-semibold flex items-center gap-2">
+          Zone {{ index }}
+          <div 
+            v-if="zone.length !== 0"
+            class="w-2 h-2 rounded-full" 
+            :class="visibilityStates.get(index) ? 'bg-muted-foreground' : 'bg-chart-4'"
+          ></div>
+        </span>
         <div class="flex gap-x-2">
           <!-- TODO: Add ui to confirm an edit -->
           <component
-            :is="zone.length > 0 ? Pencil : Plus"
+            :is="zone.length === 0 ? Plus : (editingZoneIndex === index ? Check : Pencil)"
             v-if="mission?.mission_status !== 'Complete'"
             class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500"
             @click="handleCreateZone(index)"
-          
           />
           <component
-            :is="zoneVisibility(index) ? Eye : EyeOff"
-            @click="() => toggleVisibility(index)"
+            :is="zone.length === 0 ? EyeOff : (visibilityStates.get(index) ? EyeOff : Eye)"
+            v-if="zone.length !== 0"
+            @click="toggleVisibility(index)"
             class="h-5 w-5 cursor-pointer text-gray-700 hover:text-gray-500"
           />
           <Trash2

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { computed, ref } from "vue";
-import { Trash2, Eye, EyeOff, Pencil } from "lucide-vue-next";
+import { ref, watch } from "vue";
+import { Trash2, Eye, EyeOff, Pencil, Plus, Check } from "lucide-vue-next";
 import { missionStore } from "@/lib/MissionStore";
 import mapStore from "@/lib/MapStore";
 
@@ -19,13 +19,6 @@ const statusStyles = {
     Active: "text-chart-4 font-semibold",
     Complete: "text-chart-2 font-semibold"
   }
-};
-
-// Toggle Eye Icon
-const isVisible = ref(true); // Track visibility state
-
-const toggleVisibility = () => {
-  isVisible.value = !isVisible.value;
 };
 
 // Get id of the current mission
@@ -59,6 +52,27 @@ stageList !== undefined && stageList !== null &&
 currStageIndex !== undefined && currStageIndex !== null ? 
 props.stageIndex >= currStageIndex : null;
 
+// Add editing state tracking
+const editingStageIndex = ref<number | null>(null);
+
+// Add stage visibility state tracking
+const visibilityStates = ref(new Map<number, boolean>());
+
+// Initialize visibility state when stage changes
+watch(() => stage, (newStage) => {
+  if (!newStage) return;
+  if (!visibilityStates.value.has(props.stageID)) {
+    visibilityStates.value.set(props.stageID, false);
+  }
+}, { immediate: true });
+
+const toggleVisibility = () => {
+  if (currentMissionId === null || currentVehicleName === null) return;
+  const currentVisibility = visibilityStates.value.get(props.stageID) ?? false;
+  visibilityStates.value.set(props.stageID, !currentVisibility);
+  mapStore.setStageLayerVisibility(currentMissionId, currentVehicleName, props.stageID);
+};
+
 // Handle stage name change
 const handleStageNameChange = (event: Event) => {
   if (currentMissionId === null || currentVehicleName === null) return;
@@ -75,6 +89,13 @@ const handleDeleteStage = () => {
   if (currentMissionId === null || currentVehicleName === null) return;
   missionStore.deleteStage(currentMissionId, currentVehicleName, props.stageID);
   mapStore.removeStageLayer(currentMissionId, currentVehicleName, props.stageID);
+};
+
+const handleEditStage = () => {
+  if (currentMissionId === null || currentVehicleName === null) return;
+  // If already editing stage, stop editing otherwise start editing
+  editingStageIndex.value = (editingStageIndex.value === props.stageIndex) ? null : props.stageIndex;
+  mapStore.updateStagePolygon(currentMissionId, currentVehicleName, props.stageID);
 };
 </script>
 
@@ -108,14 +129,24 @@ const handleDeleteStage = () => {
         <span :class="statusStyles.statusColor[stage.stage_status]">{{ stage.stage_status }}</span>
       </span>
       <div class="flex w-full items-center justify-between">
-        <span class="font-semibold">Search Area</span>
+        <span class="font-semibold flex items-center gap-2">
+          Search Area
+          <div 
+            v-if="stage.search_area.length !== 0"
+            class="w-2 h-2 rounded-full" 
+            :class="visibilityStates.get(props.stageID) ? 'bg-muted-foreground' : 'bg-chart-4'"
+          ></div>
+        </span>
         <div class="flex gap-x-2">
-          <Pencil
-          v-if="searchAreaEditable"
-          class="h-5 w-5 cursor-pointer text-secondary-foreground hover:text-secondary-foreground/80"
+          <component
+            :is="stage.search_area.length === 0 ? Plus : (editingStageIndex === stageIndex ? Check : Pencil)"
+            v-if="searchAreaEditable"
+            class="h-5 w-5 cursor-pointer text-secondary-foreground hover:text-secondary-foreground/80"
+            @click="handleEditStage"
           />
           <component
-            :is="isVisible ? Eye : EyeOff"
+            :is="stage.search_area.length === 0 ? EyeOff : (visibilityStates.get(props.stageID) ? EyeOff : Eye)"
+            v-if="stage.search_area.length !== 0"
             class="h-5 w-5 cursor-pointer text-secondary-foreground hover:text-secondary-foreground/80"
             @click="toggleVisibility"
           />

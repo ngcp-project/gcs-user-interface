@@ -3,7 +3,7 @@ import { reactive } from "vue";
 import { LMap } from "@vue-leaflet/vue-leaflet";
 import { LatLngTuple as LatLng } from "leaflet";
 import * as L from "leaflet";
-import { GeoCoordinateStruct, MissionsStruct, VehicleEnum, ZoneType } from "@/lib//bindings";
+import { GeoCoordinateStruct, MissionsStruct, VehicleEnum, ZoneType, StageStruct } from "@/lib//bindings";
 import { missionStore } from "./MissionStore";
 import { watch } from "vue";
 
@@ -22,7 +22,8 @@ interface ZoneLayer {
 
 interface StageLayer {
   stageId: number;
-  polygon: ZoneLayer | {};
+  polygon: ZoneLayer;
+  properties: LayerProperties;
 }
 
 interface VehicleLayers {
@@ -91,7 +92,8 @@ interface MapStore {
     stageId: number
   ) => StageLayer | undefined;
   getZoneLayers: (missionId: number, type: ZoneType) => ZoneLayer[];
-  setLayerVisibility: (missionId: number, type: ZoneType, zoneIndex: number) => void;
+  setZoneLayerVisibility: (missionId: number, type: ZoneType, zoneIndex: number) => void;
+  setStageLayerVisibility: (missionId: number, vehicle: VehicleEnum, stageId: number) => void;
   // TODO: fix it so that theres no as declaration when reading from missionStore
   updateLayerTracking: (state: MissionsStruct) => void;
 }
@@ -186,7 +188,7 @@ const mapStore = createStore<MapStore>((set, get) => ({
     }
   },
 
-  setLayerVisibility: (missionId: number, type: ZoneType, zoneIndex: number) => {
+  setZoneLayerVisibility: (missionId: number, type: ZoneType, zoneIndex: number) => {
     // Get all layers in layerTracking
     const layers = get().layerTracking.missions[missionId];
     const zoneLayers = layers.zones[type];
@@ -209,6 +211,29 @@ const mapStore = createStore<MapStore>((set, get) => ({
     // Update state (optional since we're mutating directly, but good practice)
     set({ layerTracking: get().layerTracking });
   },
+
+  setStageLayerVisibility: (missionId: number, vehicle: VehicleEnum, stageId: number) => {
+    // Get all layers in layerTracking
+    const layers = get().layerTracking.missions[missionId];
+    const vehicleLayers = layers.vehicles[vehicle];
+    const stageLayer = vehicleLayers.stages[stageId];
+    if (!stageLayer || !("polygon" in stageLayer)) return;
+
+    const currentVisibility = stageLayer.properties.visibility;
+
+    // Toggle visibility of stageLayer
+    stageLayer.properties.visibility = !currentVisibility;
+
+    // Update polygon style based on visibility
+    stageLayer.polygon.layer.setStyle({
+      opacity: stageLayer.properties.visibility ? 1 : 0,
+      fillOpacity: stageLayer.properties.visibility ? 0.2 : 0
+    });
+
+    // Update state
+    set({ layerTracking: get().layerTracking });
+  },
+
   updateLayerTracking: (newState) => {
     const newLayerTracking: LayerTracking = { missions: {} };
 
@@ -260,10 +285,49 @@ const mapStore = createStore<MapStore>((set, get) => ({
             });
           }
         });
-        set({ layerTracking: newLayerTracking });
-        get().rerenderLayers();
       });
+
+      // Update Stage Layers
+      Object.entries(mission.vehicles).forEach(([vehicleName, vehicleData]) => {
+        const vehicle = vehicleName as VehicleEnum;
+        const stages = vehicleData.stages as unknown as StageStruct[];
+        
+        stages.forEach((stage) => {
+          if (!stage.search_area || stage.search_area.length < 1) {
+            newLayerTracking.missions[mission.mission_id].vehicles[vehicle].stages[stage.stage_id] = {
+              stageId: stage.stage_id,
+              polygon: {} as ZoneLayer,
+              properties: { color: LAYER_STYLING[vehicle].color, visibility: true }
+            };
+            return;
+          }
+
+          const latLngs: LatLng[] = stage.search_area.map((coord: GeoCoordinateStruct) => [coord.lat, coord.long]);
+          const polygon = L.polygon(latLngs) as L.Polygon;
+
+          newLayerTracking.missions[mission.mission_id].vehicles[vehicle].stages[stage.stage_id] = {
+            stageId: stage.stage_id,
+            polygon: {
+              layer: polygon,
+              properties: {
+                color: LAYER_STYLING[vehicle].color,
+                visibility: true
+              }
+            },
+            properties: {
+              color: LAYER_STYLING[vehicle].color,
+              visibility: true
+            }
+          };
+        });
+      });
+
+      set({ layerTracking: newLayerTracking });
+      get().rerenderLayers();
     });
+
+    set({ layerTracking: newLayerTracking });
+    get().rerenderLayers();
   },
 
   rerenderLayers: () => {
@@ -281,7 +345,6 @@ const mapStore = createStore<MapStore>((set, get) => ({
       (["KeepIn", "KeepOut"] as ZoneType[]).forEach((type) => {
         missionData.zones[type].forEach((zone) => {
           if (!("layer" in zone) || !(Object.keys(zone.layer).length > 0)) return;
-          console.log("zone", zone);
 
           const zoneLayer = zone as ZoneLayer;
           const polygonLayer = zoneLayer.layer;
@@ -297,6 +360,24 @@ const mapStore = createStore<MapStore>((set, get) => ({
           });
         });
       });
+
+      // Add stage polygons
+      Object.entries(missionData.vehicles).forEach(([vehicleName, vehicleData]) => {
+        const vehicle = vehicleName as VehicleEnum;
+        Object.values(vehicleData.stages).forEach((stage) => {
+          if (!stage || !("polygon" in stage) || !stage.polygon.layer) return;
+
+          const polygonLayer = stage.polygon.layer;
+          polygonLayer.addTo(get().layers);
+
+          // Set the style based on the properties from layerTracking
+          polygonLayer.setStyle({
+            color: stage.properties.color,
+            fillOpacity: stage.properties.visibility ? 0.2 : 0,
+            opacity: stage.properties.visibility ? 1 : 0
+          });
+        });
+      });
     });
   },
 
@@ -308,12 +389,18 @@ const mapStore = createStore<MapStore>((set, get) => ({
     const stageLayers = get().layerTracking.missions[missionId]?.vehicles[vehicle]?.stages || {};
     const layerTrackedStage = stageLayers[stageId];
 
-    if (!layerTrackedStage || Object.keys(layerTrackedStage).length === 0) {
+    if (!layerTrackedStage || !("polygon" in layerTrackedStage) || Object.keys(layerTrackedStage.polygon).length === 0) {
       map.pm.enableDraw("Polygon");
 
       map.once("pm:create", (e) => {
         const layer = e.layer as L.Polygon;
         const latlngs = layer.getLatLngs()[0] as L.LatLng[];
+
+        // Set the polygon color based on vehicle type
+        layer.setStyle({
+          color: LAYER_STYLING[vehicle].color,
+          fillOpacity: 0.2
+        });
 
         const geoCoordinateStructs: GeoCoordinateStruct[] = latlngs.map((latlng) => ({
           lat: latlng.lat,
@@ -326,7 +413,7 @@ const mapStore = createStore<MapStore>((set, get) => ({
         layer.remove();
       });
     } else {
-      const existingLayer = (layerTrackedStage as StageLayer).polygon as ZoneLayer;
+      const existingLayer = layerTrackedStage.polygon;
       const polygonLayer = existingLayer.layer;
 
       // Toggle edit mode
@@ -340,6 +427,12 @@ const mapStore = createStore<MapStore>((set, get) => ({
       polygonLayer.once("pm:update", (e) => {
         const updatedLayer = e.layer as L.Polygon;
         const latlngs = updatedLayer.getLatLngs()[0] as L.LatLng[];
+
+        // Maintain the polygon color after editing
+        updatedLayer.setStyle({
+          color: LAYER_STYLING[vehicle].color,
+          fillOpacity: 0.2
+        });
 
         const geoCoordinateStructs: GeoCoordinateStruct[] = latlngs.map((latlng) => ({
           lat: latlng.lat,
