@@ -68,7 +68,7 @@ async fn init_database_dummy_data() {
     ")
     .bind(discover_mission_id)
     .bind("MRA")
-    .bind(-1) // change back to -1 after testing
+    .bind(1) 
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");
@@ -82,7 +82,7 @@ async fn init_database_dummy_data() {
     ")
     .bind(discover_mission_id)
     .bind("ERU")
-    .bind(-1)
+    .bind(4)
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");
@@ -96,7 +96,7 @@ async fn init_database_dummy_data() {
     ")
     .bind(discover_mission_id)
     .bind("MEA")
-    .bind(-1)
+    .bind(6)
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");
@@ -301,7 +301,7 @@ async fn init_database_dummy_data() {
     ")
     .bind(retrieve_mission_id)
     .bind("MRA")
-    .bind(-1)
+    .bind(8)
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");
@@ -316,7 +316,7 @@ async fn init_database_dummy_data() {
     ")
     .bind(retrieve_mission_id)
     .bind("ERU")
-    .bind(-1)
+    .bind(11)
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");
@@ -332,7 +332,7 @@ async fn init_database_dummy_data() {
     ")
     .bind(retrieve_mission_id)
     .bind("MEA")
-    .bind(-1)
+    .bind(13)
     .fetch_one(&mut db_conn)
     .await
     .expect("Failed to insert dummy data into vehicles");

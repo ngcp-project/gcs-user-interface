@@ -3,7 +3,7 @@ use std::{num::ParseFloatError, str::FromStr};
 #[taurpc::ipc_type]
 #[derive(Debug)]
 pub struct MissionsStruct {
-    pub current_mission: i32,
+    pub current_mission: i32, // -1 for no mission
     pub missions: Vec<MissionStruct>,
 }
 
