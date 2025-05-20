@@ -684,22 +684,34 @@ async fn main() {
             let app_handle = app.handle().clone();
             let rabbitmq = rabbitmq_api.with_app_handle(app_handle);
 
-            // Initialize consumers
-            tauri::async_runtime::spawn(async move {
-                if let Err(e) = rabbitmq.init_consumers().await {
-                    eprintln!("Failed to initialize telemetry consumers: {}", e);
-                }
-            });
+            if env::var("INITIALIZE_RABBITMQ")
+                .unwrap_or_default()
+                .to_lowercase()
+                == "true"
+            {
+                // Initialize consumers
+                tauri::async_runtime::spawn(async move {
+                    if let Err(e) = rabbitmq.init_consumers().await {
+                        eprintln!("Failed to initialize telemetry consumers: {}", e);
+                    }
+                });
+            }
 
-            // Start test publisher
-            tauri::async_runtime::spawn(async {
-                println!("🚀 Starting RabbitMQ test publisher");
-                if let Err(e) = telemetry::publisher::test_publisher().await {
-                    eprintln!("❌ Test publisher failed: {}", e);
-                } else {
-                    println!("✅ Test publisher finished");
-                }
-            });
+            if env::var("TEST_PUBLISHER")
+                .unwrap_or_default()
+                .to_lowercase()
+                == "true"
+            {
+                // Start test publisher
+                tauri::async_runtime::spawn(async {
+                    println!("🚀 Starting RabbitMQ test publisher");
+                    if let Err(e) = telemetry::publisher::test_publisher().await {
+                        eprintln!("❌ Test publisher failed: {}", e);
+                    } else {
+                        println!("✅ Test publisher finished");
+                    }
+                });
+            }
 
             Ok(())
         })
