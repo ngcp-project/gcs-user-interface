@@ -314,3 +314,26 @@ pub async fn update_mission_status(
 
     Ok(())
 }
+
+pub async fn add_zones(
+    db_conn: PgPool,
+    mission_id: i32,
+    keep_in_zones: Vec<String>,
+    keep_out_zones: Vec<String>,
+) -> Result<(), sqlx::Error> {
+    query("
+        INSERT INTO missions (mission_id, keep_in_zones, keep_out_zones)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (mission_id) DO UPDATE
+        SET keep_in_zones = EXCLUDED.keep_in_zones,
+            keep_out_zones = EXCLUDED.keep_out_zones
+    ")// waaah where is my UPSERT  T^T
+    .bind(mission_id)
+    .bind(keep_in_zones)
+    .bind(keep_out_zones)
+    .execute(&db_conn)
+    .await
+    .expect("Failed to update mission zones");
+
+    Ok(())
+}

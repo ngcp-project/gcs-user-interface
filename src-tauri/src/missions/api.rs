@@ -720,6 +720,48 @@ impl MissionApi for MissionApiImpl {
             ZoneType::KeepOut => mission.zones.keep_out_zones.push(GeofenceType::default()),
         }
 
+        let temp_test_keep_in_zone = &vec![
+            r#"[
+                (69,420),
+                (69,420),
+                (69,420),
+                (69,420),
+                (69,420),
+            ]"#.to_string(),
+            r#"[
+                (420,69),
+                (420,69),
+                (420,69),
+                (420,69),
+                (420,69),
+            ]"#.to_string()
+        ];
+
+        let temp_test_keep_out_zone = &vec![
+            r#"[
+                (1,2),
+                (1,2),
+                (1,2),
+                (1,2),
+                (1,2),
+            ]"#.to_string(),
+            r#"[
+                (3,4),
+                (3,4),
+                (3,4),
+                (3,4),
+                (3,4),
+            ]"#.to_string()
+        ];
+
+        // Transition to next stage if available
+        add_zones(
+            self.db.clone(),
+            mission.mission_id,
+            temp_test_keep_in_zone.clone(),
+            temp_test_keep_out_zone.clone(),
+        ).await.expect  ("Failed to add zones");
+
         self.emit_state_update(&app_handle, &state)
     }
 
