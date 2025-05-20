@@ -1,23 +1,16 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-
-
 use sqlx::postgres::PgConnection;
 use sqlx::Connection;
 use sqlx::{query, Row};
 use std::env;
-use tauri::Manager;
-use taurpc::Router; // Add this import for the Manager trait
+use taurpc::Router;
 mod missions;
 mod telemetry;
-// add this import
+
 use crate::telemetry::rabbitmq::RabbitMQAPI;
 use missions::api::{MissionApi, MissionApiImpl};
-use tauri::ipc::Invoke;
-use tauri::Runtime;
-use telemetry::publisher::RabbitMQPublisher;
-// use telemetry::rabbitmq::{init_telemetry_consumer, RabbitMQConsumer};
 
 const DB_URL: &str = "postgres://ngcp:ngcp@localhost:5433/ngcpdb";
 
@@ -674,12 +667,10 @@ async fn main() {
     }
 
     // Initialize APIs outside of Tauri setup
-     let rabbitmq_api = telemetry::rabbitmq::RabbitMQAPIImpl::new()
-        .await
-        .unwrap();
-    
+    let rabbitmq_api = telemetry::rabbitmq::RabbitMQAPIImpl::new().await.unwrap();
+
     let missions_api = MissionApiImpl::new().await;
-    
+
     // Create router with both handlers
     let router = Router::new()
         .merge(missions_api.into_handler())
@@ -694,7 +685,7 @@ async fn main() {
             let rabbitmq = rabbitmq_api.with_app_handle(app_handle);
 
             // Initialize consumers
-             tauri::async_runtime::spawn(async move {
+            tauri::async_runtime::spawn(async move {
                 if let Err(e) = rabbitmq.init_consumers().await {
                     eprintln!("Failed to initialize telemetry consumers: {}", e);
                 }
@@ -712,19 +703,7 @@ async fn main() {
 
             Ok(())
         })
-        .invoke_handler(move |invoke| {
-            router_handler(invoke)
-        })
+        .invoke_handler(move |invoke| router_handler(invoke))
         .run(tauri::generate_context!())
         .expect("Error running Tauri application");
 }
-// let missions_api = MissionApiImpl::new().await;
-// let router = Router::new()
-//     .merge(missions_api.into_handler());
-
-// tauri::Builder::default()
-//     .plugin(tauri_plugin_shell::init())
-//     .invoke_handler(router.into_handler())
-//     .setup(|_app| Ok(()))
-//     .run(tauri::generate_context!())
-//     .expect("Error while running Tauri application");

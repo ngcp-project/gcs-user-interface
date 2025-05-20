@@ -1,20 +1,20 @@
 use crate::telemetry::geos;
 use crate::telemetry::geos::*;
-use crate::telemetry::types::{VehicleTelemetryData, TelemetryData};
-use crate::telemetry::types::{AppData, Coordinate};
+
+use crate::telemetry::types::{TelemetryData, VehicleTelemetryData};
 use futures_util::stream::StreamExt;
 use lapin::{
     options::*, types::FieldTable, Channel, Connection, ConnectionProperties, Consumer,
-    Error as LapinError, Queue, Result as LapinResult,
+     Queue, Result as LapinResult,
 };
 use serde_json::json;
 use std::sync::Arc;
+use tauri::{AppHandle, Emitter};
 use taurpc;
-use tauri::{AppHandle, Emitter, Manager};
 use tokio::sync::Mutex;
 use tokio_amqp::*;
 
-// Renamed to RabbitMQAPIImpl as suggested in TODO
+
 #[derive(Clone)]
 pub struct RabbitMQAPIImpl {
     connection: Arc<Mutex<Connection>>,
@@ -143,7 +143,10 @@ impl RabbitMQAPIImpl {
                         }
 
                         let vehicle_id = data.vehicle_id.clone();
-                        self.state.lock().await.update_vehicle_telemetry_state(vehicle_id.clone(), data.clone());
+                        self.state
+                            .lock()
+                            .await
+                            .update_vehicle_telemetry_state(vehicle_id.clone(), data.clone());
 
                         // Create payload for the event
                         let payload = json!({
@@ -153,7 +156,8 @@ impl RabbitMQAPIImpl {
 
                         // Emit the telemetry update using TelemetryEventTrigger
                         if let Some(app_handle) = &self.app_handle {
-                            let vehicle_telemetry: VehicleTelemetryData = self.state.lock().await.clone();
+                            let vehicle_telemetry: VehicleTelemetryData =
+                                self.state.lock().await.clone();
                             match TelemetryEventTrigger::new(app_handle.clone())
                                 .on_updated(vehicle_telemetry)
                             {
@@ -228,7 +232,6 @@ pub trait RabbitMQAPI {
     async fn get_telemetry() -> VehicleTelemetryData;
 }
 
-
 // Implementation of the TauRPC trait for our API
 #[taurpc::resolvers]
 impl RabbitMQAPI for RabbitMQAPIImpl {
@@ -240,18 +243,3 @@ impl RabbitMQAPI for RabbitMQAPIImpl {
         self.state.lock().await.clone()
     }
 }
-
-// Function to setup and initialize the RabbitMQ API implementation
-// pub async fn setup_rabbitmq_api(app_handle: AppHandle) -> Result<RabbitMQAPIImpl, String> {
-//     let api_impl = RabbitMQAPIImpl::new()
-//         .await
-//         .map_err(|e| format!("Failed to create RabbitMQ API: {}", e))?;
-
-//     let api_with_handle = api_impl.with_app_handle(app_handle);
-
-//     api_with_handle.init_consumers()
-//         .await
-//         .map_err(|e| format!("Failed to initialize consumers: {}", e))?;
-
-//     Ok(api_with_handle)
-// }

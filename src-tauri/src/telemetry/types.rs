@@ -1,8 +1,5 @@
-// #[derive(Debug)]
-// #[taurpc::ipc_type]
-use serde::{Deserialize, Serialize};
+
 use std::collections::HashMap;
-use std::time::SystemTime;
 
 #[taurpc::ipc_type]
 #[derive(Debug, Default)]
@@ -29,13 +26,10 @@ impl VehicleTelemetryData {
     }
 }
 
-
 #[taurpc::ipc_type]
-#[derive(Debug)]
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct TelemetryData {
     pub vehicle_id: String, // Added vehicle_id
-    // pub localIP: String
     pub signal_strength: i32,
     pub pitch: f32,
     pub yaw: f32,
@@ -44,15 +38,12 @@ pub struct TelemetryData {
     pub altitude: f32,
     pub battery_life: i32, //f32
     pub current_position: Coordinate,
-    // pub last_updated: SystemTime, //what is the exact format we have to follow timestamp 8 bytes
-    // pub fire_found: bool,
-    // pub fire_coordinate: Coordinate,
     pub vehicle_status: String,
     pub request_coordinate: RequestCoordinate,
-}#[taurpc::ipc_type]
+}
+#[taurpc::ipc_type]
 //Change vehicleStatus : i8 1 byte 0 - 255
-#[derive(Debug)]
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct RequestCoordinate {
     pub message_flag: i32,
     pub request_location: Coordinate,
@@ -60,16 +51,14 @@ pub struct RequestCoordinate {
     pub patient_secured: Option<bool>,
 }
 #[taurpc::ipc_type]
-#[derive(Debug)]
-#[derive(Default)]
+#[derive(Debug, Default)]
 //change this to f64
 pub struct Coordinate {
     pub latitude: f64,
     pub longitude: f64,
 }
 #[taurpc::ipc_type]
-#[derive(Debug)]
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct AppData {
     pub telemetryx: HashMap<String, TelemetryData>,
 }

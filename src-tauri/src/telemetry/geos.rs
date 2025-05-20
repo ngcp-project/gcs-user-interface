@@ -9,13 +9,6 @@ pub struct Coordinate {
     pub longitude: f64,
 }
 
-// #[derive(Clone, serde::Serialize, serde::Deserialize)]
-// //change this to f64
-// pub struct Coordinate{
-//     pub latitude: f64,
-//     pub longitude: f64,
-// }
-
 #[derive(Debug, Deserialize)]
 pub struct PolygonDTO {
     pub vehicle_id: String,
