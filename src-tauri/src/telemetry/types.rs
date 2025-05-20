@@ -6,10 +6,12 @@ use std::time::SystemTime;
 
 #[taurpc::ipc_type]
 #[derive(Debug, Default)]
+#[allow(non_snake_case)]
+
 pub struct VehicleTelemetryData {
-    pub eru: TelemetryData,
-    pub mea: TelemetryData,
-    pub mra: TelemetryData,
+    pub ERU: TelemetryData,
+    pub MEA: TelemetryData,
+    pub MRA: TelemetryData,
 }
 
 impl VehicleTelemetryData {
@@ -19,9 +21,9 @@ impl VehicleTelemetryData {
         telemetry_data: TelemetryData,
     ) {
         match vehicle_id.as_str() {
-            "eru" => self.eru = telemetry_data,
-            "mea" => self.mea = telemetry_data,
-            "mra" => self.mra = telemetry_data,
+            "eru" => self.ERU = telemetry_data,
+            "mea" => self.MEA = telemetry_data,
+            "mra" => self.MRA = telemetry_data,
             _ => {}
         }
     }
