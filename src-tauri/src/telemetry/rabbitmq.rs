@@ -1,6 +1,6 @@
 use crate::telemetry::geos;
 use crate::telemetry::geos::*;
-use crate::telemetry::types::TelemetryData;
+use crate::telemetry::types::{VehicleTelemetryData, TelemetryData};
 use crate::telemetry::types::{AppData, Coordinate};
 use futures_util::stream::StreamExt;
 use lapin::{
@@ -18,7 +18,7 @@ use tokio_amqp::*;
 #[derive(Clone)]
 pub struct RabbitMQAPIImpl {
     connection: Arc<Mutex<Connection>>,
-    state: Arc<Mutex<TelemetryData>>,
+    state: Arc<Mutex<VehicleTelemetryData>>,
     channel: Channel,
     app_handle: Option<AppHandle>,
 }
@@ -39,7 +39,7 @@ impl RabbitMQAPIImpl {
         let consumer = Self {
             connection,
             channel,
-            state: Arc::new(Mutex::new(TelemetryData::default())),
+            state: Arc::new(Mutex::new(VehicleTelemetryData::default())),
             app_handle: None,
         };
 
@@ -142,22 +142,20 @@ impl RabbitMQAPIImpl {
                             data.vehicle_status = "Approaching restricted area".to_string();
                         }
 
-                        // Update the internal state
-                        {
-                            let mut state = self.state.lock().await;
-                            *state = data.clone();
-                        }
+                        let vehicle_id = data.vehicle_id.clone();
+                        self.state.lock().await.update_vehicle_telemetry_state(vehicle_id.clone(), data.clone());
 
                         // Create payload for the event
                         let payload = json!({
-                            "vehicle_id": data.vehicle_id,
+                            "vehicle_id": vehicle_id,
                             "telemetry": data.clone()
                         });
 
                         // Emit the telemetry update using TelemetryEventTrigger
                         if let Some(app_handle) = &self.app_handle {
+                            let vehicle_telemetry: VehicleTelemetryData = self.state.lock().await.clone();
                             match TelemetryEventTrigger::new(app_handle.clone())
-                                .on_updated(data.clone())
+                                .on_updated(vehicle_telemetry)
                             {
                                 Ok(_) => {
                                     println!(
@@ -223,22 +221,22 @@ impl RabbitMQAPIImpl {
 )]
 pub trait RabbitMQAPI {
     #[taurpc(event)]
-    async fn on_updated(new_data: TelemetryData);
+    async fn on_updated(new_data: VehicleTelemetryData);
 
     // State Management
-    async fn get_default_data() -> TelemetryData;
-    async fn get_telemetry() -> TelemetryData;
+    async fn get_default_data() -> VehicleTelemetryData;
+    async fn get_telemetry() -> VehicleTelemetryData;
 }
 
 
 // Implementation of the TauRPC trait for our API
 #[taurpc::resolvers]
 impl RabbitMQAPI for RabbitMQAPIImpl {
-    async fn get_default_data(self) -> TelemetryData {
+    async fn get_default_data(self) -> VehicleTelemetryData {
         Self::new().await.unwrap().state.lock().await.clone()
     }
 
-    async fn get_telemetry(self) -> TelemetryData {
+    async fn get_telemetry(self) -> VehicleTelemetryData {
         self.state.lock().await.clone()
     }
 }

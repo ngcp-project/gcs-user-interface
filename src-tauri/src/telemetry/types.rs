@@ -5,12 +5,28 @@ use std::collections::HashMap;
 use std::time::SystemTime;
 
 #[taurpc::ipc_type]
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct VehicleTelemetryData {
     pub eru: TelemetryData,
     pub mea: TelemetryData,
     pub mra: TelemetryData,
 }
+
+impl VehicleTelemetryData {
+    pub fn update_vehicle_telemetry_state(
+        &mut self,
+        vehicle_id: String,
+        telemetry_data: TelemetryData,
+    ) {
+        match vehicle_id.as_str() {
+            "eru" => self.eru = telemetry_data,
+            "mea" => self.mea = telemetry_data,
+            "mra" => self.mra = telemetry_data,
+            _ => {}
+        }
+    }
+}
+
 
 #[taurpc::ipc_type]
 #[derive(Debug)]
