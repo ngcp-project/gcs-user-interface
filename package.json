@@ -13,6 +13,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@geoman-io/leaflet-geoman-free": "^2.18.3",
     "@rushstack/eslint-patch": "^1.11.0",
     "@tauri-apps/api": "2.0.0",
     "@tauri-apps/plugin-shell": "~2.2.1",

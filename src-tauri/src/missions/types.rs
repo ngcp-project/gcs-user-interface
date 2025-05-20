@@ -80,6 +80,8 @@ pub struct StageStruct {
     pub search_area: GeofenceType,
 }
 
+
+// TODO: Change ZoneType and ZonesStruct to match
 #[taurpc::ipc_type]
 #[derive(Debug)]
 pub struct ZonesStruct {

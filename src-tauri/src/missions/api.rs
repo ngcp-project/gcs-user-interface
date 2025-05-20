@@ -341,6 +341,14 @@ pub trait MissionApi {
         vehicle_name: VehicleEnum,
         stage_name: String,
     ) -> Result<(), String>;
+    async fn update_stage(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: i32,
+        vehicle_name: VehicleEnum,
+        stage_id: i32,
+        new_stage_name: Option<String>,
+        new_status: Option<MissionStageStatusEnum>,
+    ) -> Result<(), String>;
     async fn delete_stage(
         app_handle: AppHandle<impl Runtime>,
         mission_id: i32,
@@ -360,6 +368,14 @@ pub trait MissionApi {
         vehicle_name: VehicleEnum,
     ) -> Result<(), String>;
 
+    async fn update_stage_area(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: i32,
+        vehicle_name: VehicleEnum,
+        stage_id: i32,
+        area: GeofenceType,
+    ) -> Result<(), String>;
+
     // ----------------------------------
     // Zone Operations
     // ----------------------------------
@@ -367,6 +383,13 @@ pub trait MissionApi {
         app_handle: AppHandle<impl Runtime>,
         mission_id: i32,
         zone_type: ZoneType,
+    ) -> Result<(), String>;
+    async fn update_zone(
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: i32,
+        zone_type: ZoneType,
+        zone_index: i32,
+        zone_coords: GeofenceType,
     ) -> Result<(), String>;
     async fn delete_zone(
         app_handle: AppHandle<impl Runtime>,
@@ -569,6 +592,74 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
 
+    async fn update_stage(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: i32,
+        vehicle_name: VehicleEnum,
+        stage_id: i32,
+        new_stage_name: Option<String>,
+        new_status: Option<MissionStageStatusEnum>,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found")?;
+        let vehicle = match vehicle_name {
+            VehicleEnum::MEA => &mut mission.vehicles.MEA,
+            VehicleEnum::ERU => &mut mission.vehicles.ERU,
+            VehicleEnum::MRA => &mut mission.vehicles.MRA,
+        };
+        let stage = vehicle
+            .stages
+            .iter_mut()
+            .find(|s| s.stage_id == stage_id)
+            .ok_or("Stage not found")?;
+
+        if let Some(name) = new_stage_name {
+            stage.stage_name = name;
+        }
+        if let Some(status) = new_status {
+            stage.stage_status = status;
+        }
+
+        self.emit_state_update(&app_handle, &state)
+    }
+
+    async fn update_stage_area(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: i32,
+        vehicle_name: VehicleEnum,
+        stage_id: i32,
+        area: GeofenceType,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found")?;
+
+        let vehicle = match vehicle_name {
+            VehicleEnum::MEA => &mut mission.vehicles.MEA,
+            VehicleEnum::ERU => &mut mission.vehicles.ERU,
+            VehicleEnum::MRA => &mut mission.vehicles.MRA,
+        };
+
+        let stage = vehicle
+            .stages
+            .iter_mut()
+            .find(|s| s.stage_id == stage_id)
+            .ok_or("Stage not found")?;
+
+        stage.search_area = area;
+
+        self.emit_state_update(&app_handle, &state)
+    }
+
     async fn delete_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -596,7 +687,8 @@ impl MissionApi for MissionApiImpl {
             .position(|s| s.stage_id == stage_id)
             .ok_or("Stage not found")?;
 
-        if vehicle.current_stage >= stage_index as i32 {
+        let stage = &vehicle.stages[stage_index];
+        if matches!(stage.stage_status, MissionStageStatusEnum::Active | MissionStageStatusEnum::Complete) {
             return Err("Cannot delete current/completed stage".into());
         }
         delete_stage(
@@ -657,7 +749,6 @@ impl MissionApi for MissionApiImpl {
             .iter_mut()
             .find(|m| m.mission_id == mission_id)
             .ok_or("Mission not found")?;
-
         let vehicle = match vehicle_name {
             VehicleEnum::MEA => &mut mission.vehicles.MEA,
             VehicleEnum::ERU => &mut mission.vehicles.ERU,
@@ -765,7 +856,42 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
 
-    // TODO: replace temp test zones with rust state zones and test with rust state
+    // TODO: SQL
+    async fn update_zone(
+        self,
+        app_handle: AppHandle<impl Runtime>,
+        mission_id: i32,
+        zone_type: ZoneType,
+        zone_index: i32,
+        zone_coords: GeofenceType,
+    ) -> Result<(), String> {
+        let mut state = self.state.lock().await;
+        let mission = state
+            .missions
+            .iter_mut()
+            .find(|m| m.mission_id == mission_id)
+            .ok_or("Mission not found")?;
+
+        // TODO: Error handling for out of bounds
+        match zone_type {
+            ZoneType::KeepIn => {
+                // if zone_index >= mission.zones.keep_in_zones.len() as u32 {
+                //     return Err("KeepIn index out of range".into());
+                // }
+                mission.zones.keep_in_zones[zone_index as usize] = zone_coords;
+            }
+            ZoneType::KeepOut => {
+                // if zone_index >= mission.zones.keep_out_zones.len() as u32 {
+                //     return Err("KeepOut index out of range".into());
+                // }
+                mission.zones.keep_out_zones[zone_index as usize] = zone_coords;
+            }
+        }
+
+        self.emit_state_update(&app_handle, &state)
+    }
+
+    // TODO: SQL
     async fn delete_zone(
         self,
         app_handle: AppHandle<impl Runtime>,

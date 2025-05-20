@@ -2,8 +2,9 @@
 import VehicleStatus from "../components/VehicleStatusComponent.vue";
 import { onMounted, ref, Ref } from "vue";
 import Map from "../components/Map.vue";
-import MapSidebar from "../components/MapSidebar.vue";
-
+import { Button } from "@/components/ui/button";
+import MapSidebar from "@/components/MapSidebar.vue";
+import mapStore from "@/lib/MapStore";
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
 const ERU_data = ref({
   batteryPct: 0,
@@ -94,13 +95,59 @@ function updateIsInKeepIn(vehicleKey: string, isInZone: boolean) {
 function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
   vehicleMap[vehicleKey.toLowerCase()].value.inKeepOut = isInZone;
 }
+
+// Add ref for the map component
+const mapRef = ref();
+
+// Add methods to control the map
+const handleDrawPolygon = () => {
+  mapRef.value?.toggleDrawMode();
+};
+
+const handleEditPolygon = () => {
+  mapRef.value?.toggleEditMode();
+};
+
+const handleDragPolygon = () => {
+  mapRef.value?.toggleDragMode();
+};
+
+const handleRemovePolygon = () => {
+  mapRef.value?.toggleRemoveMode();
+};
+
+const handleZoneIn = async () => {
+  try {
+    await mapRef.value?.sendZoneInPolygonPoints();
+  } catch (error) {
+    console.error("Error handling Zone In:", error);
+  }
+};
+
+const handleZoneOut = async () => {
+  try {
+    await mapRef.value?.sendZoneOutPolygonPoints();
+  } catch (error) {
+    console.error("Error handling Zone Out:", error);
+  }
+};
+
+const handleClearPolygons = async () => {
+  try {
+    await mapRef.value?.clearPolygons();
+  } catch (error) {
+    console.error("Error handling Clear All:", error);
+  }
+};
 </script>
 
 <template>
-  <div class="flex flex-row h-full w-[100dvw]">
+
+  <div class="flex h-full w-[100dvw] flex-row">
+
     <div class="flex-grow">
-      <!-- should be fire coords -->
-      <Map
+       <!-- should be fire coords --> <Map
+        ref="mapRef"
         :ERU_coords="ERU_data.coordinates"
         :ERU_yaw="ERU_data.yaw"
         :MEA_coords="MEA_data.coordinates"
@@ -112,13 +159,13 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
         :FRA_yaw="FRA_data.yaw"
         @keepIn="updateIsInKeepIn"
         @keepOut="updateIsInKeepOut"
-      ></Map>
+      />
     </div>
-
-    <div>
-      <MapSidebar side="right"/>
-    </div>
+     <!-- <div
+      class="flex h-full w-fit max-w-[300px] flex-none flex-col gap-[6px] overflow-y-scroll bg-background p-[6px]"
+    > --> <MapSidebar side="right" /> <!-- </div> -->
   </div>
+
 </template>
 
 <style scoped>
@@ -150,3 +197,4 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
   width: 77%;
 }
 </style>
+
