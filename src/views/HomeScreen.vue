@@ -171,7 +171,6 @@ async function initializeTelemetryListeners() {
   for (const vehicleKey of Object.keys(vehicleMap)) {
     try {
       console.log(`Initializing telemetry for ${vehicleKey}`);
-      await core.invoke("init_telemetry_consumer", { vehicleId: vehicleKey });
       console.log(`Initial telemetry data: for ${vehicleKey}`);
     } catch (error) {
       console.error(`Failed to fetch initial telemetry for ${vehicleKey}:`, error);
