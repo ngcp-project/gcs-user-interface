@@ -6,6 +6,14 @@ use std::time::SystemTime;
 
 #[taurpc::ipc_type]
 #[derive(Debug)]
+pub struct VehicleTelemetryData {
+    pub eru: TelemetryData,
+    pub mea: TelemetryData,
+    pub mra: TelemetryData,
+}
+
+#[taurpc::ipc_type]
+#[derive(Debug)]
 #[derive(Default)]
 pub struct TelemetryData {
     pub vehicle_id: String, // Added vehicle_id
