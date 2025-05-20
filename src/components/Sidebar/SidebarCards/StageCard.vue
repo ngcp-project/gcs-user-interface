@@ -43,14 +43,18 @@ const vehicleData = currentMissionId !== null && currentVehicleName !== null ? m
 // Get list of stages from vehicle data
 const stageList = vehicleData !== undefined && vehicleData !== null ? vehicleData.stages : null;
 
-// Get index of active stage
-const currStageIndex = vehicleData !== undefined && vehicleData !== null ? vehicleData.current_stage : null;
+// Get current stage id
+const currStageId = vehicleData !== undefined && vehicleData !== null ? vehicleData.current_stage : null;
+// Find index of current stage in stage list
+const currStageIndex = stageList && currStageId !== null
+  ? stageList.findIndex(stage => stage.stage_id === currStageId)
+  : null;
 
 // Compare current stage index with active stage index
 const searchAreaEditable =
-stageList !== undefined && stageList !== null && 
-currStageIndex !== undefined && currStageIndex !== null ? 
-props.stageIndex >= currStageIndex : null;
+  stageList !== undefined && stageList !== null &&
+  currStageIndex !== undefined && currStageIndex !== null ?
+  props.stageIndex >= currStageIndex : null;
 
 // Add editing state tracking
 const editingStageIndex = ref<number | null>(null);

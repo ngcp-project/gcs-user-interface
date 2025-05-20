@@ -687,7 +687,8 @@ impl MissionApi for MissionApiImpl {
             .position(|s| s.stage_id == stage_id)
             .ok_or("Stage not found")?;
 
-        if vehicle.current_stage >= stage_index as i32 {
+        let stage = &vehicle.stages[stage_index];
+        if matches!(stage.stage_status, MissionStageStatusEnum::Active | MissionStageStatusEnum::Complete) {
             return Err("Cannot delete current/completed stage".into());
         }
         delete_stage(
