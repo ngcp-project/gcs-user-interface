@@ -5,6 +5,7 @@ use tauri::{AppHandle, Runtime};
 use taurpc;
 use tokio::sync::Mutex;
 use super::sql::*;
+use serde_json::Value;
 
 /*==============================================================================
  * MissionApiImpl Structure and Default Implementation
@@ -791,7 +792,6 @@ impl MissionApi for MissionApiImpl {
     // ----------------------------------
     // Zone Operations Implementations
     // ----------------------------------
-    // TODO: replace temp test zones with rust state zones and test with rust state
     async fn add_zone(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -811,52 +811,11 @@ impl MissionApi for MissionApiImpl {
             ZoneType::KeepOut => mission.zones.keep_out_zones.push(GeofenceType::default()),
         }
 
-        let temp_test_keep_in_zone = &vec![
-            r#"[
-                (69,420),
-                (69,420),
-                (69,420),
-                (69,420),
-                (69,420),
-            ]"#.to_string(),
-            r#"[
-                (420,69),
-                (420,69),
-                (420,69),
-                (420,69),
-                (420,69),
-            ]"#.to_string()
-        ];
-
-        let temp_test_keep_out_zone = &vec![
-            r#"[
-                (1,2),
-                (1,2),
-                (1,2),
-                (1,2),
-                (1,2),
-            ]"#.to_string(),
-            r#"[
-                (3,4),
-                (3,4),
-                (3,4),
-                (3,4),
-                (3,4),
-            ]"#.to_string()
-        ];
-
-        // add/update zones
-        update_zones(
-            self.db.clone(),
-            mission.mission_id,
-            temp_test_keep_in_zone.clone(),
-            temp_test_keep_out_zone.clone(),
-        ).await.expect  ("Failed to add zones");
+        // note: no need for SQL here since its just an empty zone be changed in the rust state
 
         self.emit_state_update(&app_handle, &state)
     }
 
-    // TODO: SQL
     async fn update_zone(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -888,10 +847,32 @@ impl MissionApi for MissionApiImpl {
             }
         }
 
+        let keep_in_zones = mission.zones.keep_in_zones.iter()
+            .map(|zone| {
+                let json = serde_json::to_string(zone).unwrap();
+                convert_zone_format(&json)
+            })
+            .collect::<Vec<String>>();
+
+        let keep_out_zones = mission.zones.keep_out_zones.iter()
+            .map(|zone| {
+                let json = serde_json::to_string(zone).unwrap();
+                convert_zone_format(&json)
+            })
+            .collect::<Vec<String>>();
+
+
+        // update zones
+        update_zones(
+            self.db.clone(),
+            mission.mission_id,
+            keep_in_zones.clone(),
+            keep_out_zones.clone(),
+        ).await.expect("Failed to add zones");
+
         self.emit_state_update(&app_handle, &state)
     }
 
-    // TODO: SQL
     async fn delete_zone(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -907,51 +888,62 @@ impl MissionApi for MissionApiImpl {
             .find(|m| m.mission_id == mission_id)
             .ok_or("Mission not found")?;
 
+        // TODO: Error handling for out of bounds
         match zone_type {
             ZoneType::KeepIn => {
-                if zone_index >= mission.zones.keep_in_zones.len() as i32 {
-                    return Err("KeepIn index out of range".into());
-                }
+                // if zone_index >= mission.zones.keep_in_zones.len() as i32 {
+                //     return Err("KeepIn index out of range".into());
+                // }
                 mission.zones.keep_in_zones.remove(zone_index as usize);
             }
             ZoneType::KeepOut => {
-                if zone_index >= mission.zones.keep_out_zones.len() as i32 {
-                    return Err("KeepOut index out of range".into());
-                }
+                // if zone_index >= mission.zones.keep_out_zones.len() as i32 {
+                //     return Err("KeepOut index out of range".into());
+                // }
                 mission.zones.keep_out_zones.remove(zone_index as usize);
             }
         }
 
-        let temp_test_keep_in_zone = &vec![
-            r#"[
-                (69,420),
-                (69,420),
-            ]"#.to_string(),
-            r#"[
-                (420,69),
-                (420,69),
-            ]"#.to_string()
-        ];
+        let keep_in_zones = mission.zones.keep_in_zones.iter()
+            .map(|zone| {
+                let json = serde_json::to_string(zone).unwrap();
+                convert_zone_format(&json)
+            })
+            .collect::<Vec<String>>();
 
-        let temp_test_keep_out_zone = &vec![
-            r#"[
-                (1,2),
-                (1,2),
-            ]"#.to_string(),
-            r#"[
-                (3,4),
-                (3,4),
-            ]"#.to_string()
-        ];
+        let keep_out_zones = mission.zones.keep_out_zones.iter()
+            .map(|zone| {
+                let json = serde_json::to_string(zone).unwrap();
+                convert_zone_format(&json)
+            })
+            .collect::<Vec<String>>();
 
-        // delete/update zones
+
+        // update zones
         update_zones(
             self.db.clone(),
             mission.mission_id,
-            temp_test_keep_in_zone.clone(),
-            temp_test_keep_out_zone.clone(),
-        ).await.expect  ("Failed to add zones");
+            keep_in_zones.clone(),
+            keep_out_zones.clone(),
+        ).await.expect("Failed to delete zones");
 
         self.emit_state_update(&app_handle, &state)
+    }
+}
+
+// helper function for converting JSON string to zone format
+fn convert_zone_format(json_str: &str) -> String {
+    let parsed: Value = serde_json::from_str(json_str).unwrap();
+
+    if let Some(arr) = parsed.as_array() {
+        let tuples: Vec<String> = arr.iter().map(|point| {
+            let lat = point["lat"].as_f64().unwrap();
+            let long = point["long"].as_f64().unwrap();
+            format!("({:.5},{:.5})", lat, long)
+        }).collect();
+
+        format!("[\n    {}\n]", tuples.join(",\n    "))
+    } else {
+        String::new()
     }
 }
