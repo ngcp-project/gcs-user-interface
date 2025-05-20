@@ -700,7 +700,7 @@ impl MissionApi for MissionApiImpl {
     // ----------------------------------
     // Zone Operations Implementations
     // ----------------------------------
-    // TODO: SQL
+    // TODO: replace temp test zones with rust state zones and test with rust state
     async fn add_zone(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -754,8 +754,8 @@ impl MissionApi for MissionApiImpl {
             ]"#.to_string()
         ];
 
-        // Transition to next stage if available
-        add_zones(
+        // add/update zones
+        update_zones(
             self.db.clone(),
             mission.mission_id,
             temp_test_keep_in_zone.clone(),
@@ -765,7 +765,7 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
 
-    // TODO: SQL
+    // TODO: replace temp test zones with rust state zones and test with rust state
     async fn delete_zone(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -795,6 +795,36 @@ impl MissionApi for MissionApiImpl {
                 mission.zones.keep_out_zones.remove(zone_index as usize);
             }
         }
+
+        let temp_test_keep_in_zone = &vec![
+            r#"[
+                (69,420),
+                (69,420),
+            ]"#.to_string(),
+            r#"[
+                (420,69),
+                (420,69),
+            ]"#.to_string()
+        ];
+
+        let temp_test_keep_out_zone = &vec![
+            r#"[
+                (1,2),
+                (1,2),
+            ]"#.to_string(),
+            r#"[
+                (3,4),
+                (3,4),
+            ]"#.to_string()
+        ];
+
+        // delete/update zones
+        update_zones(
+            self.db.clone(),
+            mission.mission_id,
+            temp_test_keep_in_zone.clone(),
+            temp_test_keep_out_zone.clone(),
+        ).await.expect  ("Failed to add zones");
 
         self.emit_state_update(&app_handle, &state)
     }

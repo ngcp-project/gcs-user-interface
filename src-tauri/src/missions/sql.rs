@@ -315,7 +315,7 @@ pub async fn update_mission_status(
     Ok(())
 }
 
-pub async fn add_zones(
+pub async fn update_zones(
     db_conn: PgPool,
     mission_id: i32,
     keep_in_zones: Vec<String>,
@@ -327,13 +327,13 @@ pub async fn add_zones(
         ON CONFLICT (mission_id) DO UPDATE
         SET keep_in_zones = EXCLUDED.keep_in_zones,
             keep_out_zones = EXCLUDED.keep_out_zones
-    ")// waaah where is my UPSERT  T^T
+    ")// waaah where is my UPSERT  T^T  ~tho this is basically an upsert
     .bind(mission_id)
     .bind(keep_in_zones)
     .bind(keep_out_zones)
     .execute(&db_conn)
     .await
-    .expect("Failed to update mission zones");
+    .expect("Failed to upsert mission zones");
 
     Ok(())
 }
