@@ -1,10 +1,10 @@
+use super::sql::*;
 use super::types::*;
-use std::sync::Arc;
 use sqlx::{postgres::PgPoolOptions, PgPool, Row};
+use std::sync::Arc;
 use tauri::{AppHandle, Runtime};
 use taurpc;
 use tokio::sync::Mutex;
-use super::sql::*;
 
 /*==============================================================================
  * MissionApiImpl Structure and Default Implementation
@@ -24,7 +24,7 @@ pub struct MissionApiImpl {
 impl MissionApiImpl {
     /// Create new instance with initial state
     pub async fn new() -> Self {
-        let mut initial_state = MissionsStruct {    
+        let mut initial_state = MissionsStruct {
             current_mission: 0,
             missions: vec![],
         };
@@ -35,8 +35,7 @@ impl MissionApiImpl {
             .await
             .expect("Failed to connect to the database");
 
-        let all_mission_ids = sqlx::query(
-            "SELECT mission_id FROM missions ")
+        let all_mission_ids = sqlx::query("SELECT mission_id FROM missions ")
             .fetch_all(&database_connection)
             .await
             .expect("Failed to execute query");
@@ -46,7 +45,7 @@ impl MissionApiImpl {
             for mission_id_row in all_mission_ids {
                 let mission_id: i32 = mission_id_row.get("mission_id");
                 let mission = sqlx::query(
-                "
+                    "
                     SELECT 
                         missions.mission_id,
                         missions.mission_name,
@@ -66,7 +65,7 @@ impl MissionApiImpl {
                     INNER JOIN vehicles ON missions.mission_id = vehicles.mission_id
                     INNER JOIN stages ON vehicles.vehicle_id = stages.vehicle_id
                     WHERE missions.mission_id = $1
-                    "
+                    ",
                 )
                 .bind(mission_id)
                 .fetch_all(&database_connection)
@@ -94,7 +93,11 @@ impl MissionApiImpl {
                 initial_state.missions.push(MissionStruct {
                     mission_name: mission[0].get("mission_name"),
                     mission_id: mission[0].get("mission_id"),
-                    mission_status: match mission[0].try_get::<String, _>("status").unwrap_or_else(|_| "Inactive".to_string()).as_str() {
+                    mission_status: match mission[0]
+                        .try_get::<String, _>("status")
+                        .unwrap_or_else(|_| "Inactive".to_string())
+                        .as_str()
+                    {
                         "Active" => MissionStageStatusEnum::Active,
                         "Inactive" => MissionStageStatusEnum::Inactive,
                         "Complete" => MissionStageStatusEnum::Complete,
@@ -112,14 +115,19 @@ impl MissionApiImpl {
                                 .map(|row| StageStruct {
                                     stage_name: row.get("stage_name"),
                                     stage_id: row.get("stage_id"),
-                                    stage_status: match row.try_get::<String, _>("stage_status").unwrap_or_else(|_| "Inactive".to_string()).as_str() {
+                                    stage_status: match row
+                                        .try_get::<String, _>("stage_status")
+                                        .unwrap_or_else(|_| "Inactive".to_string())
+                                        .as_str()
+                                    {
                                         "Active" => MissionStageStatusEnum::Active,
                                         "Inactive" => MissionStageStatusEnum::Inactive,
                                         "Complete" => MissionStageStatusEnum::Complete,
                                         "Failed" => MissionStageStatusEnum::Failed,
                                         _ => MissionStageStatusEnum::Inactive,
                                     },
-                                    search_area: row.try_get::<Vec<String>, _>("search_area")
+                                    search_area: row
+                                        .try_get::<Vec<String>, _>("search_area")
                                         .unwrap_or_else(|_| Vec::new())
                                         .into_iter()
                                         .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
@@ -137,14 +145,19 @@ impl MissionApiImpl {
                                 .map(|row| StageStruct {
                                     stage_name: row.get("stage_name"),
                                     stage_id: row.get("stage_id"),
-                                    stage_status: match row.try_get::<String, _>("stage_status").unwrap_or_else(|_| "Inactive".to_string()).as_str() {
+                                    stage_status: match row
+                                        .try_get::<String, _>("stage_status")
+                                        .unwrap_or_else(|_| "Inactive".to_string())
+                                        .as_str()
+                                    {
                                         "Active" => MissionStageStatusEnum::Active,
                                         "Inactive" => MissionStageStatusEnum::Inactive,
                                         "Complete" => MissionStageStatusEnum::Complete,
                                         "Failed" => MissionStageStatusEnum::Failed,
                                         _ => MissionStageStatusEnum::Inactive,
                                     },
-                                    search_area: row.try_get::<Vec<String>, _>("search_area")
+                                    search_area: row
+                                        .try_get::<Vec<String>, _>("search_area")
                                         .unwrap_or_else(|_| Vec::new())
                                         .into_iter()
                                         .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
@@ -162,14 +175,19 @@ impl MissionApiImpl {
                                 .map(|row| StageStruct {
                                     stage_name: row.get("stage_name"),
                                     stage_id: row.get("stage_id"),
-                                    stage_status: match row.try_get::<String, _>("stage_status").unwrap_or_else(|_| "Inactive".to_string()).as_str() {
+                                    stage_status: match row
+                                        .try_get::<String, _>("stage_status")
+                                        .unwrap_or_else(|_| "Inactive".to_string())
+                                        .as_str()
+                                    {
                                         "Active" => MissionStageStatusEnum::Active,
                                         "Inactive" => MissionStageStatusEnum::Inactive,
                                         "Complete" => MissionStageStatusEnum::Complete,
                                         "Failed" => MissionStageStatusEnum::Failed,
                                         _ => MissionStageStatusEnum::Inactive,
                                     },
-                                    search_area: row.try_get::<Vec<String>, _>("search_area")
+                                    search_area: row
+                                        .try_get::<Vec<String>, _>("search_area")
                                         .unwrap_or_else(|_| Vec::new())
                                         .into_iter()
                                         .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
@@ -188,7 +206,8 @@ impl MissionApiImpl {
                                     .unwrap_or_else(|_| Vec::new())
                             })
                             .collect(),
-                        keep_out_zones: match mission[0].try_get::<Vec<String>, _>("keep_out_zones") {
+                        keep_out_zones: match mission[0].try_get::<Vec<String>, _>("keep_out_zones")
+                        {
                             Ok(zones) => zones
                                 .into_iter()
                                 .map(|zone| {
@@ -213,11 +232,9 @@ impl MissionApiImpl {
 
     /// Create default stage configuration
     pub async fn create_default_stage(self, name: &str, id: i32) -> StageStruct {
-        let stage_id = insert_new_stage(
-            self.db.clone(),
-            id,
-            name,
-        ).await.expect("Failed to insert new stage into database");
+        let stage_id = insert_new_stage(self.db.clone(), id, name)
+            .await
+            .expect("Failed to insert new stage into database");
 
         StageStruct {
             stage_name: name.to_string(),
@@ -442,11 +459,9 @@ impl MissionApi for MissionApiImpl {
             .find(|m| m.mission_id == mission_id)
             .ok_or("Mission not found")?;
 
-        update_mission_name(
-            self.db.clone(),
-            mission.mission_id,
-            &mission_name,
-        ).await.expect("Failed to update mission name");
+        update_mission_name(self.db.clone(), mission.mission_id, &mission_name)
+            .await
+            .expect("Failed to update mission name");
         mission.mission_name = mission_name;
         self.emit_state_update(&app_handle, &state)
     }
@@ -481,10 +496,9 @@ impl MissionApi for MissionApiImpl {
         ) {
             return Err("Cannot delete active/past missions".into());
         }
-        delete_mission(
-            self.db.clone(),
-            state.missions[mission_index].mission_id,
-        ).await.expect("Failed to delete mission from database");
+        delete_mission(self.db.clone(), state.missions[mission_index].mission_id)
+            .await
+            .expect("Failed to delete mission from database");
 
         state.missions.remove(mission_index);
         self.emit_state_update(&app_handle, &state)
@@ -542,7 +556,9 @@ impl MissionApi for MissionApiImpl {
             mission.mission_id,
             vehicle.vehicle_name.to_string(),
             is_auto,
-        ).await.expect("Failed to update auto mode in database");
+        )
+        .await
+        .expect("Failed to update auto mode in database");
 
         vehicle.is_auto = Some(is_auto);
         self.emit_state_update(&app_handle, &state)
@@ -574,7 +590,9 @@ impl MissionApi for MissionApiImpl {
             self.db.clone(),
             mission.mission_id,
             vehicle.vehicle_name.to_string(),
-        ).await.expect("Failed to find vehicle mission");
+        )
+        .await
+        .expect("Failed to find vehicle mission");
 
         let default_stage = Self::create_default_stage(
             self.clone(),
@@ -691,10 +709,9 @@ impl MissionApi for MissionApiImpl {
         if matches!(stage.stage_status, MissionStageStatusEnum::Active | MissionStageStatusEnum::Complete) {
             return Err("Cannot delete current/completed stage".into());
         }
-        delete_stage(
-            self.db.clone(),
-            stage_id,
-        ).await.expect("Failed to delete stage from database");
+        delete_stage(self.db.clone(), stage_id)
+            .await
+            .expect("Failed to delete stage from database");
 
         vehicle.stages.remove(stage_index);
         self.emit_state_update(&app_handle, &state)
@@ -725,22 +742,19 @@ impl MissionApi for MissionApiImpl {
             .find(|s| s.stage_id == stage_id)
             .ok_or("Stage not found")?;
 
-        update_stage_name(
-            self.db.clone(),
-            stage.stage_id,
-            &stage_name,
-        ).await.expect("Failed to update stage name");
+        update_stage_name(self.db.clone(), stage.stage_id, &stage_name)
+            .await
+            .expect("Failed to update stage name");
 
         stage.stage_name = stage_name;
         self.emit_state_update(&app_handle, &state)
     }
-    
+
     async fn transition_stage(
         self,
         app_handle: AppHandle<impl Runtime>,
         mission_id: i32,
         vehicle_name: VehicleEnum,
-
     ) -> Result<(), String> {
         println!("Transitioning stage for vehicle: {:?}", vehicle_name);
         let mut state = self.state.lock().await;
@@ -771,9 +785,14 @@ impl MissionApi for MissionApiImpl {
             mission.mission_id,
             vehicle.vehicle_name.to_string(),
             vehicle.current_stage,
-        ).await.expect("Failed to transition stage");
+        )
+        .await
+        .expect("Failed to transition stage");
 
-        println!("After Transition Stage: {:?}", transitioned_stage.unwrap_or(vehicle.current_stage));
+        println!(
+            "After Transition Stage: {:?}",
+            transitioned_stage.unwrap_or(vehicle.current_stage)
+        );
 
         if let Some(stage) = vehicle.stages.iter_mut().find(|s| s.stage_id == transitioned_stage.unwrap_or(vehicle.current_stage)) {
             vehicle.current_stage = transitioned_stage.unwrap_or(vehicle.current_stage);
@@ -857,7 +876,10 @@ impl MissionApi for MissionApiImpl {
         zone_type: ZoneType,
         zone_index: i32,
     ) -> Result<(), String> {
-        println!("Deleting zone of type: {:?} at index: {}", zone_type, zone_index);
+        println!(
+            "Deleting zone of type: {:?} at index: {}",
+            zone_type, zone_index
+        );
         let mut state = self.state.lock().await;
         let mission = state
             .missions
@@ -882,4 +904,8 @@ impl MissionApi for MissionApiImpl {
 
         self.emit_state_update(&app_handle, &state)
     }
+    
+    // async fn on_updated(new_data: MissionsStruct) {
+    //     todo!()
+    // }
 }
