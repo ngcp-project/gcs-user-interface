@@ -665,11 +665,7 @@ async fn main() {
         println!("Seeding dummy data...");
         init_database_dummy_data().await;
     }
-     if env::var("INITIALIZE_RABBITMQ")
-        .unwrap_or_default()
-        .to_lowercase()
-        == "true"
-    {
+
     // Initialize APIs outside of Tauri setup
     let rabbitmq_api = telemetry::rabbitmq::RabbitMQAPIImpl::new().await.unwrap();
 
@@ -722,36 +718,4 @@ async fn main() {
         .invoke_handler(move |invoke| router_handler(invoke))
         .run(tauri::generate_context!())
         .expect("Error running Tauri application");
-    }
-    else{
-        // let rabbitmq_api = telemetry::rabbitmq::RabbitMQAPIImpl::new().await.unwrap();
-
-    let missions_api = MissionApiImpl::new().await;
-
-    // Create router with both handlers
-    let router = Router::new()
-        .merge(missions_api.into_handler());
-        // .merge(rabbitmq_api.clone().into_handler());
-
-
-    tauri::Builder::default()
-        .plugin(tauri_plugin_shell::init())
-        .invoke_handler(router.into_handler())
-        .run(tauri::generate_context!())
-        .expect("Error running Tauri application");
-        
-    }
-
-//     async fn main() {
-//     // Initialize apis here
-//     let missions_api = MissionApiImpl::default();
-
-//     let router = Router::new().merge(missions_api.into_handler());
-
-//     tauri::Builder::default()
-//         .plugin(tauri_plugin_shell::init())
-//         .invoke_handler(router.into_handler())
-//         .run(tauri::generate_context!())
-//         .expect("error while running tauri application");
-// }
 }
