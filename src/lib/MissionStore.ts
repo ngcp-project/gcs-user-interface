@@ -218,7 +218,7 @@ taurpc.mission.on_updated.on((data: MissionsStruct) => {
 // are synced with new zustand state
 missionZustandStore.subscribe((newState) => {
   Object.assign(missionStore, newState);
-  console.log("Zustand Store updated", missionStore);
+  console.log("Mission Zustand Store updated", missionStore);
 });
 
 // Make all properties readonly to avoid desync
