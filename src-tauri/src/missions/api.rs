@@ -626,6 +626,23 @@ impl MissionApi for MissionApiImpl {
             stage.stage_status = status;
         }
 
+        update_stage_name(
+            self.db.clone(),
+            stage.stage_id,
+            &stage.stage_name,
+        ).await.expect("Failed to update stage name");
+        
+        update_stage_status(
+            self.db.clone(),
+            stage.stage_id,
+            &match stage.stage_status {
+                MissionStageStatusEnum::Active => "Active",
+                MissionStageStatusEnum::Inactive => "Inactive",
+                MissionStageStatusEnum::Complete => "Complete",
+                MissionStageStatusEnum::Failed => "Failed",
+            },
+        ).await.expect("Failed to update stage status");
+
         self.emit_state_update(&app_handle, &state)
     }
 
@@ -657,6 +674,23 @@ impl MissionApi for MissionApiImpl {
             .ok_or("Stage not found")?;
 
         stage.search_area = area;
+
+        let search_area_string = format!(
+            "[\n    {}\n]",
+            stage.search_area
+                .iter()
+                .map(|coord| format!("({}, {})", coord.lat, coord.long))
+                .collect::<Vec<String>>()
+                .join(",\n    ")
+        );
+        
+        let search_area_array: Vec<String> = vec![search_area_string.clone()];
+        
+        update_stage_area(
+            self.db.clone(),
+            stage.stage_id,
+            search_area_array,
+        ).await.expect("Failed to update stage area");
 
         self.emit_state_update(&app_handle, &state)
     }
@@ -891,15 +925,15 @@ impl MissionApi for MissionApiImpl {
         // TODO: Error handling for out of bounds
         match zone_type {
             ZoneType::KeepIn => {
-                // if zone_index >= mission.zones.keep_in_zones.len() as i32 {
-                //     return Err("KeepIn index out of range".into());
-                // }
+                if zone_index >= mission.zones.keep_in_zones.len() as i32 {
+                    return Err("KeepIn index out of range".into());
+                }
                 mission.zones.keep_in_zones.remove(zone_index as usize);
             }
             ZoneType::KeepOut => {
-                // if zone_index >= mission.zones.keep_out_zones.len() as i32 {
-                //     return Err("KeepOut index out of range".into());
-                // }
+                if zone_index >= mission.zones.keep_out_zones.len() as i32 {
+                    return Err("KeepOut index out of range".into());
+                }
                 mission.zones.keep_out_zones.remove(zone_index as usize);
             }
         }

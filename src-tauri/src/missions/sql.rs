@@ -186,6 +186,39 @@ pub async fn update_stage_name(
     Ok(())
 }
 
+pub async fn update_stage_status(
+    db_conn: PgPool,
+    stage_id: i32,
+    status: &str,
+) -> Result<(), sqlx::Error> {
+    query("
+        UPDATE stages SET status = $1 WHERE stage_id = $2
+    ")
+    .bind(status)
+    .bind(stage_id)
+    .execute(&db_conn)
+    .await
+    .expect("Failed to update stage status");
+
+    Ok(())
+}
+
+pub async fn update_stage_area(
+    db_conn: PgPool,
+    stage_id: i32,
+    area: Vec<String>,
+) -> Result<(), sqlx::Error> {
+    query("
+        UPDATE stages SET search_area = $1 WHERE stage_id = $2
+    ")
+    .bind(area)
+    .bind(stage_id)
+    .execute(&db_conn)
+    .await
+    .expect("Failed to update stage area");
+
+    Ok(())
+}
 
 pub async fn update_auto_mode_vehicle(
     db_conn: PgPool,
