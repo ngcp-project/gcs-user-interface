@@ -3,18 +3,19 @@
 
 use std::env;
 use taurpc::Router;
-use rabbitmq::{TelemApiImpl, CommandsApiImpl};
-
-// Import the traits so that into_handler() and the RPC methods exist
-use rabbitmq::telem::TeleApi;
-use rabbitmq::commands::CommandsApi;
+use tauri::Builder;
 
 mod missions;
 mod telemetry;
+mod rabbitmq;
 
 use crate::telemetry::rabbitmq::RabbitMQAPI;
 use missions::api::{MissionApi, MissionApiImpl};
 use telemetry::rabbitmq::RabbitMQAPIImpl;
+use rabbitmq::{TelemApiImpl, CommandsApiImpl};
+use rabbitmq::telem::TeleApi;
+use rabbitmq::commands::CommandsApi;
+
 mod init_db;
 use init_db::{clear_database, initialize_database, init_database_dummy_data};
 
@@ -46,16 +47,6 @@ async fn main() {
     // Initialize APIs outside of Tauri setup
     let rabbitmq_api = RabbitMQAPIImpl::new().await.unwrap();
 
-    let missions_api = MissionApiImpl::new().await;
-
-    // Create router with both handlers
-    let router = Router::new()
-        .merge(missions_api.into_handler())
-        .merge(rabbitmq_api.clone().into_handler());
-
-    let router_handler = router.into_handler();
-
-    tauri::Builder::default()
     // Initialize each impl (they all impl Default + Clone)
     let missions_api = MissionApiImpl::default();
     let telem_api = TelemApiImpl::default();
@@ -65,11 +56,14 @@ async fn main() {
     let telem_handler = telem_api.clone();
     let commands_handler = commands_api.clone();
 
-    // Merge all API handlers into a single router
+    // Create router with all handlers
     let router = Router::new()
         .merge(missions_api.into_handler())
         .merge(telem_handler.into_handler())
-        .merge(commands_handler.into_handler());
+        .merge(commands_handler.into_handler())
+        .merge(rabbitmq_api.clone().into_handler());
+
+    let router_handler = router.into_handler();
 
     Builder::default()
         .plugin(tauri_plugin_shell::init())

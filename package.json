@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "osm:setup": "docker-compose run osm-setup",
     "osm:run": "docker-compose up osm-server",
-    "tauri": "tauri dev",
+    "tauri": "tauri",
     "format": "prettier --write src/",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
