@@ -11,6 +11,7 @@ mod telemetry;
 
 use crate::telemetry::rabbitmq::RabbitMQAPI;
 use missions::api::{MissionApi, MissionApiImpl};
+use telemetry::rabbitmq::RabbitMQAPIImpl;
 
 const DB_URL: &str = "postgres://ngcp:ngcp@localhost:5433/ngcpdb";
 
@@ -667,7 +668,7 @@ async fn main() {
     }
 
     // Initialize APIs outside of Tauri setup
-    let rabbitmq_api = telemetry::rabbitmq::RabbitMQAPIImpl::new().await.unwrap();
+    let rabbitmq_api = RabbitMQAPIImpl::new().await.unwrap();
 
     let missions_api = MissionApiImpl::new().await;
 
