@@ -2,7 +2,6 @@ use super::sql::*;
 use super::types::*;
 use std::{sync::Arc, thread::current};
 use sqlx::{postgres::PgPoolOptions, PgPool, Row};
-use std::sync::Arc;
 use tauri::{AppHandle, Runtime};
 use taurpc;
 use tokio::sync::Mutex;
