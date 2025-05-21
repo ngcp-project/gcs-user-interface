@@ -1,5 +1,5 @@
 use super::types::*;
-use std::sync::Arc;
+use std::{sync::Arc, thread::current};
 use sqlx::{postgres::PgPoolOptions, PgPool, Row};
 use tauri::{AppHandle, Runtime};
 use taurpc;
@@ -686,11 +686,22 @@ impl MissionApi for MissionApiImpl {
         
         let search_area_array: Vec<String> = vec![search_area_string.clone()];
         
-        update_stage_area(
+        let vehicle_id = select_vehicle_from_mission(
+            self.db.clone(),
+            mission.mission_id,
+            vehicle.vehicle_name.to_string(),
+        ).await.expect("Failed to find vehicle mission");
+
+        let current_stage_id = update_stage_area(
             self.db.clone(),
             stage.stage_id,
             search_area_array,
+            vehicle_id,
         ).await.expect("Failed to update stage area");
+
+        if current_stage_id == stage.stage_id {
+            stage.stage_status = MissionStageStatusEnum::Active;
+        }
 
         self.emit_state_update(&app_handle, &state)
     }
