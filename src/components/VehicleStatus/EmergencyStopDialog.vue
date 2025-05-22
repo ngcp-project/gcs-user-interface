@@ -17,20 +17,19 @@
       </DialogHeader>
       <slot name="body">
         <div class="text-xl font-medium">
-          Send Stop Command to
+          Send STOP command to
           <span class="font-bold text-red-500">
             <span v-if="vehicleName == 'all'"><span class="">ALL</span> vehicles</span>
             <span v-else>
               vehicle <span>{{ vehicleName }}</span>
             </span>
-          </span>
-          ?
+          </span>?
         </div>
       </slot>
 
       <DialogFooter>
-        <DialogClose><Button variant="destructive">No</Button></DialogClose>
-        <DialogClose><Button @click="sendStopCommand">Yes</Button></DialogClose>
+        <DialogClose><Button>No</Button></DialogClose>
+        <DialogClose><Button variant="destructive" @click="sendStopCommand">Yes</Button></DialogClose>
       </DialogFooter>
     </DialogContent>
   </Dialog>
