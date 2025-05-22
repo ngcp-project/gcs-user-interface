@@ -52,7 +52,7 @@ const props = defineProps<{
   vehicleName: string;
 }>();
 
-const vehicle_names = ["ERU", "MEA", "MRA", "FRA"];
+const vehicle_names = ["ERU", "MEA", "MRA"];
 
 function sendStopCommand() {
   const promises: any[] = [];
