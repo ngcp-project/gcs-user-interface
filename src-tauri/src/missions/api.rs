@@ -526,6 +526,31 @@ impl MissionApi for MissionApiImpl {
         update_mission_status(self.db.clone(), mission_id, "Active").await.expect("Failed to update mission status");
 
         
+        let vehicles = &mut state.missions[start_mission_index].vehicles;
+        
+        // Set the first stage of each vehicle to active
+        vehicles.MEA.stages[0].stage_status = MissionStageStatusEnum::Active;
+        update_stage_status(
+            self.db.clone(),
+            vehicles.MEA.stages[0].stage_id,
+            "Active",
+        ).await.expect("Failed to update stage status");
+        
+        vehicles.ERU.stages[0].stage_status = MissionStageStatusEnum::Active;
+        update_stage_status(
+            self.db.clone(),
+            vehicles.ERU.stages[0].stage_id,
+            "Active",
+        ).await.expect("Failed to update stage status");
+        
+        
+        vehicles.MRA.stages[0].stage_status = MissionStageStatusEnum::Active;
+        update_stage_status(
+            self.db.clone(),
+            vehicles.MRA.stages[0].stage_id,
+            "Active",
+        ).await.expect("Failed to update stage status");
+        
         self.emit_state_update(&app_handle, &state)
     }
 
@@ -717,10 +742,6 @@ impl MissionApi for MissionApiImpl {
             search_area_array,
             vehicle_id,
         ).await.expect("Failed to update stage area");
-
-        if current_stage_id == stage.stage_id {
-            stage.stage_status = MissionStageStatusEnum::Active;
-        }
 
         self.emit_state_update(&app_handle, &state)
     }
