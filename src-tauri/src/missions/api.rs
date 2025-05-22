@@ -1,11 +1,10 @@
 use super::sql::*;
 use super::types::*;
-use std::{sync::Arc, thread::current};
+use std::sync::Arc;
 use sqlx::{postgres::PgPoolOptions, PgPool, Row};
 use tauri::{AppHandle, Runtime};
 use taurpc;
 use tokio::sync::Mutex;
-use super::sql::*;
 use serde_json::Value;
 
 /*==============================================================================
@@ -360,14 +359,6 @@ pub trait MissionApi {
         vehicle_name: VehicleEnum,
         stage_name: String,
     ) -> Result<(), String>;
-    async fn update_stage(
-        app_handle: AppHandle<impl Runtime>,
-        mission_id: i32,
-        vehicle_name: VehicleEnum,
-        stage_id: i32,
-        new_stage_name: Option<String>,
-        new_status: Option<MissionStageStatusEnum>,
-    ) -> Result<(), String>;
     async fn delete_stage(
         app_handle: AppHandle<impl Runtime>,
         mission_id: i32,
@@ -633,59 +624,6 @@ impl MissionApi for MissionApiImpl {
         if vehicle.current_stage == -1 {
             vehicle.current_stage = stage_id;
         }
-
-        self.emit_state_update(&app_handle, &state)
-    }
-
-    async fn update_stage(
-        self,
-        app_handle: AppHandle<impl Runtime>,
-        mission_id: i32,
-        vehicle_name: VehicleEnum,
-        stage_id: i32,
-        new_stage_name: Option<String>,
-        new_status: Option<MissionStageStatusEnum>,
-    ) -> Result<(), String> {
-        let mut state = self.state.lock().await;
-        let mission = state
-            .missions
-            .iter_mut()
-            .find(|m| m.mission_id == mission_id)
-            .ok_or("Mission not found")?;
-        let vehicle = match vehicle_name {
-            VehicleEnum::MEA => &mut mission.vehicles.MEA,
-            VehicleEnum::ERU => &mut mission.vehicles.ERU,
-            VehicleEnum::MRA => &mut mission.vehicles.MRA,
-        };
-        let stage = vehicle
-            .stages
-            .iter_mut()
-            .find(|s| s.stage_id == stage_id)
-            .ok_or("Stage not found")?;
-
-        if let Some(name) = new_stage_name {
-            stage.stage_name = name;
-        }
-        if let Some(status) = new_status {
-            stage.stage_status = status;
-        }
-
-        update_stage_name(
-            self.db.clone(),
-            stage.stage_id,
-            &stage.stage_name,
-        ).await.expect("Failed to update stage name");
-        
-        update_stage_status(
-            self.db.clone(),
-            stage.stage_id,
-            &match stage.stage_status {
-                MissionStageStatusEnum::Active => "Active",
-                MissionStageStatusEnum::Inactive => "Inactive",
-                MissionStageStatusEnum::Complete => "Complete",
-                MissionStageStatusEnum::Failed => "Failed",
-            },
-        ).await.expect("Failed to update stage status");
 
         self.emit_state_update(&app_handle, &state)
     }
