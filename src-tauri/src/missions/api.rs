@@ -72,7 +72,6 @@ impl MissionApiImpl {
                 .fetch_all(&database_connection)
                 .await
                 .expect("Failed to execute query");
-                println!("{:?}", mission);
 
                 // Set current mission ID if a mission has a status of "Active"
                 if mission[0].try_get::<String, _>("status").unwrap_or_else(|_| "Inactive".to_string()) == "Active" {
@@ -90,14 +89,6 @@ impl MissionApiImpl {
                 let mra_row = mission.iter()
                     .find(|row| row.get::<String, _>("vehicle_name") == "MRA")
                     .expect("Expected MRA row");
-
-                // println!("Mea Stage name: {:?}", mea_row.get::<Option<String>, _>("stage_name"));
-                // let stage_name = mea_row.get::<Option<String>, _>("stage_name");
-                // if let Some(data) = mea_row.get::<Option<String>, _>("stage_name") {
-                //     println!("Stage name: {:?}", data);
-                // } else {
-                //     println!("Stage name not found");
-                // }
 
                 initial_state.missions.push(MissionStruct {
                     mission_name: mission[0].get("mission_name"),
@@ -241,21 +232,20 @@ impl MissionApiImpl {
                             .unwrap_or_else(|_| Vec::new())
                             .into_iter()
                             .map(|zone| {
-                                serde_json::from_str::<Vec<GeoCoordinateStruct>>(&zone)
+                                serde_json::from_str::<Vec<GeoCoordinateStruct>>(convert_zone_to_json(&zone).as_str())
                                     .unwrap_or_else(|_| Vec::new())
                             })
                             .collect(),
-                        keep_out_zones: match mission[0].try_get::<Vec<String>, _>("keep_out_zones")
-                        {
-                            Ok(zones) => zones
+                        keep_out_zones:
+                            mission[0]
+                                .try_get::<Vec<String>, _>("keep_out_zones")
+                                .unwrap_or_else(|_| Vec::new())
                                 .into_iter()
                                 .map(|zone| {
-                                    serde_json::from_str::<Vec<GeoCoordinateStruct>>(&zone)
+                                    serde_json::from_str::<Vec<GeoCoordinateStruct>>(convert_zone_to_json(&zone).as_str())
                                         .unwrap_or_else(|_| Vec::new())
                                 })
                                 .collect(),
-                            Err(_) => Vec::new(),
-                        },
                     },
                 });
             }
@@ -1015,4 +1005,37 @@ fn convert_zone_format(json_str: &str) -> String {
     } else {
         String::new()
     }
+}
+fn convert_zone_to_json(zone_str: &str) -> String {
+    // Remove brackets and whitespace
+    let content = zone_str
+        .trim()
+        .trim_start_matches('[')
+        .trim_end_matches(']')
+        .trim();
+
+    // Parse each coordinate pair
+    let coords: Vec<String> = content
+        .split(',')
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<&str>>()
+        .chunks(2)
+        .map(|chunk| {
+            let lat = chunk[0]
+                .trim()
+                .trim_start_matches('(')
+                .trim_end_matches(')')
+                .parse::<f64>()
+                .unwrap_or(0.0);
+            let long = chunk[1]
+                .trim()
+                .trim_start_matches('(')
+                .trim_end_matches(')')
+                .parse::<f64>()
+                .unwrap_or(0.0);
+            format!(r#"{{"lat":{:.5},"long":{:.5}}}"#, lat, long)
+        })
+        .collect();
+
+    format!("[{}]", coords.join(","))
 }
