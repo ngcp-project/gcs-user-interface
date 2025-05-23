@@ -1,7 +1,7 @@
 import { createStore } from "zustand/vanilla";
 import { reactive } from "vue";
 import { LMap } from "@vue-leaflet/vue-leaflet";
-import { LatLngTuple as LatLng } from "leaflet";
+import { LatLngTuple as LatLng, LatLngExpression } from "leaflet";
 import * as L from "leaflet";
 import { GeoCoordinateStruct, MissionsStruct, VehicleEnum, ZoneType, StageStruct } from "@/lib//bindings";
 import { missionStore } from "./MissionStore";
@@ -63,7 +63,7 @@ const LAYER_STYLING = {
   MRA: { color: "#00FFFF" }
 } as const;
 
-const DEFAULT_MAP_ORIGIN: LatLng = [35.33004319829399, -120.75064544958856];
+const DEFAULT_MAP_ORIGIN: LatLng = [33.932573934575075, -117.63059569114814];
 const TILE_URL = "http://localhost:8080/tile/{z}/{x}/{y}.png";
 
 // =============================================
@@ -72,15 +72,20 @@ const TILE_URL = "http://localhost:8080/tile/{z}/{x}/{y}.png";
 interface MapStore {
   map: LeafletMapGeoman | null;
   mapOrigin: LatLng;
+  markerCoord: LatLngExpression;
   layers: L.FeatureGroup<L.Polygon>;
   localTileURL: string;
   layerTracking: LayerTracking;
+  vehicleMarkers: Record<VehicleEnum, LatLngExpression>;
 
   // Map Management
   updateMapRef: (ref: LeafletMapGeoman | null) => void;
   toggleDrawMode: () => void;
   rerenderLayers: () => void;
   logMapStore: () => void;
+  updateVehicleMarker: (vehicle: VehicleEnum, lat: number, lng: number) => void;
+  updateMarkerCoords: (vehicle: VehicleEnum, coords: LatLngExpression) => void;
+  getVehicleMarkers: () => Record<VehicleEnum, LatLngExpression>;
 
   // Layer Management
   updateStagePolygon: (missionId: number, vehicle: VehicleEnum, stageId: number) => void;
@@ -104,9 +109,15 @@ interface MapStore {
 const mapStore = createStore<MapStore>((set, get) => ({
   map: null,
   mapOrigin: DEFAULT_MAP_ORIGIN,
+  markerCoord: L.latLng(33.932573934575075, -117.63059569114814),
   localTileURL: TILE_URL,
   layerTracking: { missions: {} },
   layers: L.featureGroup([]),
+  vehicleMarkers: {
+    MRA: L.latLng(33.932573934575075, -117.63059569114814),
+    MEA: L.latLng(33.932573934575075, -117.63059569114814),
+    ERU: L.latLng(33.932573934575075, -117.63059569114814)
+  },
 
   // Map Management Methods
   updateMapRef: (refValue: LeafletMapGeoman | null) => {
@@ -459,6 +470,27 @@ const mapStore = createStore<MapStore>((set, get) => ({
     const mission = get().layerTracking.missions[missionId];
     if (!mission) return [];
     return mission.zones[type] as ZoneLayer[];
+  },
+  updateVehicleMarker: (vehicle: VehicleEnum, lat: number, lng: number) => {
+    set((state) => ({
+      vehicleMarkers: {
+        ...state.vehicleMarkers,
+        [vehicle]: L.latLng(lat, lng)
+      }
+    }));
+  },
+  updateMarkerCoords: (vehicle: VehicleEnum, coords: LatLngExpression) => {
+    if (Array.isArray(coords) && coords.length === 2) {
+      set((state) => ({
+        vehicleMarkers: {
+          ...state.vehicleMarkers,
+          [vehicle]: L.latLng(coords[0], coords[1])
+        }
+      }));
+    }
+  },
+  getVehicleMarkers: () => {
+    return get().vehicleMarkers;
   }
 }));
 

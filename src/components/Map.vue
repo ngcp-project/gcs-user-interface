@@ -16,6 +16,12 @@
         layer-type="base"
         name="CustomTiles"
       />
+      <l-marker
+        v-for="(coords, vehicle) in mapStore.vehicleMarkers"
+        :key="vehicle"
+        :lat-lng="coords"
+        :icon="getVehicleIcon(vehicle)"
+      />
     </l-map>
   </div>
 </template>
@@ -28,12 +34,34 @@ import { LMap, LTileLayer, LPolygon, LMarker, LControl } from "@vue-leaflet/vue-
 import { LeafletMouseEvent, LatLngTuple as LatLng, icon } from "leaflet";
 import mapStore, { LeafletMapGeoman } from "@/lib/MapStore";
 import GeomanController from "@/components/map/GeomanController.vue";
+import { VehicleEnum } from "@/lib/bindings";
+
+// Import vehicle icons
+import MEAIcon from "@/assets/MEA.png";
+import ERUIcon from "@/assets/ERU.png";
+import MRAIcon from "@/assets/MRA.png";
 
 // Updates the store with templateRef when map component renders
 const mapRef = ref<LeafletMapGeoman | null>(null);
 const handleReady = () => {
   mapStore.updateMapRef(mapRef.value);
 };
+
+// Function to get vehicle-specific icon
+const getVehicleIcon = (vehicle: VehicleEnum) => {
+  const iconMap = {
+    MEA: MEAIcon,
+    ERU: ERUIcon,
+    MRA: MRAIcon
+  };
+  
+  return icon({
+    iconUrl: iconMap[vehicle],
+    iconSize: [32, 32],
+    iconAnchor: [16, 16]
+  });
+};
+
 </script>
 
 <style>
