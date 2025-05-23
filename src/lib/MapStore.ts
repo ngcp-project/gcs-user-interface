@@ -35,7 +35,7 @@ const LAYER_STYLING = {
   MRA: { color: "#00FFFF" }
 } as const;
 
-const DEFAULT_MAP_ORIGIN: LatLng = [0.01, 0.01];
+const DEFAULT_MAP_ORIGIN: LatLng = [33.932573934575075, -117.63059569114814];
 const TILE_URL = "http://localhost:8080/tile/{z}/{x}/{y}.png";
 
 // =============================================

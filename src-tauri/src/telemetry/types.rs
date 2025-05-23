@@ -14,8 +14,8 @@ pub struct VehicleTelemetryData {
 impl Default for VehicleTelemetryData {
     fn default() -> Self {
         let default_coords = Coordinate {
-            latitude: 0.01,
-            longitude: 0.01,
+            latitude: 33.932573934575075,
+            longitude: -117.63059569114814,
         };
         
         Self {
