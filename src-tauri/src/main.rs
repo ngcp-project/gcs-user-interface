@@ -5,10 +5,13 @@ use std::env;
 use taurpc::Router;
 mod missions;
 mod telemetry;
+mod commands;
 
 use crate::telemetry::rabbitmq::RabbitMQAPI;
 use missions::api::{MissionApi, MissionApiImpl};
 use telemetry::rabbitmq::RabbitMQAPIImpl;
+use commands::{CommandsApiImpl};
+use commands::commands::CommandsApi;
 mod init_db;
 use init_db::{clear_database, initialize_database, init_database_dummy_data};
 
@@ -41,11 +44,14 @@ async fn main() {
     let rabbitmq_api = RabbitMQAPIImpl::new().await.unwrap();
 
     let missions_api = MissionApiImpl::new().await;
+    let commands_api = CommandsApiImpl::default();
+    let commands_handler = commands_api.clone();
 
     // Create router with both handlers
     let router = Router::new()
         .merge(missions_api.into_handler())
-        .merge(rabbitmq_api.clone().into_handler());
+        .merge(rabbitmq_api.clone().into_handler())
+        .merge(commands_handler.into_handler());
 
     let router_handler = router.into_handler();
 

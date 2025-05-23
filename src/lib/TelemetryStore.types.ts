@@ -2,6 +2,7 @@ import {
   VehicleTelemetryData,
   VehicleEnum,
 } from "@/lib/bindings"
+import { LatLngExpression } from "leaflet"
 
 export interface TelemetryStore { 
   // --------------------------
@@ -13,6 +14,10 @@ export interface TelemetryStore {
   // --------------------------
   // Methods
   // --------------------------
+  
+  updateVehicleMarkers: (state: VehicleTelemetryData) => void;
+  updateVehicleCoords: (vehicle: VehicleEnum, coords: LatLngExpression) => void;
+  // simulateMovement: () => void;
   
   // Telemetry Data
   getTelemetry: () => VehicleTelemetryData; // Gets current state of telemetry
