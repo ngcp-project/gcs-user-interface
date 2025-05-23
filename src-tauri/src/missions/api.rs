@@ -116,7 +116,7 @@ impl MissionApiImpl {
                                     _ => Some(PatientStatusEnum::Unsecured),
                                 }, 
                             stages: 
-                            if mission[0].get::<i32, _>("current_stage") != -1 {
+                            if mea_row.get::<i32, _>("current_stage") != -1 {
                                 mission.iter()
                                     .filter(|row| row.get::<String, _>("vehicle_name") == "MEA")
                                     .map(|row| StageStruct {
@@ -133,12 +133,16 @@ impl MissionApiImpl {
                                             "Failed" => MissionStageStatusEnum::Failed,
                                             _ => MissionStageStatusEnum::Inactive,
                                         },
-                                        search_area: row
-                                            .try_get::<Vec<String>, _>("search_area")
-                                            .unwrap_or_else(|_| Vec::new())
-                                            .into_iter()
-                                            .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
-                                            .collect(),
+                                        search_area:
+                                        match row.try_get::<Vec<String>, _>("search_area").unwrap_or_else(|_| Vec::new()) {
+                                            search_areas => search_areas
+                                                .into_iter()
+                                                .filter_map(|area: String| {
+                                                    serde_json::from_str::<Vec<GeoCoordinateStruct>>(convert_zone_to_json(&area).as_str()).ok()
+                                                })
+                                                .flatten()
+                                                .collect::<Vec<GeoCoordinateStruct>>()
+                                            }
                                     })
                                     .collect()
                             } else {
@@ -156,7 +160,7 @@ impl MissionApiImpl {
                                     _ => Some(PatientStatusEnum::Unsecured),
                                 },
                             stages: 
-                            if mission[0].get::<i32, _>("current_stage") != -1 {
+                            if eru_row.get::<i32, _>("current_stage") != -1 {
                                 mission.iter()
                                     .filter(|row| row.get::<String, _>("vehicle_name") == "ERU")
                                     .map(|row| StageStruct {
@@ -173,12 +177,16 @@ impl MissionApiImpl {
                                             "Failed" => MissionStageStatusEnum::Failed,
                                             _ => MissionStageStatusEnum::Inactive,
                                         },
-                                        search_area: row
-                                            .try_get::<Vec<String>, _>("search_area")
-                                            .unwrap_or_else(|_| Vec::new())
-                                            .into_iter()
-                                            .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
-                                            .collect(),
+                                        search_area: 
+                                            match row.try_get::<Vec<String>, _>("search_area").unwrap_or_else(|_| Vec::new()) {
+                                            search_areas => search_areas
+                                                .into_iter()
+                                                .filter_map(|area: String| {
+                                                    serde_json::from_str::<Vec<GeoCoordinateStruct>>(convert_zone_to_json(&area).as_str()).ok()
+                                                })
+                                                .flatten()
+                                                .collect::<Vec<GeoCoordinateStruct>>()
+                                            }
                                     })
                                     .collect()
                             } else {
@@ -196,7 +204,7 @@ impl MissionApiImpl {
                                     _ => Some(PatientStatusEnum::Unsecured),
                                 },
                             stages: 
-                            if mission[0].get::<i32, _>("current_stage") != -1 {
+                            if mra_row.get::<i32, _>("current_stage") != -1 {
                                 mission.iter()
                                     .filter(|row| row.get::<String, _>("vehicle_name") == "MRA")
                                     .map(|row| StageStruct {
@@ -213,12 +221,16 @@ impl MissionApiImpl {
                                             "Failed" => MissionStageStatusEnum::Failed,
                                             _ => MissionStageStatusEnum::Inactive,
                                         },
-                                        search_area: row
-                                            .try_get::<Vec<String>, _>("search_area")
-                                            .unwrap_or_else(|_| Vec::new())
-                                            .into_iter()
-                                            .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
-                                            .collect(),
+                                        search_area:
+                                            match row.try_get::<Vec<String>, _>("search_area").unwrap_or_else(|_| Vec::new()) {
+                                            search_areas => search_areas
+                                                .into_iter()
+                                                .filter_map(|area: String| {
+                                                    serde_json::from_str::<Vec<GeoCoordinateStruct>>(convert_zone_to_json(&area).as_str()).ok()
+                                                })
+                                                .flatten()
+                                                .collect::<Vec<GeoCoordinateStruct>>()
+                                            },
                                     })
                                     .collect()
                             } else {
