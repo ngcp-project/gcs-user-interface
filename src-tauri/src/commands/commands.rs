@@ -10,9 +10,16 @@ use lapin::{
 };
 
 #[derive(Debug, Deserialize, Serialize, Clone, Type)]
+pub struct GeoCoordinate {
+    pub lat: f64,
+    pub long: f64,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, Type)]
 pub struct CommandsStruct {
     pub vehicle_id: String,
     pub commandID: i32,
+    pub coordinates: Option<Vec<GeoCoordinate>>,
 }
 
 type SharedCommands = Arc<Mutex<CommandsStruct>>;
@@ -21,7 +28,7 @@ type SharedCommands = Arc<Mutex<CommandsStruct>>;
 pub trait CommandsApi {
     async fn send_emergency_stop(vehicle_id: String) -> Result<(), String>;
     async fn send_mission_update(vehicle_id: String, mission_id: String) -> Result<(), String>;
-    async fn send_zone_update(vehicle_id: String, zone_id: String) -> Result<(), String>;
+    async fn send_zone_update(vehicle_id: String, zone_id: String, coordinates: Vec<GeoCoordinate>) -> Result<(), String>;
 }
 
 #[derive(Clone)]
@@ -35,6 +42,7 @@ impl Default for CommandsApiImpl {
             state: Arc::new(Mutex::new(CommandsStruct {
                 vehicle_id: "default".to_string(),
                 commandID: 0,
+                coordinates: None,
             })),
         }
     }
@@ -46,6 +54,7 @@ impl CommandsApi for CommandsApiImpl {
         let mut state = self.state.lock().await;
         state.vehicle_id = vehicle_id;
         state.commandID = 1; // Emergency stop command ID
+        state.coordinates = None;
         self.publish_command_to_rabbitmq(&state).await?;
         Ok(())
     }
@@ -54,14 +63,16 @@ impl CommandsApi for CommandsApiImpl {
         let mut state = self.state.lock().await;
         state.vehicle_id = vehicle_id;
         state.commandID = mission_id.parse().unwrap_or(0);
+        state.coordinates = None;
         self.publish_command_to_rabbitmq(&state).await?;
         Ok(())
     }
 
-    async fn send_zone_update(self, vehicle_id: String, zone_id: String) -> Result<(), String> {
+    async fn send_zone_update(self, vehicle_id: String, zone_id: String, coordinates: Vec<GeoCoordinate>) -> Result<(), String> {
         let mut state = self.state.lock().await;
         state.vehicle_id = vehicle_id;
         state.commandID = zone_id.parse().unwrap_or(0);
+        state.coordinates = Some(coordinates);
         self.publish_command_to_rabbitmq(&state).await?;
         Ok(())
     }

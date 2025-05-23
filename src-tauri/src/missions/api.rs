@@ -6,6 +6,8 @@ use tauri::{AppHandle, Runtime};
 use taurpc;
 use tokio::sync::Mutex;
 use serde_json::Value;
+use crate::commands::CommandsApi;
+use crate::commands::commands::{CommandsApiImpl, GeoCoordinate};
 
 /*==============================================================================
  * MissionApiImpl Structure and Default Implementation
@@ -543,45 +545,143 @@ impl MissionApi for MissionApiImpl {
         mission_id: i32,
     ) -> Result<(), String> {
         let mut state = self.state.lock().await;
+        let commands_api = CommandsApiImpl::default();
 
+        // First, handle the previous mission if it exists
         if let Some(prev_mission_index) = state.missions.iter().position(|m| m.mission_id == state.current_mission) {
             state.missions[prev_mission_index].mission_status = MissionStageStatusEnum::Complete;
             update_mission_status(self.db.clone(), state.missions[prev_mission_index].mission_id, "Complete").await.expect("Failed to update mission status");
         }
 
+        // Find and update the new mission
         let start_mission_index = state.missions.iter().position(|m| m.mission_id == mission_id)
             .ok_or("Mission not found")?;
-                
+        
+        // Update mission status first
         state.missions[start_mission_index].mission_status = MissionStageStatusEnum::Active;
         state.current_mission = mission_id;
         update_mission_status(self.db.clone(), mission_id, "Active").await.expect("Failed to update mission status");
 
+        // Emit state update to ensure frontend reflects the change
+        self.emit_state_update(&app_handle, &state)?;
+
+        // Now handle the zone updates
+        let mission = &state.missions[start_mission_index];
         
+        // Send keep-in zones (commandID: 2) only if there are valid zones
+        for zone in &mission.zones.keep_in_zones {
+            if zone.len() >= 3 {  // Only send if we have at least 3 coordinates
+                let coords: Vec<GeoCoordinate> = zone.iter()
+                    .take(6) // Limit to 6 points
+                    .map(|coord| GeoCoordinate {
+                        lat: coord.lat,
+                        long: coord.long,
+                    })
+                    .collect();
+                
+                // Send to MEA
+                commands_api.clone().send_zone_update("MEA".to_string(), "2".to_string(), coords.clone()).await?;
+                // Send to ERU
+                commands_api.clone().send_zone_update("ERU".to_string(), "2".to_string(), coords.clone()).await?;
+                // Send to MRA
+                commands_api.clone().send_zone_update("MRA".to_string(), "2".to_string(), coords.clone()).await?;
+            }
+        }
+
+        // Send keep-out zones (commandID: 3) only if there are valid zones
+        for zone in &mission.zones.keep_out_zones {
+            if zone.len() >= 3 {  // Only send if we have at least 3 coordinates
+                let coords: Vec<GeoCoordinate> = zone.iter()
+                    .take(6) // Limit to 6 points
+                    .map(|coord| GeoCoordinate {
+                        lat: coord.lat,
+                        long: coord.long,
+                    })
+                    .collect();
+                
+                // Send to MEA
+                commands_api.clone().send_zone_update("MEA".to_string(), "3".to_string(), coords.clone()).await?;
+                // Send to ERU
+                commands_api.clone().send_zone_update("ERU".to_string(), "3".to_string(), coords.clone()).await?;
+                // Send to MRA
+                commands_api.clone().send_zone_update("MRA".to_string(), "3".to_string(), coords.clone()).await?;
+            }
+        }
+
+        // Update vehicle stages and send search areas
         let vehicles = &mut state.missions[start_mission_index].vehicles;
         
-        // Set the first stage of each vehicle to active
-        vehicles.MEA.stages[0].stage_status = MissionStageStatusEnum::Active;
-        update_stage_status(
-            self.db.clone(),
-            vehicles.MEA.stages[0].stage_id,
-            "Active",
-        ).await.expect("Failed to update stage status");
+        // Set the first stage of each vehicle to active if they have stages
+        if !vehicles.MEA.stages.is_empty() {
+            vehicles.MEA.stages[0].stage_status = MissionStageStatusEnum::Active;
+            update_stage_status(
+                self.db.clone(),
+                vehicles.MEA.stages[0].stage_id,
+                "Active",
+            ).await.expect("Failed to update stage status");
+
+            // Send search area for MEA only if it has valid coordinates
+            let search_area = &vehicles.MEA.stages[0].search_area;
+            if search_area.len() >= 3 {  // Only send if we have at least 3 coordinates
+                let coords: Vec<GeoCoordinate> = search_area.iter()
+                    .take(6)
+                    .map(|coord| GeoCoordinate {
+                        lat: coord.lat,
+                        long: coord.long,
+                    })
+                    .collect();
+                
+                commands_api.clone().send_zone_update("MEA".to_string(), "4".to_string(), coords).await?;
+            }
+        }
         
-        vehicles.ERU.stages[0].stage_status = MissionStageStatusEnum::Active;
-        update_stage_status(
-            self.db.clone(),
-            vehicles.ERU.stages[0].stage_id,
-            "Active",
-        ).await.expect("Failed to update stage status");
+        if !vehicles.ERU.stages.is_empty() {
+            vehicles.ERU.stages[0].stage_status = MissionStageStatusEnum::Active;
+            update_stage_status(
+                self.db.clone(),
+                vehicles.ERU.stages[0].stage_id,
+                "Active",
+            ).await.expect("Failed to update stage status");
+
+            // Send search area for ERU only if it has valid coordinates
+            let search_area = &vehicles.ERU.stages[0].search_area;
+            if search_area.len() >= 3 {  // Only send if we have at least 3 coordinates
+                let coords: Vec<GeoCoordinate> = search_area.iter()
+                    .take(6)
+                    .map(|coord| GeoCoordinate {
+                        lat: coord.lat,
+                        long: coord.long,
+                    })
+                    .collect();
+                
+                commands_api.clone().send_zone_update("ERU".to_string(), "4".to_string(), coords).await?;
+            }
+        }
         
+        if !vehicles.MRA.stages.is_empty() {
+            vehicles.MRA.stages[0].stage_status = MissionStageStatusEnum::Active;
+            update_stage_status(
+                self.db.clone(),
+                vehicles.MRA.stages[0].stage_id,
+                "Active",
+            ).await.expect("Failed to update stage status");
+
+            // Send search area for MRA only if it has valid coordinates
+            let search_area = &vehicles.MRA.stages[0].search_area;
+            if search_area.len() >= 3 {  // Only send if we have at least 3 coordinates
+                let coords: Vec<GeoCoordinate> = search_area.iter()
+                    .take(6)
+                    .map(|coord| GeoCoordinate {
+                        lat: coord.lat,
+                        long: coord.long,
+                    })
+                    .collect();
+                
+                commands_api.clone().send_zone_update("MRA".to_string(), "4".to_string(), coords).await?;
+            }
+        }
         
-        vehicles.MRA.stages[0].stage_status = MissionStageStatusEnum::Active;
-        update_stage_status(
-            self.db.clone(),
-            vehicles.MRA.stages[0].stage_id,
-            "Active",
-        ).await.expect("Failed to update stage status");
-        
+        // Final state update after all changes
         self.emit_state_update(&app_handle, &state)
     }
 
@@ -804,6 +904,7 @@ impl MissionApi for MissionApiImpl {
     ) -> Result<(), String> {
         println!("Transitioning stage for vehicle: {:?}", vehicle_name);
         let mut state = self.state.lock().await;
+        let commands_api = CommandsApiImpl::default();
         let mission = state
             .missions
             .iter_mut()
@@ -815,7 +916,6 @@ impl MissionApi for MissionApiImpl {
             VehicleEnum::MRA => &mut mission.vehicles.MRA,
         };
 
-        // println!("\n\nStart vehicle rust state: {:?}\n\n\n", vehicle);
         println!("Current Stage: {:?}", vehicle.current_stage);
 
         // Mark current stage as complete
@@ -842,13 +942,28 @@ impl MissionApi for MissionApiImpl {
 
         if let Some(stage) = vehicle.stages.iter_mut().find(|s| s.stage_id == transitioned_stage.unwrap_or(vehicle.current_stage)) {
             vehicle.current_stage = transitioned_stage.unwrap_or(vehicle.current_stage);
-            // println!("Rust state current Stage after transition: {:?}", vehicle.current_stage);
             stage.stage_status = MissionStageStatusEnum::Active;
+
+            // Send search area for the new active stage if it has valid coordinates
+            if stage.search_area.len() >= 3 {  // Only send if we have at least 3 coordinates
+                let coords: Vec<GeoCoordinate> = stage.search_area.iter()
+                    .take(6) // Limit to 6 points
+                    .map(|coord| GeoCoordinate {
+                        lat: coord.lat,
+                        long: coord.long,
+                    })
+                    .collect();
+                
+                // Send search area (commandID: 4) to the specific vehicle
+                commands_api.clone().send_zone_update(
+                    vehicle.vehicle_name.to_string(),
+                    "4".to_string(),
+                    coords
+                ).await?;
+            }
         } else {
             println!("No next stage available");
         }
-
-        // println!("\n\n\nEnd vehicle rust state: {:?}", vehicle);
 
         self.emit_state_update(&app_handle, &state)
     }
