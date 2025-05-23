@@ -44,14 +44,14 @@ const TILE_URL = "http://localhost:8080/tile/{z}/{x}/{y}.png";
 const mapStore = createStore<MapStore>((set, get) => ({
   map: null,
   mapOrigin: DEFAULT_MAP_ORIGIN,
-  markerCoord: L.latLng(33.932573934575075, -117.63059569114814),
+  markerCoord: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
   localTileURL: TILE_URL,
   layerTracking: { missions: {} },
   layers: L.featureGroup([]),
   vehicleMarkers: {
-    MRA: L.latLng(33.932573934575075, -117.63059569114814),
-    MEA: L.latLng(33.932573934575075, -117.63059569114814),
-    ERU: L.latLng(33.932573934575075, -117.63059569114814)
+    MRA: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
+    MEA: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
+    ERU: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1])
   },
 
   // Map Management Methods
@@ -68,7 +68,15 @@ const mapStore = createStore<MapStore>((set, get) => ({
 
   toggleDrawMode: () => {
     // Draws a polygon not linked to layers
-    get().map?.leafletObject?.pm.enableDraw("Polygon");
+    const map = get().map?.leafletObject;
+
+    if (!map) return;
+    
+    if (map.pm.globalDrawModeEnabled()) {
+      map.pm.disableDraw();
+    } else {
+      map.pm.enableDraw("Polygon");
+    }
   },
 
   logMapStore: () => {
