@@ -14,17 +14,22 @@ use taurpc;
 use tokio::sync::Mutex;
 use tokio_amqp::*;
 
+use sqlx::{postgres::PgPoolOptions, PgPool, Row};
+use super::sql::*;
+
 
 #[derive(Clone)]
 pub struct RabbitMQAPIImpl {
     connection: Arc<Mutex<Connection>>,
     state: Arc<Mutex<VehicleTelemetryData>>,
     channel: Channel,
+    db: PgPool,
     app_handle: Option<AppHandle>,
 }
 
 // Constants
 const RABBITMQ_ADDR: &str = "amqp://admin:admin@localhost:5672/%2f";
+const DATABASE_URL: &str = "postgres://ngcp:ngcp@localhost:5433/ngcpdb";
 const VALID_VEHICLE_IDS: [&str; 4] = ["eru", "fra", "mea", "mra"];
 
 impl RabbitMQAPIImpl {
@@ -36,9 +41,17 @@ impl RabbitMQAPIImpl {
         let connection = Arc::new(Mutex::new(connection));
         let channel = connection.lock().await.create_channel().await?;
 
+        let database_connection = PgPoolOptions::new()
+            .max_connections(5)
+            .connect(DATABASE_URL)
+            .await
+            .expect("Failed to connect to the database");
+        let db = database_connection;
+
         let consumer = Self {
             connection,
             channel,
+            db,
             state: Arc::new(Mutex::new(VehicleTelemetryData::default())),
             app_handle: None,
         };
@@ -185,6 +198,27 @@ impl RabbitMQAPIImpl {
                         println!("Received telemetry data: {:?}", payload);
                         println!("Signal status: {:?}", data.vehicle_status);
                         delivery.ack(BasicAckOptions::default()).await?;
+
+                        // Insert telemetry data into the database
+                        let current_position_str = serde_json::to_string(&data.current_position).unwrap();
+                        let request_coordinate_str = serde_json::to_string(&data.request_coordinate).unwrap();
+                    
+                        if let Err(e) = insert_telemetry(
+                            self.db.clone(),
+                            data.vehicle_id.clone(),
+                            data.signal_strength,
+                            data.pitch,
+                            data.yaw,
+                            data.roll,
+                            data.speed,
+                            data.altitude,
+                            data.battery_life,
+                            current_position_str,
+                            data.vehicle_status.clone(),
+                            request_coordinate_str,
+                        ).await {
+                            eprintln!("Failed to insert telemetry data: {}", e);
+                        }
                     }
                     Err(e) => {
                         failure_count += 1;
