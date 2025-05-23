@@ -1,12 +1,47 @@
 <script setup lang="ts">
 import VehicleStatus from "../components/VehicleStatusComponent.vue";
-import { onMounted, ref, Ref } from "vue";
+import { onMounted, ref, Ref, onUnmounted } from "vue";
 import Map from "../components/Map.vue";
-import MapSidebar from "../components/MapSidebar.vue";
+import { Button } from "@/components/ui/button";
+import MapSidebar from "@/components/MapSidebar.vue";
+import mapStore from "@/lib/MapStore";import { core } from "@tauri-apps/api";
+import { listen, UnlistenFn } from "@tauri-apps/api/event";
 
+interface VehicleData {
+  batteryPct: number;
+  //Signal String
+  signal_string: number;
+  coordinates: { longitude: number; latitude: number };
+  status: string;
+  yaw: number;
+  inKeepIn: boolean;
+  inKeepOut: boolean;
+  fire_coordinates?: { longitude: number; latitude: number };
+}
+
+interface TelemetryEvent {
+  vehicleKey: string;
+  data: {
+    batteryLife: number;
+    vehicleStatus: string;
+    currentPosition: {
+      latitude: number;
+      longitude: number;
+    };
+    lastUpdated: number;
+    yaw: number;
+    fireCoordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+  };
+}
+
+const unlistenFunctions: UnlistenFn[] = [];
 // initialize reactive variables for each vehicle's telemetry data (the object is reactive, so each key/value pair is also reactive)
 const ERU_data = ref({
-  batteryPct: 0,
+  batteryPct: 5,
+  signal_string: 0,
   lastUpdated: 0,
   coordinates: { longitude: 0, latitude: 0 },
   status: "Standby",
@@ -15,7 +50,8 @@ const ERU_data = ref({
   inKeepOut: false
 });
 const MEA_data = ref({
-  batteryPct: 0,
+  batteryPct: 5,
+  signal_string: 0,
   lastUpdated: 0,
   coordinates: { longitude: 0, latitude: 0 },
   status: "Standby",
@@ -24,7 +60,8 @@ const MEA_data = ref({
   inKeepOut: false
 });
 const MRA_data = ref({
-  batteryPct: 0,
+  batteryPct: 5,
+  signal_string: 0,
   lastUpdated: 0,
   coordinates: { longitude: 0, latitude: 0 },
   status: "Standby",
@@ -33,7 +70,8 @@ const MRA_data = ref({
   inKeepOut: false
 });
 const FRA_data = ref({
-  batteryPct: 0,
+  batteryPct: 5,
+  signal_string: 0,
   lastUpdated: 0,
   coordinates: { longitude: 0, latitude: 0 },
   fire_coordinates: { longitude: 0, latitude: 0 },
@@ -44,7 +82,7 @@ const FRA_data = ref({
 });
 
 // maps vehicle name to corresponding reactive variable so that addListeners can more easily set EventListeners to update variables
-const vehicleMap: { [key: string]: Ref<any> } = {
+const vehicleMap: { [key: string]: Ref<VehicleData> } = {
   eru: ERU_data,
   mea: MEA_data,
   mra: MRA_data,
@@ -87,6 +125,81 @@ const vehicleMap: { [key: string]: Ref<any> } = {
 
 // gets all 4 websocket connections and adds event listeners to each of them once Static Screen finishes initial rendering
 
+function handleTelemetryUpdate(event: any) {
+  console.log("Received telemetry update:", event);
+
+  // Handle both direct payload and event wrapper formats
+  const payload = event.payload || event;
+  const vehicleKey = payload.vehicle_id?.toLowerCase();
+  const telemetryData = payload.telemetry;
+  const vehicle = vehicleMap[vehicleKey];
+  if (!telemetryData) {
+    console.error("No telemetry data found in the payload:", payload);
+    return;
+  }
+  console.log("Processing update for vehicle:", vehicleKey, "with data:", telemetryData);
+  if (vehicle) {
+    console.log(telemetryData.signal_string);
+    // Update vehicle data with the new format
+    vehicle.value = {
+      ...vehicle.value,
+      status: telemetryData.vehicle_status || "Standby",
+      batteryPct: telemetryData.battery_life || vehicle.value.batteryPct,
+      signal_string: telemetryData.signal_string || vehicle.value.signal_string,
+      coordinates: {
+        latitude:
+          telemetryData.currentPosition?.latitude ||
+          telemetryData.current_position?.latitude ||
+          telemetryData.coordinates?.latitude ||
+          vehicle.value.coordinates.latitude,
+
+        longitude:
+          telemetryData.currentPosition?.longitude ||
+          telemetryData.current_position?.longitude ||
+          telemetryData.coordinates?.longitude ||
+          vehicle.value.coordinates.longitude
+      },
+      yaw: telemetryData.yaw || vehicle.value.yaw,
+      inKeepIn: vehicle.value.inKeepIn,
+      inKeepOut: vehicle.value.inKeepOut
+    };
+    // Handle FRA fire coordinates
+    if (vehicleKey === "fra" && telemetryData.fireCoordinate) {
+      vehicle.value.fire_coordinates = {
+        latitude: telemetryData.fireCoordinate.latitude || 0,
+
+        longitude: telemetryData.fireCoordinate.longitude || 0
+      };
+    }
+    console.log(`Updated ${vehicleKey} data:`, vehicle.value);
+  } else {
+    console.error("Vehicle not found:", vehicleKey);
+  }
+}
+
+// Modify the event listener setup
+
+// async function initializeTelemetryListeners() {
+//   const unlisten = await listen("telemetry_update", (event: any) => {
+//     console.log("Received telemetry event:", JSON.stringify(event));
+
+//     handleTelemetryUpdate(event.payload);
+
+//     console.log(event.payload);
+//   });
+//   unlistenFunctions.push(unlisten);
+//   // Initial telemetry fetch for each vehicle
+//   for (const vehicleKey of Object.keys(vehicleMap)) {
+//     try {
+//       console.log(`Initializing telemetry for ${vehicleKey}`);
+//       console.log(`Initial telemetry data: for ${vehicleKey}`);
+//       // handleTelemetryUpdate(data);
+//     } catch (error) {
+//       console.error(`Failed to fetch initial telemetry for ${vehicleKey}:`, error);
+//     }
+//   }
+// }
+
 function updateIsInKeepIn(vehicleKey: string, isInZone: boolean) {
   vehicleMap[vehicleKey.toLowerCase()].value.inKeepIn = isInZone;
 }
@@ -94,13 +207,72 @@ function updateIsInKeepIn(vehicleKey: string, isInZone: boolean) {
 function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
   vehicleMap[vehicleKey.toLowerCase()].value.inKeepOut = isInZone;
 }
+
+// Add ref for the map component
+const mapRef = ref();
+
+// Add methods to control the map
+const handleDrawPolygon = () => {
+  mapRef.value?.toggleDrawMode();
+};
+
+const handleEditPolygon = () => {
+  mapRef.value?.toggleEditMode();
+};
+
+const handleDragPolygon = () => {
+  mapRef.value?.toggleDragMode();
+};
+
+const handleRemovePolygon = () => {
+  mapRef.value?.toggleRemoveMode();
+};
+
+const handleZoneIn = async () => {
+  try {
+    await mapRef.value?.sendZoneInPolygonPoints();
+  } catch (error) {
+    console.error("Error handling Zone In:", error);
+  }
+};
+
+const handleZoneOut = async () => {
+  try {
+    await mapRef.value?.sendZoneOutPolygonPoints();
+  } catch (error) {
+    console.error("Error handling Zone Out:", error);
+  }
+};
+
+const handleClearPolygons = async () => {
+  try {
+    await mapRef.value?.clearPolygons();
+  } catch (error) {
+    console.error("Error handling Clear All:", error);
+  }
+};
+
+onMounted(async () => {
+  // await initializeTelemetryListeners();
+  // console.log("Telemetry listeners initialized");
+  // KeepOutZones("mra");
+  // KeepOutZones("eru");
+  // KeepOutZones("fra");
+});
+
+onUnmounted(() => {
+  // Clean up all event listeners
+  unlistenFunctions.forEach((unlisten) => unlisten());
+});
 </script>
 
 <template>
-  <div class="flex flex-row h-full w-[100dvw]">
+
+  <div class="flex h-full w-[100dvw] flex-row">
+
     <div class="flex-grow">
-      <!-- should be fire coords -->
-      <Map
+       <!-- should be fire coords --> <Map
+        ref="mapRef"
         :ERU_coords="ERU_data.coordinates"
         :ERU_yaw="ERU_data.yaw"
         :MEA_coords="MEA_data.coordinates"
@@ -112,13 +284,13 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
         :FRA_yaw="FRA_data.yaw"
         @keepIn="updateIsInKeepIn"
         @keepOut="updateIsInKeepOut"
-      ></Map>
+      />
     </div>
-
-    <div>
-      <MapSidebar side="right"/>
-    </div>
+     <!-- <div
+      class="flex h-full w-fit max-w-[300px] flex-none flex-col gap-[6px] overflow-y-scroll bg-background p-[6px]"
+    > --> <MapSidebar side="right" /> <!-- </div> -->
   </div>
+
 </template>
 
 <style scoped>
@@ -150,3 +322,4 @@ function updateIsInKeepOut(vehicleKey: string, isInZone: boolean) {
   width: 77%;
 }
 </style>
+

@@ -39,6 +39,7 @@ export interface MissionStore {
   renameMission: (missionId: number, missionName: string) => Promise<null>;
   createNewMission: (missionName: string) => Promise<null>;
   deleteMission: (missionId: number) => Promise<null>;
+  startMission: (missionId: number) => Promise<null>;
 
   // Vehicle Data
   getVehicleData: (missionId: number, vehicleName: VehicleEnum) => VehicleStruct | undefined;
@@ -50,7 +51,7 @@ export interface MissionStore {
     vehicleName: VehicleEnum,
     stageId: number
   ) => StageStruct | undefined;
-  addStage: (missionId: number, vehicleName: VehicleEnum, stageName: string) => Promise<null>;
+  addStage: (missionId: number, vehicleName: VehicleEnum) => Promise<null>;
   deleteStage: (missionId: number, vehicleName: VehicleEnum, stageId: number) => Promise<null>;
   renameStage: (
     missionId: number,
@@ -59,9 +60,21 @@ export interface MissionStore {
     stageName: string
   ) => Promise<null>;
   transitionStage: (missionId: number, vehicleName: VehicleEnum) => Promise<null>;
+  updateStageArea: (
+    missionId: number,
+    vehicleName: VehicleEnum,
+    stageId: number,
+    area: GeoCoordinateStruct[]
+  ) => Promise<null>;
 
   // Zone Data
   getZoneData: (missionId: number, zoneType: ZoneType) => GeoCoordinateStruct[][] | undefined;
   addZone: (missionId: number, zoneType: ZoneType) => Promise<null>;
+  updateZone: (
+    missionId: number,
+    zoneType: ZoneType,
+    zoneIndex: number,
+    polygon: GeoCoordinateStruct[]
+  ) => Promise<null>;
   deleteZone: (missionId: number, zoneType: ZoneType, zoneIndex: number) => Promise<null>;
 }

@@ -14,21 +14,22 @@
 
 <script setup lang="ts">
 import { cn } from "@/lib/utils";
+import { Signal } from "lucide-vue-next";
 import { ref, watch } from "vue";
 
 const props = defineProps<{
-  latency: number;
+  signal_string: number;
   displayLatency: boolean;
 }>();
 
-const calculatedLatency = ref(0);
+// const calculatedLatency = ref(0);
 
-watch(
-  () => props.latency,
-  (newLatency) => {
-    calculatedLatency.value = Date.now() - newLatency;
-  }
-);
+// watch(
+//   () => props.signal_string,
+//   (newLatency) => {
+//     calculatedLatency.value = Date.now() - newLatency;
+//   }
+// );
 </script>
 
 <style scoped>

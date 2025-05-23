@@ -14,6 +14,8 @@ defineProps<{
       latitude: number;
       longitude: number;
     };
+    altitude: number;
+    airspeed: number;
   }[];
 }>();
 </script>
@@ -32,6 +34,8 @@ defineProps<{
           :connection="vehicle.connection"
           :latitude="vehicle.coordinates.latitude"
           :longitude="vehicle.coordinates.longitude"
+          :altitude="vehicle.altitude"
+          :airspeed="vehicle.airspeed"
         />
       </div>
     </SidebarContent>

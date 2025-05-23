@@ -13,7 +13,8 @@ edition = "2021"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+# Use specific version for Tauri without window-emit feature (which doesn't exist in v2)
+tauri = { version = "2.0.0", features = [] }
 serde = { version = "1.0", features = ["derive"] }
 specta = {version = "=2.0.0-rc.22", features= ["derive"] }
 tokio = { version = "1.41.1", features = ["full"] }
@@ -21,8 +22,24 @@ taurpc = "0.4.1"
 serde_json = "1.0"
 tauri-plugin-shell = "2"
 rand = "0.9"
+sqlx = { version = "0.8", features = [ "runtime-tokio", "tls-native-tls", "postgres" ] }
+dotenvy = "0.15.7"
+lapin = "2.3.0"
+tokio-amqp = "2.0.0"
+lazy_static = "1.4.0"
+futures-util = "0.3"
+
+
+
+
+
+
+
+[dependencies.ntapi]
+version = "0.4.1"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
 # DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
+used_linker = []

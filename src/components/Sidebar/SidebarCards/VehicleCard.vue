@@ -20,7 +20,7 @@ const vehicle =
 const currentVehicleStage =
   vehicle === undefined || vehicle === null || missionId === null
     ? null
-    : vehicle.stages[vehicle.current_stage];
+    : vehicle.stages.find((stage) => stage.stage_id === vehicle.current_stage);
 
 const patientStatusStyles = {
   statusColor: {
@@ -64,7 +64,7 @@ const patientStatusStyles = {
     <CardFooter class="mt-4 justify-start">
       <!-- TODO: Add logic to disable if vehicle is at last stage or if mission is not submitted or not started-->
       <Button
-        :disabled="vehicle.stages.length < 1 || vehicle.current_stage === vehicle.stages.length - 1"
+        :disabled="vehicle.stages.length < 1 || vehicle.current_stage === vehicle.stages[vehicle.stages.length - 1].stage_id"
         @click.stop="missionStore.transitionStage(missionId, props.vehicleName)">
         Next Stage
       </Button>
