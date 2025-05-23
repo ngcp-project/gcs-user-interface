@@ -17,7 +17,7 @@ pub struct CommandsStruct {
 
 type SharedCommands = Arc<Mutex<CommandsStruct>>;
 
-#[procedures(export_to = "../src/lib/commands_bindings.ts", path = "commands")]
+#[procedures(export_to = "../src/lib/bindings.ts", path = "commands")]
 pub trait CommandsApi {
     async fn send_emergency_stop(vehicle_id: String) -> Result<(), String>;
     async fn send_mission_update(vehicle_id: String, mission_id: String) -> Result<(), String>;

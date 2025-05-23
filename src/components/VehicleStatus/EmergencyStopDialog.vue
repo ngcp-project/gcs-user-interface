@@ -47,7 +47,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Icon } from "@iconify/vue";
-import { createTauRPCProxy } from "@/lib/commands_bindings";
+import { createTauRPCProxy } from "@/lib/bindings";
 
 const { vehicleName } = defineProps<{ vehicleName: string }>();
 
