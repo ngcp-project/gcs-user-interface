@@ -23,14 +23,13 @@
             <span v-else>
               vehicle <span>{{ vehicleName }}</span>
             </span>
-          </span>
-          ?
+          </span>?
         </div>
       </slot>
 
       <DialogFooter>
-        <DialogClose><Button variant="destructive">No</Button></DialogClose>
-        <DialogClose><Button @click="sendStopCommand">Yes</Button></DialogClose>
+        <DialogClose><Button>No</Button></DialogClose>
+        <DialogClose><Button variant="destructive" @click="sendStopCommand">Yes</Button></DialogClose>
       </DialogFooter>
     </DialogContent>
   </Dialog>
