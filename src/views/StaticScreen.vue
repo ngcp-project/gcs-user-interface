@@ -270,7 +270,7 @@ onUnmounted(() => {
 
   <div class="flex h-full w-[100dvw] flex-row">
 
-    <div class="flex-grow">
+    <div class="flex-grow map-container">
        <!-- should be fire coords --> <Map
         ref="mapRef"
         :ERU_coords="ERU_data.coordinates"
@@ -318,8 +318,9 @@ onUnmounted(() => {
   margin-left: auto;
 }
 
-.map_div {
+.map-container {
   width: 77%;
+  z-index: 49 !important;
 }
 </style>
 

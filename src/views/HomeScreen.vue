@@ -198,10 +198,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="text-xs text-gray-500 fixed bottom-2 right-2 z-50">
-    Route: {{ route.name }} ({{ route.path }})
-  </div>
-  <div class="flex w-full">
+<div class="flex w-full">
     <HomeSidebar :vehicles="vehicleData" />
     <Cameras />
   </div>
