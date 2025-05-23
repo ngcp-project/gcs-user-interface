@@ -19,6 +19,7 @@ pub struct GeoCoordinate {
 pub struct CommandsStruct {
     pub vehicle_id: String,
     pub commandID: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub coordinates: Option<Vec<GeoCoordinate>>,
 }
 
@@ -52,7 +53,7 @@ impl Default for CommandsApiImpl {
 impl CommandsApi for CommandsApiImpl {
     async fn send_emergency_stop(self, vehicle_id: String) -> Result<(), String> {
         let mut state = self.state.lock().await;
-        state.vehicle_id = vehicle_id;
+        state.vehicle_id = vehicle_id;  // This will be "ALL" for all vehicles or specific vehicle name
         state.commandID = 1; // Emergency stop command ID
         state.coordinates = None;
         self.publish_command_to_rabbitmq(&state).await?;

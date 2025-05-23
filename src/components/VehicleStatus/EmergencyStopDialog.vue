@@ -57,12 +57,9 @@ const commands = createTauRPCProxy().commands;
 async function sendStopCommand() {
   try {
     if (vehicleName == "all") {
-      // Send Emergency Stop command for all vehicles
-      const promises = vehicle_names.map(name => 
-        commands.send_emergency_stop(name)
-      );
-      await Promise.all(promises);
-      console.log("Sent stop commands to all vehicles!");
+      // Send single Emergency Stop command for all vehicles
+      await commands.send_emergency_stop("ALL");
+      console.log("Sent stop command to all vehicles!");
     } else {
       // Send Emergency Stop command for specific vehicle
       await commands.send_emergency_stop(vehicleName);

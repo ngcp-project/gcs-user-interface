@@ -579,12 +579,8 @@ impl MissionApi for MissionApiImpl {
                     })
                     .collect();
                 
-                // Send to MEA
-                commands_api.clone().send_zone_update("MEA".to_string(), "2".to_string(), coords.clone()).await?;
-                // Send to ERU
-                commands_api.clone().send_zone_update("ERU".to_string(), "2".to_string(), coords.clone()).await?;
-                // Send to MRA
-                commands_api.clone().send_zone_update("MRA".to_string(), "2".to_string(), coords.clone()).await?;
+                // Send to ALL vehicles at once
+                commands_api.clone().send_zone_update("ALL".to_string(), "2".to_string(), coords).await?;
             }
         }
 
@@ -599,12 +595,8 @@ impl MissionApi for MissionApiImpl {
                     })
                     .collect();
                 
-                // Send to MEA
-                commands_api.clone().send_zone_update("MEA".to_string(), "3".to_string(), coords.clone()).await?;
-                // Send to ERU
-                commands_api.clone().send_zone_update("ERU".to_string(), "3".to_string(), coords.clone()).await?;
-                // Send to MRA
-                commands_api.clone().send_zone_update("MRA".to_string(), "3".to_string(), coords.clone()).await?;
+                // Send to ALL vehicles at once
+                commands_api.clone().send_zone_update("ALL".to_string(), "3".to_string(), coords).await?;
             }
         }
 
