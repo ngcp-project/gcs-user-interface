@@ -7,15 +7,6 @@ defineProps<{
 }>();
 </script>
 
-<script lang="ts" setup>
-import { defineProps } from "vue";
-
-defineProps<{
-  percentage: number;
-  charging: boolean;
-}>();
-</script>
-
 <template>
   <div class="relative flex flex-col h-full w-full items-center">
     <div class="h-[1px] w-2 border-2 border-[#020817]"></div>

@@ -4,6 +4,8 @@ import { createTauRPCProxy as createProxy, type InferCommandOutput } from 'taurp
 type TAURI_CHANNEL<T> = (response: T) => void
 
 
+export type Coordinate = { latitude: number; longitude: number }
+
 export type GeoCoordinateStruct = { lat: number; long: number }
 
 export type MissionStageStatusEnum = "Active" | "Inactive" | "Complete" | "Failed"
@@ -14,11 +16,19 @@ export type MissionsStruct = { current_mission: number; missions: MissionStruct[
 
 export type PatientStatusEnum = "Secured" | "Unsecured"
 
+export type RequestCoordinate = { message_flag: number; request_location: Coordinate; patient_secured?: boolean | null }
+
 export type StageStruct = { stage_name: string; stage_id: number; stage_status: MissionStageStatusEnum; search_area: GeoCoordinateStruct[] }
+
+export type TelemetryData = { vehicle_id: string; signal_strength: number; pitch: number; yaw: number; roll: number; speed: number; altitude: number; battery_life: number; current_position: Coordinate; vehicle_status: string; request_coordinate: RequestCoordinate }
+
+export type TelemetryStruct = { vehicle_id: string; latitude: number; longitude: number; heading: number; battery_level: number; timestamp: string }
 
 export type VehicleEnum = "MEA" | "ERU" | "MRA"
 
 export type VehicleStruct = { vehicle_name: VehicleEnum; current_stage: number; is_auto: boolean | null; patient_status: PatientStatusEnum | null; stages: StageStruct[] }
+
+export type VehicleTelemetryData = { ERU: TelemetryData; MEA: TelemetryData; MRA: TelemetryData }
 
 export type VehiclesStruct = { MEA: VehicleStruct; ERU: VehicleStruct; MRA: VehicleStruct }
 
@@ -26,8 +36,12 @@ export type ZoneType = "KeepIn" | "KeepOut"
 
 export type ZonesStruct = { keep_in_zones: GeoCoordinateStruct[][]; keep_out_zones: GeoCoordinateStruct[][] }
 
-const ARGS_MAP = { 'mission':'{"get_default_data":[],"add_stage":["mission_id","vehicle_name","stage_name"],"set_auto_mode":["mission_id","vehicle_name","is_auto"],"transition_stage":["mission_id","vehicle_name"],"delete_mission":["mission_id"],"on_updated":["new_data"],"get_mission_data":["mission_id"],"add_zone":["mission_id","zone_type"],"get_all_missions":[],"delete_stage":["mission_id","vehicle_name","stage_id"],"delete_zone":["mission_id","zone_type","zone_index"],"create_mission":["mission_name"],"set_mission_data":["mission_data"]}' }
-export type Router = { 'mission': { on_updated: (newData: MissionsStruct) => Promise<void>, 
+const ARGS_MAP = { 'telemetry':'{"on_updated":["new_data"],"get_default_data":[],"get_telemetry":[]}', 'mission':'{"delete_stage":["mission_id","vehicle_name","stage_id"],"get_all_missions":[],"get_mission_data":["mission_id"],"delete_mission":["mission_id"],"add_stage":["mission_id","vehicle_name","stage_name"],"get_default_data":[],"transition_stage":["mission_id","vehicle_name"],"set_auto_mode":["mission_id","vehicle_name","is_auto"],"set_mission_data":["mission_data"],"on_updated":["new_data"],"create_mission":["mission_name"],"add_zone":["mission_id","zone_type"],"delete_zone":["mission_id","zone_type","zone_index"]}', 'commands':'{"send_emergency_stop":["vehicle_id"],"send_mission_update":["vehicle_id","mission_id"],"send_zone_update":["vehicle_id","zone_id"]}', 'telem':'{"get_default_telemetry":[]}' }
+export type Router = { 'telem': { get_default_telemetry: () => Promise<TelemetryStruct> },
+'commands': { send_emergency_stop: (vehicleId: string) => Promise<null>, 
+send_mission_update: (vehicleId: string, missionId: string) => Promise<null>, 
+send_zone_update: (vehicleId: string, zoneId: string) => Promise<null> },
+'mission': { on_updated: (newData: MissionsStruct) => Promise<void>, 
 get_default_data: () => Promise<MissionsStruct>, 
 get_all_missions: () => Promise<MissionsStruct>, 
 set_mission_data: (missionData: MissionStruct) => Promise<null>, 
@@ -39,7 +53,10 @@ add_stage: (missionId: number, vehicleName: VehicleEnum, stageName: string) => P
 delete_stage: (missionId: number, vehicleName: VehicleEnum, stageId: number) => Promise<null>, 
 transition_stage: (missionId: number, vehicleName: VehicleEnum) => Promise<null>, 
 add_zone: (missionId: number, zoneType: ZoneType) => Promise<null>, 
-delete_zone: (missionId: number, zoneType: ZoneType, zoneIndex: number) => Promise<null> } };
+delete_zone: (missionId: number, zoneType: ZoneType, zoneIndex: number) => Promise<null> },
+'telemetry': { on_updated: (newData: VehicleTelemetryData) => Promise<void>, 
+get_default_data: () => Promise<VehicleTelemetryData>, 
+get_telemetry: () => Promise<VehicleTelemetryData> } };
 
 
 export type { InferCommandOutput }
