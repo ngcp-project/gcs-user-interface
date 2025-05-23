@@ -76,8 +76,8 @@ pub async fn test_publisher() -> Result<(), Box<dyn std::error::Error>> {
                 altitude: rand::random::<f32>() * 100.0,
                 battery_life: rand::random::<i32>() % 40 + 20,
                 current_position: Coordinate {
-                    latitude: rand::random::<f64>() * 100.0,
-                    longitude: rand::random::<f64>() * 100.0,
+                    latitude: 33.932573934575075 + rand::random::<f64>() * 0.01,
+                    longitude: -117.63059569114814 + rand::random::<f64>() * 0.01,
                 },
                 // last_updated: SystemTime::now(),
                 vehicle_status: "something".to_string(),

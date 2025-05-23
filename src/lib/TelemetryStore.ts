@@ -44,9 +44,10 @@ export const telemetryZustandStore = createStore<TelemetryStore>((set, get) => (
         // Convert vehicle name to match VehicleEnum
         const vehicleEnum = vehicle.toUpperCase() as VehicleEnum;
         // Dynamically update coordinates from telemetry data
-        mapStore.updateMarkerCoords(
+        mapStore.updateVehicleMarker(
           vehicleEnum,
-          [data.current_position.latitude, data.current_position.longitude]
+          data.current_position.latitude,
+          data.current_position.longitude
         );
       }
     });
