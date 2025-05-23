@@ -21,9 +21,10 @@ bun install
 ```
 
 Run the application.
-
+- NOTE: Ensure PostGreSQL and RabbitMQ images need to be running, along with ONLY the Map server container (bun run osm:run)
+- Simply running docker-compose up will run all containers and cause the map server to fail.
 ```bash
-bun tauri dev
+bun tauri
 ```
 
 ## Running the Map Server
@@ -40,6 +41,11 @@ Run the Map Server container.
 bun run osm:run
 ```
 
+## Running the PostGreSQL Docker image
+`docker-compose up db`
+
+## Running the RabbitMQ Docker image
+`docker-compose up rabbitmq`
 
 ## Map Server Debugging Notes
 - If you get an error "Error: role renderer already exists" when running the map server, go into Docker Desktop and delete the volume installed. Re-run the setup command to install the volume again.

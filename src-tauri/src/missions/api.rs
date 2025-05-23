@@ -1,10 +1,11 @@
 use super::sql::*;
 use super::types::*;
-use sqlx::{postgres::PgPoolOptions, PgPool, Row};
 use std::sync::Arc;
+use sqlx::{postgres::PgPoolOptions, PgPool, Row};
 use tauri::{AppHandle, Runtime};
 use taurpc;
 use tokio::sync::Mutex;
+use serde_json::Value;
 
 /*==============================================================================
  * MissionApiImpl Structure and Default Implementation
@@ -62,8 +63,8 @@ impl MissionApiImpl {
                         stages.target_coordinate,
                         stages.status AS stage_status
                     FROM missions
-                    INNER JOIN vehicles ON missions.mission_id = vehicles.mission_id
-                    INNER JOIN stages ON vehicles.vehicle_id = stages.vehicle_id
+                    LEFT JOIN vehicles ON missions.mission_id = vehicles.mission_id
+                    LEFT JOIN stages ON vehicles.vehicle_id = stages.vehicle_id
                     WHERE missions.mission_id = $1
                     ",
                 )
@@ -89,7 +90,6 @@ impl MissionApiImpl {
                     .find(|row| row.get::<String, _>("vehicle_name") == "MRA")
                     .expect("Expected MRA row");
 
-
                 initial_state.missions.push(MissionStruct {
                     mission_name: mission[0].get("mission_name"),
                     mission_id: mission[0].get("mission_id"),
@@ -109,91 +109,133 @@ impl MissionApiImpl {
                             vehicle_name: VehicleEnum::MEA,
                             current_stage: mea_row.get("current_stage"),
                             is_auto: mea_row.get("is_auto"),
-                            patient_status: mea_row.get("patient_status"),
-                            stages: mission.iter()
-                                .filter(|row| row.get::<String, _>("vehicle_name") == "MEA")
-                                .map(|row| StageStruct {
-                                    stage_name: row.get("stage_name"),
-                                    stage_id: row.get("stage_id"),
-                                    stage_status: match row
-                                        .try_get::<String, _>("stage_status")
-                                        .unwrap_or_else(|_| "Inactive".to_string())
-                                        .as_str()
-                                    {
-                                        "Active" => MissionStageStatusEnum::Active,
-                                        "Inactive" => MissionStageStatusEnum::Inactive,
-                                        "Complete" => MissionStageStatusEnum::Complete,
-                                        "Failed" => MissionStageStatusEnum::Failed,
-                                        _ => MissionStageStatusEnum::Inactive,
-                                    },
-                                    search_area: row
-                                        .try_get::<Vec<String>, _>("search_area")
-                                        .unwrap_or_else(|_| Vec::new())
-                                        .into_iter()
-                                        .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
-                                        .collect(),
-                                })
-                                .collect(),
+                            patient_status: 
+                                match mea_row.get::<String, _>("patient_status").as_str() {
+                                    "Unsecured" => Some(PatientStatusEnum::Unsecured),
+                                    "Secured" => Some(PatientStatusEnum::Secured),
+                                    _ => Some(PatientStatusEnum::Unsecured),
+                                }, 
+                            stages: 
+                            if mea_row.get::<i32, _>("current_stage") != -1 {
+                                mission.iter()
+                                    .filter(|row| row.get::<String, _>("vehicle_name") == "MEA")
+                                    .map(|row| StageStruct {
+                                        stage_name: row.get("stage_name"),
+                                        stage_id: row.get("stage_id"),
+                                        stage_status: match row
+                                            .try_get::<String, _>("stage_status")
+                                            .unwrap_or_else(|_| "Inactive".to_string())
+                                            .as_str()
+                                        {
+                                            "Active" => MissionStageStatusEnum::Active,
+                                            "Inactive" => MissionStageStatusEnum::Inactive,
+                                            "Complete" => MissionStageStatusEnum::Complete,
+                                            "Failed" => MissionStageStatusEnum::Failed,
+                                            _ => MissionStageStatusEnum::Inactive,
+                                        },
+                                        search_area:
+                                        match row.try_get::<Vec<String>, _>("search_area").unwrap_or_else(|_| Vec::new()) {
+                                            search_areas => search_areas
+                                                .into_iter()
+                                                .filter_map(|area: String| {
+                                                    serde_json::from_str::<Vec<GeoCoordinateStruct>>(convert_zone_to_json(&area).as_str()).ok()
+                                                })
+                                                .flatten()
+                                                .collect::<Vec<GeoCoordinateStruct>>()
+                                            }
+                                    })
+                                    .collect()
+                            } else {
+                                vec![]
+                            }
                         },
                         ERU: VehicleStruct {
                             vehicle_name: VehicleEnum::ERU,
                             current_stage: eru_row.get("current_stage"),
                             is_auto: eru_row.get("is_auto"),
-                            patient_status: eru_row.get("patient_status"),
-                            stages: mission.iter()
-                                .filter(|row| row.get::<String, _>("vehicle_name") == "ERU")
-                                .map(|row| StageStruct {
-                                    stage_name: row.get("stage_name"),
-                                    stage_id: row.get("stage_id"),
-                                    stage_status: match row
-                                        .try_get::<String, _>("stage_status")
-                                        .unwrap_or_else(|_| "Inactive".to_string())
-                                        .as_str()
-                                    {
-                                        "Active" => MissionStageStatusEnum::Active,
-                                        "Inactive" => MissionStageStatusEnum::Inactive,
-                                        "Complete" => MissionStageStatusEnum::Complete,
-                                        "Failed" => MissionStageStatusEnum::Failed,
-                                        _ => MissionStageStatusEnum::Inactive,
-                                    },
-                                    search_area: row
-                                        .try_get::<Vec<String>, _>("search_area")
-                                        .unwrap_or_else(|_| Vec::new())
-                                        .into_iter()
-                                        .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
-                                        .collect(),
-                                })
-                                .collect(),
+                            patient_status: 
+                                match eru_row.get::<String, _>("patient_status").as_str() {
+                                    "Unsecured" => Some(PatientStatusEnum::Unsecured),
+                                    "Secured" => Some(PatientStatusEnum::Secured),
+                                    _ => Some(PatientStatusEnum::Unsecured),
+                                },
+                            stages: 
+                            if eru_row.get::<i32, _>("current_stage") != -1 {
+                                mission.iter()
+                                    .filter(|row| row.get::<String, _>("vehicle_name") == "ERU")
+                                    .map(|row| StageStruct {
+                                        stage_name: row.get("stage_name"),
+                                        stage_id: row.get("stage_id"),
+                                        stage_status: match row
+                                            .try_get::<String, _>("stage_status")
+                                            .unwrap_or_else(|_| "Inactive".to_string())
+                                            .as_str()
+                                        {
+                                            "Active" => MissionStageStatusEnum::Active,
+                                            "Inactive" => MissionStageStatusEnum::Inactive,
+                                            "Complete" => MissionStageStatusEnum::Complete,
+                                            "Failed" => MissionStageStatusEnum::Failed,
+                                            _ => MissionStageStatusEnum::Inactive,
+                                        },
+                                        search_area: 
+                                            match row.try_get::<Vec<String>, _>("search_area").unwrap_or_else(|_| Vec::new()) {
+                                            search_areas => search_areas
+                                                .into_iter()
+                                                .filter_map(|area: String| {
+                                                    serde_json::from_str::<Vec<GeoCoordinateStruct>>(convert_zone_to_json(&area).as_str()).ok()
+                                                })
+                                                .flatten()
+                                                .collect::<Vec<GeoCoordinateStruct>>()
+                                            }
+                                    })
+                                    .collect()
+                            } else {
+                                vec![]
+                            }
                         },
                         MRA: VehicleStruct {
                             vehicle_name: VehicleEnum::MRA,
                             current_stage: mra_row.get("current_stage"),
                             is_auto: mra_row.get("is_auto"),
-                            patient_status: mra_row.get("patient_status"),
-                            stages: mission.iter()
-                                .filter(|row| row.get::<String, _>("vehicle_name") == "MRA")
-                                .map(|row| StageStruct {
-                                    stage_name: row.get("stage_name"),
-                                    stage_id: row.get("stage_id"),
-                                    stage_status: match row
-                                        .try_get::<String, _>("stage_status")
-                                        .unwrap_or_else(|_| "Inactive".to_string())
-                                        .as_str()
-                                    {
-                                        "Active" => MissionStageStatusEnum::Active,
-                                        "Inactive" => MissionStageStatusEnum::Inactive,
-                                        "Complete" => MissionStageStatusEnum::Complete,
-                                        "Failed" => MissionStageStatusEnum::Failed,
-                                        _ => MissionStageStatusEnum::Inactive,
-                                    },
-                                    search_area: row
-                                        .try_get::<Vec<String>, _>("search_area")
-                                        .unwrap_or_else(|_| Vec::new())
-                                        .into_iter()
-                                        .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
-                                        .collect(),
-                                })
-                                .collect(),
+                            patient_status:
+                                match mra_row.get::<String, _>("patient_status").as_str() {
+                                    "Unsecured" => Some(PatientStatusEnum::Unsecured),
+                                    "Secured" => Some(PatientStatusEnum::Secured),
+                                    _ => Some(PatientStatusEnum::Unsecured),
+                                },
+                            stages: 
+                            if mra_row.get::<i32, _>("current_stage") != -1 {
+                                mission.iter()
+                                    .filter(|row| row.get::<String, _>("vehicle_name") == "MRA")
+                                    .map(|row| StageStruct {
+                                        stage_name: row.get("stage_name"),
+                                        stage_id: row.get("stage_id"),
+                                        stage_status: match row
+                                            .try_get::<String, _>("stage_status")
+                                            .unwrap_or_else(|_| "Inactive".to_string())
+                                            .as_str()
+                                        {
+                                            "Active" => MissionStageStatusEnum::Active,
+                                            "Inactive" => MissionStageStatusEnum::Inactive,
+                                            "Complete" => MissionStageStatusEnum::Complete,
+                                            "Failed" => MissionStageStatusEnum::Failed,
+                                            _ => MissionStageStatusEnum::Inactive,
+                                        },
+                                        search_area:
+                                            match row.try_get::<Vec<String>, _>("search_area").unwrap_or_else(|_| Vec::new()) {
+                                            search_areas => search_areas
+                                                .into_iter()
+                                                .filter_map(|area: String| {
+                                                    serde_json::from_str::<Vec<GeoCoordinateStruct>>(convert_zone_to_json(&area).as_str()).ok()
+                                                })
+                                                .flatten()
+                                                .collect::<Vec<GeoCoordinateStruct>>()
+                                            },
+                                    })
+                                    .collect()
+                            } else {
+                                vec![]
+                            }
                         },
                     },
                     zones: ZonesStruct {
@@ -202,21 +244,20 @@ impl MissionApiImpl {
                             .unwrap_or_else(|_| Vec::new())
                             .into_iter()
                             .map(|zone| {
-                                serde_json::from_str::<Vec<GeoCoordinateStruct>>(&zone)
+                                serde_json::from_str::<Vec<GeoCoordinateStruct>>(convert_zone_to_json(&zone).as_str())
                                     .unwrap_or_else(|_| Vec::new())
                             })
                             .collect(),
-                        keep_out_zones: match mission[0].try_get::<Vec<String>, _>("keep_out_zones")
-                        {
-                            Ok(zones) => zones
+                        keep_out_zones:
+                            mission[0]
+                                .try_get::<Vec<String>, _>("keep_out_zones")
+                                .unwrap_or_else(|_| Vec::new())
                                 .into_iter()
                                 .map(|zone| {
-                                    serde_json::from_str::<Vec<GeoCoordinateStruct>>(&zone)
+                                    serde_json::from_str::<Vec<GeoCoordinateStruct>>(convert_zone_to_json(&zone).as_str())
                                         .unwrap_or_else(|_| Vec::new())
                                 })
                                 .collect(),
-                            Err(_) => Vec::new(),
-                        },
                     },
                 });
             }
@@ -357,14 +398,6 @@ pub trait MissionApi {
         mission_id: i32,
         vehicle_name: VehicleEnum,
         stage_name: String,
-    ) -> Result<(), String>;
-    async fn update_stage(
-        app_handle: AppHandle<impl Runtime>,
-        mission_id: i32,
-        vehicle_name: VehicleEnum,
-        stage_id: i32,
-        new_stage_name: Option<String>,
-        new_status: Option<MissionStageStatusEnum>,
     ) -> Result<(), String>;
     async fn delete_stage(
         app_handle: AppHandle<impl Runtime>,
@@ -524,6 +557,31 @@ impl MissionApi for MissionApiImpl {
         update_mission_status(self.db.clone(), mission_id, "Active").await.expect("Failed to update mission status");
 
         
+        let vehicles = &mut state.missions[start_mission_index].vehicles;
+        
+        // Set the first stage of each vehicle to active
+        vehicles.MEA.stages[0].stage_status = MissionStageStatusEnum::Active;
+        update_stage_status(
+            self.db.clone(),
+            vehicles.MEA.stages[0].stage_id,
+            "Active",
+        ).await.expect("Failed to update stage status");
+        
+        vehicles.ERU.stages[0].stage_status = MissionStageStatusEnum::Active;
+        update_stage_status(
+            self.db.clone(),
+            vehicles.ERU.stages[0].stage_id,
+            "Active",
+        ).await.expect("Failed to update stage status");
+        
+        
+        vehicles.MRA.stages[0].stage_status = MissionStageStatusEnum::Active;
+        update_stage_status(
+            self.db.clone(),
+            vehicles.MRA.stages[0].stage_id,
+            "Active",
+        ).await.expect("Failed to update stage status");
+        
         self.emit_state_update(&app_handle, &state)
     }
 
@@ -610,42 +668,6 @@ impl MissionApi for MissionApiImpl {
         self.emit_state_update(&app_handle, &state)
     }
 
-    async fn update_stage(
-        self,
-        app_handle: AppHandle<impl Runtime>,
-        mission_id: i32,
-        vehicle_name: VehicleEnum,
-        stage_id: i32,
-        new_stage_name: Option<String>,
-        new_status: Option<MissionStageStatusEnum>,
-    ) -> Result<(), String> {
-        let mut state = self.state.lock().await;
-        let mission = state
-            .missions
-            .iter_mut()
-            .find(|m| m.mission_id == mission_id)
-            .ok_or("Mission not found")?;
-        let vehicle = match vehicle_name {
-            VehicleEnum::MEA => &mut mission.vehicles.MEA,
-            VehicleEnum::ERU => &mut mission.vehicles.ERU,
-            VehicleEnum::MRA => &mut mission.vehicles.MRA,
-        };
-        let stage = vehicle
-            .stages
-            .iter_mut()
-            .find(|s| s.stage_id == stage_id)
-            .ok_or("Stage not found")?;
-
-        if let Some(name) = new_stage_name {
-            stage.stage_name = name;
-        }
-        if let Some(status) = new_status {
-            stage.stage_status = status;
-        }
-
-        self.emit_state_update(&app_handle, &state)
-    }
-
     async fn update_stage_area(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -674,6 +696,30 @@ impl MissionApi for MissionApiImpl {
             .ok_or("Stage not found")?;
 
         stage.search_area = area;
+
+        let search_area_string = format!(
+            "[\n    {}\n]",
+            stage.search_area
+                .iter()
+                .map(|coord| format!("({}, {})", coord.lat, coord.long))
+                .collect::<Vec<String>>()
+                .join(",\n    ")
+        );
+        
+        let search_area_array: Vec<String> = vec![search_area_string.clone()];
+        
+        let vehicle_id = select_vehicle_from_mission(
+            self.db.clone(),
+            mission.mission_id,
+            vehicle.vehicle_name.to_string(),
+        ).await.expect("Failed to find vehicle mission");
+
+        let current_stage_id = update_stage_area(
+            self.db.clone(),
+            stage.stage_id,
+            search_area_array,
+            vehicle_id,
+        ).await.expect("Failed to update stage area");
 
         self.emit_state_update(&app_handle, &state)
     }
@@ -810,7 +856,6 @@ impl MissionApi for MissionApiImpl {
     // ----------------------------------
     // Zone Operations Implementations
     // ----------------------------------
-    // TODO: SQL
     async fn add_zone(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -830,10 +875,11 @@ impl MissionApi for MissionApiImpl {
             ZoneType::KeepOut => mission.zones.keep_out_zones.push(GeofenceType::default()),
         }
 
+        // note: no need for SQL here since its just an empty zone be changed in the rust state
+
         self.emit_state_update(&app_handle, &state)
     }
 
-    // TODO: SQL
     async fn update_zone(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -865,10 +911,32 @@ impl MissionApi for MissionApiImpl {
             }
         }
 
+        let keep_in_zones = mission.zones.keep_in_zones.iter()
+            .map(|zone| {
+                let json = serde_json::to_string(zone).unwrap();
+                convert_zone_format(&json)
+            })
+            .collect::<Vec<String>>();
+
+        let keep_out_zones = mission.zones.keep_out_zones.iter()
+            .map(|zone| {
+                let json = serde_json::to_string(zone).unwrap();
+                convert_zone_format(&json)
+            })
+            .collect::<Vec<String>>();
+
+
+        // update zones
+        update_zones(
+            self.db.clone(),
+            mission.mission_id,
+            keep_in_zones.clone(),
+            keep_out_zones.clone(),
+        ).await.expect("Failed to add zones");
+
         self.emit_state_update(&app_handle, &state)
     }
 
-    // TODO: SQL
     async fn delete_zone(
         self,
         app_handle: AppHandle<impl Runtime>,
@@ -887,6 +955,7 @@ impl MissionApi for MissionApiImpl {
             .find(|m| m.mission_id == mission_id)
             .ok_or("Mission not found")?;
 
+        // TODO: Error handling for out of bounds
         match zone_type {
             ZoneType::KeepIn => {
                 if zone_index >= mission.zones.keep_in_zones.len() as i32 {
@@ -902,10 +971,83 @@ impl MissionApi for MissionApiImpl {
             }
         }
 
+        let keep_in_zones = mission.zones.keep_in_zones.iter()
+            .map(|zone| {
+                let json = serde_json::to_string(zone).unwrap();
+                convert_zone_format(&json)
+            })
+            .collect::<Vec<String>>();
+
+        let keep_out_zones = mission.zones.keep_out_zones.iter()
+            .map(|zone| {
+                let json = serde_json::to_string(zone).unwrap();
+                convert_zone_format(&json)
+            })
+            .collect::<Vec<String>>();
+
+
+        // update zones
+        update_zones(
+            self.db.clone(),
+            mission.mission_id,
+            keep_in_zones.clone(),
+            keep_out_zones.clone(),
+        ).await.expect("Failed to delete zones");
+
         self.emit_state_update(&app_handle, &state)
     }
     
     // async fn on_updated(new_data: MissionsStruct) {
     //     todo!()
     // }
+}
+
+// helper function for converting JSON string to zone format
+fn convert_zone_format(json_str: &str) -> String {
+    let parsed: Value = serde_json::from_str(json_str).unwrap();
+
+    if let Some(arr) = parsed.as_array() {
+        let tuples: Vec<String> = arr.iter().map(|point| {
+            let lat = point["lat"].as_f64().unwrap();
+            let long = point["long"].as_f64().unwrap();
+            format!("({:.5},{:.5})", lat, long)
+        }).collect();
+
+        format!("[\n    {}\n]", tuples.join(",\n    "))
+    } else {
+        String::new()
+    }
+}
+fn convert_zone_to_json(zone_str: &str) -> String {
+    // Remove brackets and whitespace
+    let content = zone_str
+        .trim()
+        .trim_start_matches('[')
+        .trim_end_matches(']')
+        .trim();
+
+    // Parse each coordinate pair
+    let coords: Vec<String> = content
+        .split(',')
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<&str>>()
+        .chunks(2)
+        .map(|chunk| {
+            let lat = chunk[0]
+                .trim()
+                .trim_start_matches('(')
+                .trim_end_matches(')')
+                .parse::<f64>()
+                .unwrap_or(0.0);
+            let long = chunk[1]
+                .trim()
+                .trim_start_matches('(')
+                .trim_end_matches(')')
+                .parse::<f64>()
+                .unwrap_or(0.0);
+            format!(r#"{{"lat":{:.5},"long":{:.5}}}"#, lat, long)
+        })
+        .collect();
+
+    format!("[{}]", coords.join(","))
 }

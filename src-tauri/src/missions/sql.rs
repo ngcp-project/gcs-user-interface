@@ -127,7 +127,7 @@ pub async fn insert_new_stage(
 
     let new_stage_id: i32 = new_stage.get::<i32, _>("stage_id");
 
-    // set current stage id if previously didn't exitst (-1)
+    // set current stage id if previously didn't exist (-1)
     let current_stage = query("
         SELECT current_stage_id FROM vehicles WHERE vehicle_id = $1
     ")
@@ -186,6 +186,64 @@ pub async fn update_stage_name(
     Ok(())
 }
 
+pub async fn update_stage_status(
+    db_conn: PgPool,
+    stage_id: i32,
+    status: &str,
+) -> Result<(), sqlx::Error> {
+    query("
+        UPDATE stages SET status = $1 WHERE stage_id = $2
+    ")
+    .bind(status)
+    .bind(stage_id)
+    .execute(&db_conn)
+    .await
+    .expect("Failed to update stage status");
+
+    Ok(())
+}
+
+pub async fn update_stage_area(
+    db_conn: PgPool,
+    stage_id: i32,
+    area: Vec<String>,
+    vehicle_id: i32,
+) -> Result<i32, sqlx::Error> {
+    query("
+        UPDATE stages SET search_area = $1 WHERE stage_id = $2
+    ")
+    .bind(area)
+    .bind(stage_id)
+    .execute(&db_conn)
+    .await
+    .expect("Failed to update stage area");
+
+    // set status to active if current_stage_id matches stage_id
+    let current_stage = query("
+        SELECT current_stage_id FROM vehicles WHERE vehicle_id = $1
+    ")
+    .bind(vehicle_id)
+    .fetch_one(&db_conn)
+    .await
+    .expect("Failed to find vehicle in mission");
+
+    let current_stage_id = current_stage.get::<i32, _>("current_stage_id");
+
+    if current_stage_id == stage_id {
+        query("
+            UPDATE stages
+            SET status = 'Active'
+            WHERE stage_id = $1
+        ")
+        .bind(stage_id)
+        .execute(&db_conn)
+        .await
+        .expect("Failed to update stage status");
+        println!("Updated current stage status to 'Active'");
+    }
+
+    Ok(current_stage_id)
+}
 
 pub async fn update_auto_mode_vehicle(
     db_conn: PgPool,
@@ -311,6 +369,29 @@ pub async fn update_mission_status(
     .execute(&db_conn)
     .await
     .expect("Failed to update mission completion");
+
+    Ok(())
+}
+
+pub async fn update_zones(
+    db_conn: PgPool,
+    mission_id: i32,
+    keep_in_zones: Vec<String>,
+    keep_out_zones: Vec<String>,
+) -> Result<(), sqlx::Error> {
+    query("
+        INSERT INTO missions (mission_id, keep_in_zones, keep_out_zones)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (mission_id) DO UPDATE
+        SET keep_in_zones = EXCLUDED.keep_in_zones,
+            keep_out_zones = EXCLUDED.keep_out_zones
+    ")// waaah where is my UPSERT  T^T  ~tho this is basically an upsert
+    .bind(mission_id)
+    .bind(keep_in_zones)
+    .bind(keep_out_zones)
+    .execute(&db_conn)
+    .await
+    .expect("Failed to upsert mission zones");
 
     Ok(())
 }
