@@ -3,54 +3,26 @@ import { reactive } from "vue";
 import { LMap } from "@vue-leaflet/vue-leaflet";
 import { LatLngTuple as LatLng, LatLngExpression } from "leaflet";
 import * as L from "leaflet";
-import { GeoCoordinateStruct, MissionsStruct, VehicleEnum, ZoneType, StageStruct } from "@/lib//bindings";
+import {
+  GeoCoordinateStruct,
+  MissionsStruct,
+  VehicleEnum,
+  ZoneType,
+  StageStruct
+} from "@/lib//bindings";
 import { missionStore } from "./MissionStore";
 import { watch } from "vue";
-
-// =============================================
-// Types and Interfaces
-// =============================================
-interface LayerProperties {
-  color: string;
-  visibility: boolean;
-}
-
-interface ZoneLayer {
-  layer: L.Polygon;
-  properties: LayerProperties;
-}
-
-interface StageLayer {
-  stageId: number;
-  polygon: ZoneLayer;
-  properties: LayerProperties;
-}
-
-interface VehicleLayers {
-  stages: Record<number, StageLayer>;
-}
-
-interface MissionLayers {
-  vehicles: Record<VehicleEnum, VehicleLayers>;
-  zones: {
-    KeepIn: (ZoneLayer | {})[];
-    KeepOut: (ZoneLayer | {})[];
-  };
-}
-
-interface LayerTracking {
-  missions: Record<number, MissionLayers>;
-}
-
-/**
- * Merge in vue-leaflet map type with geoman L.Map
- * since geoman automatically initializes to any leaflet map created
- * Access geoman methods through .leafletObject.pm
- **/
-type LeafletMap = InstanceType<typeof LMap>;
-export interface LeafletMapGeoman extends LeafletMap {
-  leafletObject: LeafletMap["leafletObject"] & L.Map;
-}
+import {
+  LayerProperties,
+  ZoneLayer,
+  StageLayer,
+  VehicleLayers,
+  MissionLayers,
+  LayerTracking,
+  LeafletMap,
+  LeafletMapGeoman,
+  MapStore
+} from "@/lib/MapStore.types";
 
 // =============================================
 // Constants
@@ -67,56 +39,19 @@ const DEFAULT_MAP_ORIGIN: LatLng = [33.932573934575075, -117.63059569114814];
 const TILE_URL = "http://localhost:8080/tile/{z}/{x}/{y}.png";
 
 // =============================================
-// Store Interface
-// =============================================
-interface MapStore {
-  map: LeafletMapGeoman | null;
-  mapOrigin: LatLng;
-  markerCoord: LatLngExpression;
-  layers: L.FeatureGroup<L.Polygon>;
-  localTileURL: string;
-  layerTracking: LayerTracking;
-  vehicleMarkers: Record<VehicleEnum, LatLngExpression>;
-
-  // Map Management
-  updateMapRef: (ref: LeafletMapGeoman | null) => void;
-  toggleDrawMode: () => void;
-  rerenderLayers: () => void;
-  logMapStore: () => void;
-  updateVehicleMarker: (vehicle: VehicleEnum, lat: number, lng: number) => void;
-  updateMarkerCoords: (vehicle: VehicleEnum, coords: LatLngExpression) => void;
-  getVehicleMarkers: () => Record<VehicleEnum, LatLngExpression>;
-
-  // Layer Management
-  updateStagePolygon: (missionId: number, vehicle: VehicleEnum, stageId: number) => void;
-  updateZonePolygon: (missionId: number, type: ZoneType, zoneIndex: number) => void;
-  removeStageLayer: (missionId: number, vehicle: VehicleEnum, stageId: number) => void;
-  getStageLayer: (
-    missionId: number,
-    vehicle: VehicleEnum,
-    stageId: number
-  ) => StageLayer | undefined;
-  getZoneLayers: (missionId: number, type: ZoneType) => ZoneLayer[];
-  setZoneLayerVisibility: (missionId: number, type: ZoneType, zoneIndex: number) => void;
-  setStageLayerVisibility: (missionId: number, vehicle: VehicleEnum, stageId: number) => void;
-  // TODO: fix it so that theres no as declaration when reading from missionStore
-  updateLayerTracking: (state: MissionsStruct) => void;
-}
-
-// =============================================
 // Store Implementation
 // =============================================
 const mapStore = createStore<MapStore>((set, get) => ({
   map: null,
   mapOrigin: DEFAULT_MAP_ORIGIN,
-  markerCoord: L.latLng(33.932573934575075, -117.63059569114814),
+  markerCoord: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
   localTileURL: TILE_URL,
   layerTracking: { missions: {} },
   layers: L.featureGroup([]),
   vehicleMarkers: {
-    MRA: L.latLng(33.932573934575075, -117.63059569114814),
-    MEA: L.latLng(33.932573934575075, -117.63059569114814),
-    ERU: L.latLng(33.932573934575075, -117.63059569114814)
+    MRA: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
+    MEA: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
+    ERU: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1])
   },
 
   // Map Management Methods
@@ -133,7 +68,15 @@ const mapStore = createStore<MapStore>((set, get) => ({
 
   toggleDrawMode: () => {
     // Draws a polygon not linked to layers
-    get().map?.leafletObject?.pm.enableDraw("Polygon");
+    const map = get().map?.leafletObject;
+
+    if (!map) return;
+    
+    if (map.pm.globalDrawModeEnabled()) {
+      map.pm.disableDraw();
+    } else {
+      map.pm.enableDraw("Polygon");
+    }
   },
 
   logMapStore: () => {
@@ -302,18 +245,22 @@ const mapStore = createStore<MapStore>((set, get) => ({
       Object.entries(mission.vehicles).forEach(([vehicleName, vehicleData]) => {
         const vehicle = vehicleName as VehicleEnum;
         const stages = vehicleData.stages as unknown as StageStruct[];
-        
+
         stages.forEach((stage) => {
           if (!stage.search_area || stage.search_area.length < 1) {
-            newLayerTracking.missions[mission.mission_id].vehicles[vehicle].stages[stage.stage_id] = {
-              stageId: stage.stage_id,
-              polygon: {} as ZoneLayer,
-              properties: { color: LAYER_STYLING[vehicle].color, visibility: true }
-            };
+            newLayerTracking.missions[mission.mission_id].vehicles[vehicle].stages[stage.stage_id] =
+              {
+                stageId: stage.stage_id,
+                polygon: {} as ZoneLayer,
+                properties: { color: LAYER_STYLING[vehicle].color, visibility: true }
+              };
             return;
           }
 
-          const latLngs: LatLng[] = stage.search_area.map((coord: GeoCoordinateStruct) => [coord.lat, coord.long]);
+          const latLngs: LatLng[] = stage.search_area.map((coord: GeoCoordinateStruct) => [
+            coord.lat,
+            coord.long
+          ]);
           const polygon = L.polygon(latLngs) as L.Polygon;
 
           newLayerTracking.missions[mission.mission_id].vehicles[vehicle].stages[stage.stage_id] = {
@@ -400,7 +347,11 @@ const mapStore = createStore<MapStore>((set, get) => ({
     const stageLayers = get().layerTracking.missions[missionId]?.vehicles[vehicle]?.stages || {};
     const layerTrackedStage = stageLayers[stageId];
 
-    if (!layerTrackedStage || !("polygon" in layerTrackedStage) || Object.keys(layerTrackedStage.polygon).length === 0) {
+    if (
+      !layerTrackedStage ||
+      !("polygon" in layerTrackedStage) ||
+      Object.keys(layerTrackedStage.polygon).length === 0
+    ) {
       map.pm.enableDraw("Polygon");
 
       map.once("pm:create", (e) => {
