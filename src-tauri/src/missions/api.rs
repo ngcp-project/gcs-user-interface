@@ -63,8 +63,8 @@ impl MissionApiImpl {
                         stages.target_coordinate,
                         stages.status AS stage_status
                     FROM missions
-                    INNER JOIN vehicles ON missions.mission_id = vehicles.mission_id
-                    INNER JOIN stages ON vehicles.vehicle_id = stages.vehicle_id
+                    LEFT JOIN vehicles ON missions.mission_id = vehicles.mission_id
+                    LEFT JOIN stages ON vehicles.vehicle_id = stages.vehicle_id
                     WHERE missions.mission_id = $1
                     ",
                 )
@@ -72,6 +72,7 @@ impl MissionApiImpl {
                 .fetch_all(&database_connection)
                 .await
                 .expect("Failed to execute query");
+                println!("{:?}", mission);
 
                 // Set current mission ID if a mission has a status of "Active"
                 if mission[0].try_get::<String, _>("status").unwrap_or_else(|_| "Inactive".to_string()) == "Active" {
@@ -90,6 +91,13 @@ impl MissionApiImpl {
                     .find(|row| row.get::<String, _>("vehicle_name") == "MRA")
                     .expect("Expected MRA row");
 
+                // println!("Mea Stage name: {:?}", mea_row.get::<Option<String>, _>("stage_name"));
+                // let stage_name = mea_row.get::<Option<String>, _>("stage_name");
+                // if let Some(data) = mea_row.get::<Option<String>, _>("stage_name") {
+                //     println!("Stage name: {:?}", data);
+                // } else {
+                //     println!("Stage name not found");
+                // }
 
                 initial_state.missions.push(MissionStruct {
                     mission_name: mission[0].get("mission_name"),
@@ -110,91 +118,121 @@ impl MissionApiImpl {
                             vehicle_name: VehicleEnum::MEA,
                             current_stage: mea_row.get("current_stage"),
                             is_auto: mea_row.get("is_auto"),
-                            patient_status: mea_row.get("patient_status"),
-                            stages: mission.iter()
-                                .filter(|row| row.get::<String, _>("vehicle_name") == "MEA")
-                                .map(|row| StageStruct {
-                                    stage_name: row.get("stage_name"),
-                                    stage_id: row.get("stage_id"),
-                                    stage_status: match row
-                                        .try_get::<String, _>("stage_status")
-                                        .unwrap_or_else(|_| "Inactive".to_string())
-                                        .as_str()
-                                    {
-                                        "Active" => MissionStageStatusEnum::Active,
-                                        "Inactive" => MissionStageStatusEnum::Inactive,
-                                        "Complete" => MissionStageStatusEnum::Complete,
-                                        "Failed" => MissionStageStatusEnum::Failed,
-                                        _ => MissionStageStatusEnum::Inactive,
-                                    },
-                                    search_area: row
-                                        .try_get::<Vec<String>, _>("search_area")
-                                        .unwrap_or_else(|_| Vec::new())
-                                        .into_iter()
-                                        .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
-                                        .collect(),
-                                })
-                                .collect(),
+                            patient_status: 
+                                match mea_row.get::<String, _>("patient_status").as_str() {
+                                    "Unsecured" => Some(PatientStatusEnum::Unsecured),
+                                    "Secured" => Some(PatientStatusEnum::Secured),
+                                    _ => Some(PatientStatusEnum::Unsecured),
+                                }, 
+                            stages: 
+                            if mission[0].get::<i32, _>("current_stage") != -1 {
+                                mission.iter()
+                                    .filter(|row| row.get::<String, _>("vehicle_name") == "MEA")
+                                    .map(|row| StageStruct {
+                                        stage_name: row.get("stage_name"),
+                                        stage_id: row.get("stage_id"),
+                                        stage_status: match row
+                                            .try_get::<String, _>("stage_status")
+                                            .unwrap_or_else(|_| "Inactive".to_string())
+                                            .as_str()
+                                        {
+                                            "Active" => MissionStageStatusEnum::Active,
+                                            "Inactive" => MissionStageStatusEnum::Inactive,
+                                            "Complete" => MissionStageStatusEnum::Complete,
+                                            "Failed" => MissionStageStatusEnum::Failed,
+                                            _ => MissionStageStatusEnum::Inactive,
+                                        },
+                                        search_area: row
+                                            .try_get::<Vec<String>, _>("search_area")
+                                            .unwrap_or_else(|_| Vec::new())
+                                            .into_iter()
+                                            .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
+                                            .collect(),
+                                    })
+                                    .collect()
+                            } else {
+                                vec![]
+                            }
                         },
                         ERU: VehicleStruct {
                             vehicle_name: VehicleEnum::ERU,
                             current_stage: eru_row.get("current_stage"),
                             is_auto: eru_row.get("is_auto"),
-                            patient_status: eru_row.get("patient_status"),
-                            stages: mission.iter()
-                                .filter(|row| row.get::<String, _>("vehicle_name") == "ERU")
-                                .map(|row| StageStruct {
-                                    stage_name: row.get("stage_name"),
-                                    stage_id: row.get("stage_id"),
-                                    stage_status: match row
-                                        .try_get::<String, _>("stage_status")
-                                        .unwrap_or_else(|_| "Inactive".to_string())
-                                        .as_str()
-                                    {
-                                        "Active" => MissionStageStatusEnum::Active,
-                                        "Inactive" => MissionStageStatusEnum::Inactive,
-                                        "Complete" => MissionStageStatusEnum::Complete,
-                                        "Failed" => MissionStageStatusEnum::Failed,
-                                        _ => MissionStageStatusEnum::Inactive,
-                                    },
-                                    search_area: row
-                                        .try_get::<Vec<String>, _>("search_area")
-                                        .unwrap_or_else(|_| Vec::new())
-                                        .into_iter()
-                                        .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
-                                        .collect(),
-                                })
-                                .collect(),
+                            patient_status: 
+                                match eru_row.get::<String, _>("patient_status").as_str() {
+                                    "Unsecured" => Some(PatientStatusEnum::Unsecured),
+                                    "Secured" => Some(PatientStatusEnum::Secured),
+                                    _ => Some(PatientStatusEnum::Unsecured),
+                                },
+                            stages: 
+                            if mission[0].get::<i32, _>("current_stage") != -1 {
+                                mission.iter()
+                                    .filter(|row| row.get::<String, _>("vehicle_name") == "ERU")
+                                    .map(|row| StageStruct {
+                                        stage_name: row.get("stage_name"),
+                                        stage_id: row.get("stage_id"),
+                                        stage_status: match row
+                                            .try_get::<String, _>("stage_status")
+                                            .unwrap_or_else(|_| "Inactive".to_string())
+                                            .as_str()
+                                        {
+                                            "Active" => MissionStageStatusEnum::Active,
+                                            "Inactive" => MissionStageStatusEnum::Inactive,
+                                            "Complete" => MissionStageStatusEnum::Complete,
+                                            "Failed" => MissionStageStatusEnum::Failed,
+                                            _ => MissionStageStatusEnum::Inactive,
+                                        },
+                                        search_area: row
+                                            .try_get::<Vec<String>, _>("search_area")
+                                            .unwrap_or_else(|_| Vec::new())
+                                            .into_iter()
+                                            .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
+                                            .collect(),
+                                    })
+                                    .collect()
+                            } else {
+                                vec![]
+                            }
                         },
                         MRA: VehicleStruct {
                             vehicle_name: VehicleEnum::MRA,
                             current_stage: mra_row.get("current_stage"),
                             is_auto: mra_row.get("is_auto"),
-                            patient_status: mra_row.get("patient_status"),
-                            stages: mission.iter()
-                                .filter(|row| row.get::<String, _>("vehicle_name") == "MRA")
-                                .map(|row| StageStruct {
-                                    stage_name: row.get("stage_name"),
-                                    stage_id: row.get("stage_id"),
-                                    stage_status: match row
-                                        .try_get::<String, _>("stage_status")
-                                        .unwrap_or_else(|_| "Inactive".to_string())
-                                        .as_str()
-                                    {
-                                        "Active" => MissionStageStatusEnum::Active,
-                                        "Inactive" => MissionStageStatusEnum::Inactive,
-                                        "Complete" => MissionStageStatusEnum::Complete,
-                                        "Failed" => MissionStageStatusEnum::Failed,
-                                        _ => MissionStageStatusEnum::Inactive,
-                                    },
-                                    search_area: row
-                                        .try_get::<Vec<String>, _>("search_area")
-                                        .unwrap_or_else(|_| Vec::new())
-                                        .into_iter()
-                                        .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
-                                        .collect(),
-                                })
-                                .collect(),
+                            patient_status:
+                                match mra_row.get::<String, _>("patient_status").as_str() {
+                                    "Unsecured" => Some(PatientStatusEnum::Unsecured),
+                                    "Secured" => Some(PatientStatusEnum::Secured),
+                                    _ => Some(PatientStatusEnum::Unsecured),
+                                },
+                            stages: 
+                            if mission[0].get::<i32, _>("current_stage") != -1 {
+                                mission.iter()
+                                    .filter(|row| row.get::<String, _>("vehicle_name") == "MRA")
+                                    .map(|row| StageStruct {
+                                        stage_name: row.get("stage_name"),
+                                        stage_id: row.get("stage_id"),
+                                        stage_status: match row
+                                            .try_get::<String, _>("stage_status")
+                                            .unwrap_or_else(|_| "Inactive".to_string())
+                                            .as_str()
+                                        {
+                                            "Active" => MissionStageStatusEnum::Active,
+                                            "Inactive" => MissionStageStatusEnum::Inactive,
+                                            "Complete" => MissionStageStatusEnum::Complete,
+                                            "Failed" => MissionStageStatusEnum::Failed,
+                                            _ => MissionStageStatusEnum::Inactive,
+                                        },
+                                        search_area: row
+                                            .try_get::<Vec<String>, _>("search_area")
+                                            .unwrap_or_else(|_| Vec::new())
+                                            .into_iter()
+                                            .filter_map(|s| s.parse::<GeoCoordinateStruct>().ok())
+                                            .collect(),
+                                    })
+                                    .collect()
+                            } else {
+                                vec![]
+                            }
                         },
                     },
                     zones: ZonesStruct {

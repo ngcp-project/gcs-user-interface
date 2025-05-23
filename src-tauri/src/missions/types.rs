@@ -64,8 +64,7 @@ impl VehicleEnum {
     }
 }
 
-#[derive(Debug, serde::Deserialize, serde::Serialize, Clone, specta::Type, sqlx::Type)]
-#[sqlx(type_name = "patient_status_enum")]
+#[derive(Debug, serde::Deserialize, serde::Serialize, Clone, specta::Type)]
 pub enum PatientStatusEnum {
     Secured,
     Unsecured,

@@ -599,7 +599,7 @@ pub async fn initialize_database() {
         vehicle_name VARCHAR(255) NOT NULL,
         current_stage_id INTEGER NOT NULL,
         is_auto BOOLEAN DEFAULT FALSE,
-        patient_status VARCHAR(255),
+        patient_status VARCHAR(255) DEFAULT 'Unsecured',
         PRIMARY KEY (mission_id, vehicle_id)
     );
     ",
