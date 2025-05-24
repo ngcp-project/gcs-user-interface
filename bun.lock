@@ -24,6 +24,7 @@
         "vue": "^3.5.13",
         "vue-flight-indicators": "^0.1.1",
         "vue-router": "^4.5.1",
+        "vue-sonner": "^2.0.0",
         "ws": "^8.18.2",
         "zustand": "^5.0.4",
       },
@@ -957,6 +958,8 @@
     "vue-leaflet-rotate-marker": ["vue-leaflet-rotate-marker@0.1.0", "", { "dependencies": { "vue": "^3.3.4" } }, "sha512-qBrb/ydvl+cuQSZ3cinH2G0nmFNglh5h9qVIFRAlrcjCNqZE1RIEHxwjvxA0CCxdlNFxGeeZy0RFrkdSqNToeg=="],
 
     "vue-router": ["vue-router@4.5.1", "", { "dependencies": { "@vue/devtools-api": "^6.6.4" }, "peerDependencies": { "vue": "^3.2.0" } }, "sha512-ogAF3P97NPm8fJsE4by9dwSYtDwXIY1nFY9T6DyQnGHd1E2Da94w9JIolpe42LJGIl0DwOHBi8TcRPlPGwbTtw=="],
+
+    "vue-sonner": ["vue-sonner@2.0.0", "", {}, "sha512-nvlqGGWvxEv9UnKcZxsGdKpHrODEdv3CXAJF3er+1pLC03caJt2+v9HuWtRqlBQwUr1SFttsYuwVbpbEl05n4A=="],
 
     "watchpack": ["watchpack@2.4.4", "", { "dependencies": { "glob-to-regexp": "^0.4.1", "graceful-fs": "^4.1.2" } }, "sha512-c5EGNOiyxxV5qmTtAB7rbiXxi1ooX1pQKMLX/MIabJjRA0SJBQOjKF+KSVfHkr9U1cADPon0mRiVe/riyaiDUA=="],
 
