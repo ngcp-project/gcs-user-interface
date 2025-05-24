@@ -17,8 +17,8 @@ const selectedIndex = ref(0);
 import { Skeleton } from "@/components/ui/skeleton";
 
 const cameraFeeds = ref([
-  { id: 1, name: "MRA", src: "http://127.0.0.1:5000/video_feed" },
-  { id: 2, name: "ERU", src: "http://127.0.0.1:5000/video_feed" }
+  { id: 1, name: "MRA", src: "http://127.0.0.1:5000/mra_feed" },
+  { id: 2, name: "ERU", src: "http://127.0.0.1:5000/eru_feed" }
 ]);
 
 const layout = ref("grid");

@@ -1,5 +1,5 @@
 <template>
-   <l-control v-model:position="mapStore.controlPosition"
+   <!-- <l-control v-model:position="mapStore.controlPosition"
     > <Button @click="mapStore.logMapStore">State Log</Button> <Button
       @click="mapStore.toggleDrawMode"
       >Draw Mode</Button
@@ -7,7 +7,7 @@
       @click="mapStore.rerenderLayers"
       >Rerender Map</Button
     > </l-control
-  >
+  > -->
 </template>
 
 <script setup lang="ts">

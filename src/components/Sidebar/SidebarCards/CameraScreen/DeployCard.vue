@@ -5,7 +5,7 @@ import EmergencyStop from "@/components/VehicleStatus/EmergencyStop.vue";
 import Battery from "@/components/VehicleStatus/VehicleBattery.vue";
 import Connection from "@/components/VehicleStatus/VehicleConnection.vue";
 import { constants } from "os";
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { missionStore } from "@/lib/MissionStore";
 import { telemetryStore } from "@/lib/TelemetryStore";
 import { VehicleEnum } from "@/lib/bindings";
@@ -23,20 +23,15 @@ const props = defineProps<{
 
 const vehicleTelemetry = computed(() => telemetryStore.state[props.vehicleName]);
 
-const currentMissionId = missionStore.view.currentMissionId;
+
 const currentVehicleName = missionStore.view.currentVehicleName;
+const currentMissionId = missionStore.state.current_mission
+const currentStageId = missionStore.getVehicleData(currentMissionId, props.vehicleName)?.current_stage
 
-const currentStage = computed(() => {
-  // Worry about stages later
+const currentStage = (currentStageId 
+  && missionStore.getStageData(currentMissionId, props.vehicleName, currentStageId)?.stage_name) 
   
-  // if (currentMissionId !== null && currentVehicleName !== null)
-  //   return missionStore.getVehicleData(currentMissionId, currentVehicleName)?.stages[
-  //     currentVehicleName.current_stage
-  //   ];
-  // else 
-  return "No Stages Available";
-});
-
+const currentStageName = currentStage || "No Stage Available"
 const vehicleData = computed(() => {
   if (currentMissionId !== null && currentVehicleName !== null) {
     return missionStore.getVehicleData(currentMissionId, currentVehicleName);
@@ -47,6 +42,16 @@ const vehicleData = computed(() => {
 const isAuto = computed(() => {
   return vehicleData.value?.is_auto ?? false; // Default to false if not available
 });
+
+// const stateUpdate = computed((prev: boolean | undefined) => {
+//   // read from missionStore.state as a dependency
+//   missionStore;
+//   // return a boolean value that switches between true and false
+//   return !prev;
+// });
+// watch(() => missionStore.state, () => {
+//   stateUpdate.value = ! s
+// }, { immediate: true });
 </script>
 
 <template>
@@ -87,10 +92,10 @@ const isAuto = computed(() => {
       </section>
 
       <!-- Stage -->
-      <section class="mt-1 flex">
+      <!-- <section class="mt-1 flex">
         Stage:
         {{ currentStage }}
-      </section>
+      </section> -->
 
       <!-- Status -->
       <section class="mt-1 flex">

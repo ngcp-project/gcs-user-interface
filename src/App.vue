@@ -112,7 +112,7 @@ export type { Coordinate, Vehicle, Stage };
 <template>
   <!-- Toast testing bar -->
   <div class="fixed bottom-0 z-50 flex w-full items-center justify-center gap-3 pb-3">
-    <ErrorToast />
+    <!-- <ErrorToast /> -->
   </div>
 
   <div class="flex h-[100dvh] flex-col">

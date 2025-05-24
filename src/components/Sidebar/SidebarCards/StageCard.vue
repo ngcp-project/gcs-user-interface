@@ -6,6 +6,8 @@ import { Trash2, Eye, EyeOff, Pencil, Plus, Check } from "lucide-vue-next";
 import { missionStore } from "@/lib/MissionStore";
 import mapStore from "@/lib/MapStore";
 
+// TODO: vehicle status and current stage isnt synced to store (updates wont cause rerenders)
+
 const props = defineProps<{
   stageID: number;
   stageIndex: number;
