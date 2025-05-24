@@ -36,10 +36,7 @@ listen("create-toast", (event) => {
     id,
     description,
     duration: Infinity,
-    action: {
-      label: "Dismiss",
-      onClick: () => emit("dismiss-toast", { id })
-    }
+    action: { label: "Dismiss", onClick: () => emit("dismiss-toast", { id }) }
   });
 
   toastMap.set(id, String(toastId));
@@ -56,7 +53,7 @@ listen("dismiss-all-toasts", (event) => {
 </script>
 
 <template>
-  <Toaster richColors :position="toasterPosition"/>
+  <Toaster richColors :position="toasterPosition" />
 
   <!-- --------- Errors --------- -->
   <Button
