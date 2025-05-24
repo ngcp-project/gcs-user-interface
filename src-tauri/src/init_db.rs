@@ -624,6 +624,27 @@ pub async fn initialize_database() {
     .await
     .expect("Failed to execute query");
 
+    let _create_telemetry_table = query(
+        "
+    CREATE TABLE IF NOT EXISTS telemetry (
+        vehicle_id TEXT,
+        signal_strength INTEGER,
+        pitch FLOAT,
+        yaw FLOAT,
+        roll FLOAT,
+        speed FLOAT,
+        altitude FLOAT,
+        battery_life INTEGER,
+        current_position TEXT,
+        vehicle_status TEXT,
+        request_coordinate TEXT    
+    );
+    ",
+    )
+    .execute(&mut db_conn)
+    .await
+    .expect("Failed to execute query");
+
     db_conn
         .close()
         .await

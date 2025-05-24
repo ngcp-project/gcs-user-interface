@@ -198,7 +198,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex w-full">
+<div class="flex w-full">
     <HomeSidebar :vehicles="vehicleData" />
     <Cameras />
   </div>

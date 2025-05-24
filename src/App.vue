@@ -9,6 +9,8 @@ import { MissionInformation } from "./types/mission-info";
 import SidebarProvider from "./components/ui/sidebar/SidebarProvider.vue";
 import { useColorMode } from "@vueuse/core";
 
+import ErrorToast from "@/components/ErrorToast.vue"
+
 // --------- SEARCH AREA COORDINATES (used to select a search area from Map.vue) ------ //
 const searchCoords = ref([""]);
 const selectingSearch = ref(false);
@@ -110,6 +112,11 @@ export type { Coordinate, Vehicle, Stage };
 </script>
 
 <template>
+  <!-- Toast testing bar -->
+  <div class="fixed flex z-50 justify-center pb-3 gap-3 w-full items-center bottom-0">
+    <ErrorToast />
+  </div>
+  
   <div class="flex h-[100dvh] flex-col">
     <SidebarProvider class="min-h-0 flex-grow overflow-y-hidden">
       <RouterView />
