@@ -111,6 +111,7 @@ export const missionZustandStore = createStore<MissionStore>((set, get) => ({
     return await taurpc.mission.delete_mission(missionId);
   },
   startMission: async (missionId: number) => {
+    // Start the mission - backend will handle zone updates
     return await taurpc.mission.start_mission(missionId);
   },
 
