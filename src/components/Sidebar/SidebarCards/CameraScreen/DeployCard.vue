@@ -98,10 +98,10 @@ const isAuto = computed(() => {
       </section> -->
 
       <!-- Status -->
-      <section class="mt-1 flex">
+      <!-- <section class="mt-1 flex">
         Status:
         {{ isAuto ? "Auto" : "Manual" }}
-      </section>
+      </section> -->
 
       <CardFooter class="mt-4 flex w-full justify-center">
         <EmergencyStop :vehicle-name="vehicleName" />
