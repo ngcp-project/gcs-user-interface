@@ -146,7 +146,7 @@ whenever(emblaMainApi, (api) => {
   grid-template-columns: repeat(2, 1fr);
   height: 90%;
   align-items: center;
-  overflow: hidden;
+  padding: 0.5rem;
 }
 .camera {
   width: 45vw;
@@ -159,11 +159,11 @@ whenever(emblaMainApi, (api) => {
   overflow: hidden;
 }
 .focused-camera {
-  width: 45vw;
+  width: 55vw;
   margin: auto;
 }
 .thumbnail-camera {
-  width: 10vw;
+  width: 15vw;
 }
 .p-0 {
   padding: 0 !important;
