@@ -145,11 +145,13 @@ whenever(emblaMainApi, (api) => {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   height: 90%;
+  padding: 1rem;
   align-items: center;
-  padding: 0.5rem;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 .camera {
-  width: 45vw;
+  width: 40vw;
   margin: auto;
 }
 .carousel-container {
