@@ -140,15 +140,14 @@ whenever(emblaMainApi, (api) => {
 </template>
 
 <style lang="css" scoped>
-/* Your existing styles remain the same */
 .grid-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   height: 90%;
-  padding: 1rem;
+  margin: auto;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 .camera {
   width: 40vw;
