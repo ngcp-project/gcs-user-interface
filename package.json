@@ -25,6 +25,7 @@
     "embla-carousel-vue": "^8.6.0",
     "express": "^4.21.2",
     "lucide-vue-next": "^0.477.0",
+    "pinia": "^3.0.4",
     "radix-vue": "^1.9.17",
     "reka-ui": "^2.2.1",
     "tailwind-merge": "^3.2.0",

@@ -3,7 +3,7 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ref, watch } from "vue";
 import { Trash2, Eye, EyeOff, Pencil, Plus, Check } from "lucide-vue-next";
-import { missionStore } from "@/lib/MissionStore";
+import { missionStore } from "@/lib/StoresSync";
 import mapStore from "@/lib/MapStore";
 
 const props = defineProps<{
@@ -22,10 +22,10 @@ const statusStyles = {
 };
 
 // Get id of the current mission
-const currentMissionId = missionStore.view.currentMissionId;
+const currentMissionId = missionStore.getCurrentMissionId().value;
 
 // Get the current vehicle name
-const currentVehicleName = currentMissionId !== null ? missionStore.view.currentVehicleName : null;
+const currentVehicleName = currentMissionId !== null ? missionStore.getCurrentVehicleName().value : null;
 
 // Get stage data
 const stage = currentMissionId !== null && currentVehicleName !== null ? missionStore.getStageData(

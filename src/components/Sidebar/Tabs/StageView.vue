@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import StageCard from "@/components/Sidebar/SidebarCards/StageCard.vue";
 import { SidebarContent, SidebarFooter } from "@/components/ui/sidebar";
 import { Plus } from "lucide-vue-next";
-import { missionStore } from "@/lib/MissionStore";
+import { missionStore } from "@/lib/StoresSync";
 
-const currentMissionId = missionStore.view.currentMissionId;
-const currentVehicleName = missionStore.view.currentVehicleName;
+const currentMissionId = missionStore.getCurrentMissionId().value;
+const currentVehicleName = missionStore.getCurrentVehicleName().value;
 const stages = currentMissionId !== null && currentVehicleName !== null ? missionStore.getVehicleData(currentMissionId, currentVehicleName)?.stages : [];
 
 </script>

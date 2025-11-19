@@ -3,7 +3,7 @@ import { Card, CardContent, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { computed, ref, watch } from "vue";
 import { Trash2, Eye, EyeOff, Pencil, Square, Plus, Check } from "lucide-vue-next";
-import { missionStore } from "@/lib/MissionStore";
+import { missionStore } from "@/lib/StoresSync";
 import { ZoneType } from "@/lib/bindings";
 import mapStore from "@/lib/MapStore";
 
@@ -25,10 +25,12 @@ const zoneType = {
 }[String(props.zoneType) || "KeepIn"] as "In" | "Out";
 
 // Track zones
-const currentMissionId = missionStore.view.currentMissionId
-  ? missionStore.view.currentMissionId
+//Single function call into temp
+const temp = missionStore.getCurrentMissionId().value;
+const currentMissionId = temp
+  ? temp
   : null;
-const mission = currentMissionId !== null ? missionStore.getMissionData(currentMissionId) : null;
+const mission = currentMissionId !== null ? missionStore.getMissionData(currentMissionId).value : null;
 
 const zones = computed(() =>
   currentMissionId !== null ? missionStore.getZoneData(currentMissionId, props.zoneType) : []

@@ -2,7 +2,7 @@
 import VehicleCard from "@/components/Sidebar/SidebarCards/VehicleCard.vue";
 import { SidebarContent, SidebarGroup } from "@/components/ui/sidebar";
 import { VehicleEnum } from "@/lib/bindings";
-import { missionStore } from "@/lib/MissionStore";
+import { missionStore } from "@/lib/StoresSync";
 
 const handleClick = (vehicleName: VehicleEnum) => {
   missionStore.setCurrentView("stage");

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { computed } from "vue";
 import { Trash2 } from "lucide-vue-next";
-import { missionStore } from "@/lib/MissionStore";
+import { missionStore } from "@/lib/StoresSync";
 import { event } from "@tauri-apps/api";
 
 const props = defineProps<{

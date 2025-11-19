@@ -7,14 +7,14 @@ import VehicleView from "@/components/Sidebar/Tabs/VehicleView.vue";
 import StageView from "@/components/Sidebar/Tabs/StageView.vue";
 import { ChevronLeft } from "lucide-vue-next";
 import ZoneView from "@/components/Sidebar/Tabs/ZoneView.vue";
-import { missionStore } from "@/lib/MissionStore";
+import { missionStore } from "@/lib/StoresSync";
 
-const currentView = computed(() => missionStore.view.currentView);
+const currentView = missionStore.getCurrentView();
 
 // Whenever missionStore.state changes trigger a rerender fo the sidebar
 const stateUpdate = computed((prev: boolean | undefined) => {
   // read from missionStore.state as a dependency
-  missionStore.state;
+  missionStore.getAllMissions().value;
   // return a boolean value that switches between true and false
   return !prev;
 });
