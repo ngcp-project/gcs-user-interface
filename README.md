@@ -27,43 +27,9 @@ Run the application.
 bun tauri
 ```
 
-## Setting up FPV camera server
+## Running the Map Server
 
-Install Flask and opencv-python dependencies.
-
-```bash
-pip install flask
-```
-
-```bash
-pip install opencv-python
-```
-
-Install pyinstaller, this will be used to compile the `.py` file into a binary.
-
-```bash
-pip install pyinstaller
-```
-
-Create binary from opencv.py
-
-```bash
-pyinstaller --onefile .\src-tauri\opencv.py --distpath .\src-tauri\binaries\
-```
-
-Ensure the`opencv` binary is in the `dist` folder. If needed move this into `binaries` folder (if there is already a file, replace it).
-
-Run a Node.js script to rename the binary file, as you must add your architecture to the file name.
-
-```bash
-bun run target:triple
-```
-
-Now the FPV camera server should run with `bun tauri dev`. It takes time for it to spin up and once it does, make sure you refresh the camera window.
-
-## Setting up map server
-
-Ensure Docker is running then install the docker container. Note only update
+Ensure Docker is running then install the docker container.
 
 ```bash
 bun run osm:setup

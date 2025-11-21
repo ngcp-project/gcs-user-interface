@@ -2,9 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capabilities",
-  "windows": [
-    "*"
-  ],
+  "windows": ["*"],
   "permissions": [
     "core:path:default",
     "core:event:default",
@@ -14,16 +12,6 @@
     "core:resources:default",
     "core:menu:default",
     "core:tray:default",
-    "shell:allow-open",
-    "shell:default",
-    {
-      "identifier": "shell:allow-spawn",
-      "allow": [
-        {
-          "name": "binaries/opencv",
-          "sidecar": true
-        }
-      ]
-    }
+    "shell:allow-open"
   ]
 }

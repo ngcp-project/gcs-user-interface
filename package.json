@@ -10,8 +10,7 @@
     "osm:run": "docker-compose up osm-server",
     "tauri": "tauri dev",
     "format": "prettier --write src/",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "target:triple": "node scripts/target-triple.js"
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
     "@geoman-io/leaflet-geoman-free": "^2.18.3",
