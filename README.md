@@ -45,6 +45,9 @@ Install pyinstaller, this will be used to compile the `.py` file into a binary.
 pip install pyinstaller
 ```
 
+Add binary to Tauri config so it is bundled with the build.  
+In `src-tauri/tauri.conf.json`, add `"binaries/opencv"` within the [] of `"externalBin": []`.  
+
 Create binary from opencv.py
 
 ```bash

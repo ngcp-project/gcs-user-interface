@@ -16,7 +16,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "externalBin": ["binaries/opencv"]
+    "externalBin": []
   },
   "productName": "Interface",
   "mainBinaryName": "Interface",
