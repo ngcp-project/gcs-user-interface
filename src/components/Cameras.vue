@@ -140,16 +140,17 @@ whenever(emblaMainApi, (api) => {
 </template>
 
 <style lang="css" scoped>
-/* Your existing styles remain the same */
 .grid-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   height: 90%;
+  margin: auto;
   align-items: center;
-  overflow: hidden;
+  justify-content: space-between;
+  gap: 1rem;
 }
 .camera {
-  width: 45vw;
+  width: 40vw;
   margin: auto;
 }
 .carousel-container {
@@ -159,11 +160,11 @@ whenever(emblaMainApi, (api) => {
   overflow: hidden;
 }
 .focused-camera {
-  width: 45vw;
+  width: 55vw;
   margin: auto;
 }
 .thumbnail-camera {
-  width: 10vw;
+  width: 15vw;
 }
 .p-0 {
   padding: 0 !important;

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Navbar from "./components/HeaderNavbar.vue";
+import "vue-sonner/style.css";
 import { provide, ref } from "vue";
 import { RouterView } from "vue-router";
 import { Coordinate, Vehicle, Stage } from "./types";
@@ -8,6 +9,8 @@ import { TargetCoordsProvider } from "./types/target-coords.provider";
 import { MissionInformation } from "./types/mission-info";
 import SidebarProvider from "./components/ui/sidebar/SidebarProvider.vue";
 import { useColorMode } from "@vueuse/core";
+
+import ErrorToast from "@/components/ErrorToast.vue";
 
 // --------- SEARCH AREA COORDINATES (used to select a search area from Map.vue) ------ //
 const searchCoords = ref([""]);
@@ -24,10 +27,7 @@ provide<SearchCoordsProvider>("search-coords-provider", {
 
 const targetCoord = ref("");
 const selectingTarget = ref(false);
-provide<TargetCoordsProvider>("target-coords-provider", {
-  targetCoord,
-  selectingTarget
-});
+provide<TargetCoordsProvider>("target-coords-provider", { targetCoord, selectingTarget });
 
 const MISSION_INFO = ref<MissionInformation>({ missionName: "", stages: [] });
 
@@ -110,6 +110,11 @@ export type { Coordinate, Vehicle, Stage };
 </script>
 
 <template>
+  <!-- Toast testing bar -->
+  <div class="fixed bottom-0 z-50 flex w-full items-center justify-center gap-3 pb-3">
+    <ErrorToast />
+  </div>
+
   <div class="flex h-[100dvh] flex-col">
     <SidebarProvider class="min-h-0 flex-grow overflow-y-hidden">
       <RouterView />
