@@ -34,8 +34,8 @@ fn spawn_opencv_sidecar(app_handle: tauri::AppHandle) -> Result<(), String> {
     let sidecar_command = app_handle
         .shell()
         .sidecar("opencv")
-        .map_err(|e| e.to_string())?;
-    let (mut rx, child) = sidecar_command.spawn().map_err(|e| e.to_string())?;
+        .map_err(|e| {println!("[tauri] Error constructing sidecar: {}", e.to_string()); e.to_string()})?;
+    let (mut rx, child) = sidecar_command.spawn().map_err(|e| {println!("[tauri] Error running sidecar: {}", e.to_string()); e.to_string()})?;
 
     // Store the child process in the app state
     if let Some(state) = app_handle.try_state::<Arc<Mutex<Option<CommandChild>>>>() {
@@ -50,7 +50,7 @@ fn spawn_opencv_sidecar(app_handle: tauri::AppHandle) -> Result<(), String> {
             match event {
                 CommandEvent::Stdout(line_bytes) => {
                     let line = String::from_utf8_lossy(&line_bytes);
-                    println!("Sidecar stdout: {}", line);
+                    print!("[sidecar] {}", line);
 
                     // Emit the line to the frontend
                     app_handle
@@ -60,7 +60,7 @@ fn spawn_opencv_sidecar(app_handle: tauri::AppHandle) -> Result<(), String> {
 
                 CommandEvent::Stderr(line_bytes) => {
                     let line = String::from_utf8_lossy(&line_bytes);
-                    eprintln!("Sidecar stderr: {}", line);
+                    eprint!("[sidecar] {}", line);
                     // Emit the error line to the frontend
                     app_handle
                         .emit("sidecar-stderr", line.to_string())
@@ -156,6 +156,14 @@ async fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .setup(move |app| {
+            // Store the initial sidecar process in the app state
+            app.manage(Arc::new(Mutex::new(None::<CommandChild>)));
+            // Spawn the Python sidecar on startup
+            println!("[tauri] Creating sidecar...");
+            let sidecar_handle = app.handle().clone();
+            spawn_opencv_sidecar(sidecar_handle).ok();
+            println!("[tauri] Sidecar spawned and monitoring started.");
+
             let rabbitmq_handle = app.handle().clone();
             let rabbitmq = rabbitmq_api.with_app_handle(rabbitmq_handle);
 
@@ -187,12 +195,6 @@ async fn main() {
                     }
                 });
             }
-
-            // Spawn the Python sidecar on startup
-            println!("[tauri] Creating sidecar...");
-            let sidecar_handle = app.handle().clone();
-            spawn_opencv_sidecar(sidecar_handle).ok();
-            println!("[tauri] Sidecar spawned and monitoring started.");
 
             Ok(())
         })
