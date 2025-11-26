@@ -51,7 +51,7 @@ export interface LeafletMapGeoman extends LeafletMap {
 // =============================================
 // Store Interface
 // =============================================
-export interface MapStore {
+export interface MapState {  
   map: LeafletMapGeoman | null;
   mapOrigin: LatLng;
   markerCoord: LatLngExpression;
@@ -59,28 +59,5 @@ export interface MapStore {
   localTileURL: string;
   layerTracking: LayerTracking;
   vehicleMarkers: Record<VehicleEnum, LatLngExpression>;
-
-  // Map Management
-  updateMapRef: (ref: LeafletMapGeoman | null) => void;
-  toggleDrawMode: () => void;
-  rerenderLayers: () => void;
-  logMapStore: () => void;
-  updateVehicleMarker: (vehicle: VehicleEnum, lat: number, lng: number) => void;
-  updateMarkerCoords: (vehicle: VehicleEnum, coords: LatLngExpression) => void;
-  getVehicleMarkers: () => Record<VehicleEnum, LatLngExpression>;
-
-  // Layer Management
-  updateStagePolygon: (missionId: number, vehicle: VehicleEnum, stageId: number) => void;
-  updateZonePolygon: (missionId: number, type: ZoneType, zoneIndex: number) => void;
-  removeStageLayer: (missionId: number, vehicle: VehicleEnum, stageId: number) => void;
-  getStageLayer: (
-    missionId: number,
-    vehicle: VehicleEnum,
-    stageId: number
-  ) => StageLayer | undefined;
-  getZoneLayers: (missionId: number, type: ZoneType) => ZoneLayer[];
-  setZoneLayerVisibility: (missionId: number, type: ZoneType, zoneIndex: number) => void;
-  setStageLayerVisibility: (missionId: number, vehicle: VehicleEnum, stageId: number) => void;
-  // TODO: fix it so that theres no as declaration when reading from missionStore
-  updateLayerTracking: (state: MissionsStruct) => void;
 }
+

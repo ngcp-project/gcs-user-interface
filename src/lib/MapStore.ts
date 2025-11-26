@@ -1,6 +1,4 @@
-import { createStore } from "zustand/vanilla";
-import { reactive } from "vue";
-import { LMap } from "@vue-leaflet/vue-leaflet";
+import { ref } from "vue";
 import { LatLngTuple as LatLng, LatLngExpression } from "leaflet";
 import * as L from "leaflet";
 import {
@@ -9,20 +7,15 @@ import {
   VehicleEnum,
   ZoneType,
   StageStruct
-} from "@/lib//bindings";
-import { missionStore } from "./MissionStore";
-import { watch } from "vue";
+} from "@/lib/bindings";
+import { missionPiniaStore } from "./MissionStore";
 import {
-  LayerProperties,
   ZoneLayer,
-  StageLayer,
-  VehicleLayers,
-  MissionLayers,
   LayerTracking,
-  LeafletMap,
   LeafletMapGeoman,
-  MapStore
+  MapState
 } from "@/lib/MapStore.types";
+import { defineStore } from "pinia";
 
 // =============================================
 // Constants
@@ -41,54 +34,59 @@ const TILE_URL = "http://localhost:8080/tile/{z}/{x}/{y}.png";
 // =============================================
 // Store Implementation
 // =============================================
-const mapStore = createStore<MapStore>((set, get) => ({
-  map: null,
-  mapOrigin: DEFAULT_MAP_ORIGIN,
-  markerCoord: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
-  localTileURL: TILE_URL,
-  layerTracking: { missions: {} },
-  layers: L.featureGroup([]),
-  vehicleMarkers: {
-    MRA: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
-    MEA: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
-    ERU: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1])
-  },
+export const mapPiniaStore = defineStore('map', () => {
+  const mapState = ref<MapState>({
+    map: null,
+    mapOrigin: DEFAULT_MAP_ORIGIN,
+    markerCoord: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
+    localTileURL: TILE_URL,
+    layerTracking: { missions: {} },
+    layers: L.featureGroup([]),
+    vehicleMarkers: {
+      MRA: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
+      MEA: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
+      ERU: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1])
+    }
+  });
+  const missionStore = missionPiniaStore();
 
   // Map Management Methods
-  updateMapRef: (refValue: LeafletMapGeoman | null) => {
+  const updateMapRef = (refValue: LeafletMapGeoman | null) => {
     // Should be called when map @ready event is initialized
     const mapLeaflet = refValue?.leafletObject;
     if (!mapLeaflet) return;
 
-    set({ map: refValue });
+    mapState.value.map = refValue;
     // Assign preInitialized geoJSON to the map
-    get().layers.addTo(mapLeaflet);
-    get().updateLayerTracking(missionStore.state as MissionsStruct);
-  },
+    mapState.value.layers.addTo(mapLeaflet);
 
-  toggleDrawMode: () => {
+    updateLayerTracking(missionStore.getAllMissions().value as MissionsStruct);
+  };
+  const toggleDrawMode = () => {
     // Draws a polygon not linked to layers
-    const map = get().map?.leafletObject;
+    const map = mapState.value.map?.leafletObject;
 
     if (!map) return;
-    
+
     if (map.pm.globalDrawModeEnabled()) {
       map.pm.disableDraw();
     } else {
       map.pm.enableDraw("Polygon");
     }
-  },
+  };
 
-  logMapStore: () => {
-    console.log(get());
-  },
-
-  // Layer Management Methods
-  updateZonePolygon: (missionId, type, zoneIndex) => {
-    const map = get().map?.leafletObject;
+  const logMapStore = () => {
+    console.log(mapState);
+  };
+  const hello = missionPiniaStore();
+  console.log("Asdasdsadasd", hello);
+  // // Layer Management Methods
+  const updateZonePolygon = (missionId: number, type: ZoneType, zoneIndex: number) => {
+    const map = mapState.value.map?.leafletObject;
     if (!map) return;
 
-    const layerTrackedZone = get().layerTracking.missions[missionId].zones[type][zoneIndex];
+    const layerTrackedZone =
+      mapState.value.layerTracking.missions[missionId].zones[type][zoneIndex];
 
     // not pushing in zonelayer type, pushing in empty object or L.Polygon layer
     if (!layerTrackedZone || Object.keys(layerTrackedZone).length === 0) {
@@ -140,11 +138,11 @@ const mapStore = createStore<MapStore>((set, get) => ({
         missionStore.updateZone(missionId, type, zoneIndex, geoCoordinateStructs);
       });
     }
-  },
+  };
 
-  setZoneLayerVisibility: (missionId: number, type: ZoneType, zoneIndex: number) => {
+  const setZoneLayerVisibility = (missionId: number, type: ZoneType, zoneIndex: number) => {
     // Get all layers in layerTracking
-    const layers = get().layerTracking.missions[missionId];
+    const layers = mapState.value.layerTracking.missions[missionId];
     const zoneLayers = layers.zones[type];
 
     // Get the zone layer to update
@@ -161,14 +159,10 @@ const mapStore = createStore<MapStore>((set, get) => ({
       opacity: zoneLayer.properties.visibility ? 1 : 0,
       fillOpacity: zoneLayer.properties.visibility ? 0.2 : 0
     });
-
-    // Update state (optional since we're mutating directly, but good practice)
-    set({ layerTracking: get().layerTracking });
-  },
-
-  setStageLayerVisibility: (missionId: number, vehicle: VehicleEnum, stageId: number) => {
+  };
+  const setStageLayerVisibility = (missionId: number, vehicle: VehicleEnum, stageId: number) => {
     // Get all layers in layerTracking
-    const layers = get().layerTracking.missions[missionId];
+    const layers = mapState.value.layerTracking.missions[missionId];
     const vehicleLayers = layers.vehicles[vehicle];
     const stageLayer = vehicleLayers.stages[stageId];
     if (!stageLayer || !("polygon" in stageLayer)) return;
@@ -185,13 +179,12 @@ const mapStore = createStore<MapStore>((set, get) => ({
     });
 
     // Update state
-    set({ layerTracking: get().layerTracking });
-  },
-
-  updateLayerTracking: (newState) => {
+    // set({ layerTracking: mapState.value.layerTracking });
+  };
+  const updateLayerTracking = (newState: MissionsStruct) => {
     const newLayerTracking: LayerTracking = { missions: {} };
 
-    get().layers.clearLayers();
+    mapState.value.layers.clearLayers();
 
     newState.missions.forEach((mission) => {
       newLayerTracking.missions[mission.mission_id] = {
@@ -280,25 +273,24 @@ const mapStore = createStore<MapStore>((set, get) => ({
         });
       });
 
-      set({ layerTracking: newLayerTracking });
-      get().rerenderLayers();
+      mapState.value.layerTracking = newLayerTracking;
+      rerenderLayers();
     });
+    mapState.value.layerTracking = newLayerTracking;
+    rerenderLayers();
+  };
 
-    set({ layerTracking: newLayerTracking });
-    get().rerenderLayers();
-  },
-
-  rerenderLayers: () => {
-    const map = get().map?.leafletObject;
+  const rerenderLayers = () => {
+    const map = mapState.value.map?.leafletObject;
     if (!map) return;
 
     // Clear the existing layers first
-    get().layers.clearLayers();
+    mapState.value.layers.clearLayers();
 
-    // console.log("layerTracking", get().layerTracking);
+    // console.log("layerTracking", mapState.value.layerTracking);
 
     // Iterate over layerTracking and add polygons to the map
-    Object.entries(get().layerTracking.missions).forEach(([missionId, missionData]) => {
+    Object.entries(mapState.value.layerTracking.missions).forEach(([missionId, missionData]) => {
       // Iterate over the zones (KeepIn, KeepOut)
       (["KeepIn", "KeepOut"] as ZoneType[]).forEach((type) => {
         missionData.zones[type].forEach((zone) => {
@@ -308,7 +300,7 @@ const mapStore = createStore<MapStore>((set, get) => ({
           const polygonLayer = zoneLayer.layer;
 
           // Add the polygon layer to the map
-          polygonLayer.addTo(get().layers);
+          polygonLayer.addTo(mapState.value.layers as L.FeatureGroup<L.Polygon>);
 
           // Set the style based on the properties from layerTracking
           polygonLayer.setStyle({
@@ -326,7 +318,7 @@ const mapStore = createStore<MapStore>((set, get) => ({
           if (!stage || !("polygon" in stage) || !stage.polygon.layer) return;
 
           const polygonLayer = stage.polygon.layer;
-          polygonLayer.addTo(get().layers);
+          polygonLayer.addTo(mapState.value.layers as L.FeatureGroup<L.Polygon>);
 
           // Set the style based on the properties from layerTracking
           polygonLayer.setStyle({
@@ -337,14 +329,14 @@ const mapStore = createStore<MapStore>((set, get) => ({
         });
       });
     });
-  },
-
-  updateStagePolygon: (missionId: number, vehicle: VehicleEnum, stageId: number) => {
-    const map = get().map?.leafletObject;
+  };
+  const updateStagePolygon = (missionId: number, vehicle: VehicleEnum, stageId: number) => {
+    const map = mapState.value.map?.leafletObject;
     if (!map) return;
 
     // If no stageLayer then make it also an empty object
-    const stageLayers = get().layerTracking.missions[missionId]?.vehicles[vehicle]?.stages || {};
+    const stageLayers =
+      mapState.value.layerTracking.missions[missionId]?.vehicles[vehicle]?.stages || {};
     const layerTrackedStage = stageLayers[stageId];
 
     if (
@@ -404,62 +396,58 @@ const mapStore = createStore<MapStore>((set, get) => ({
         missionStore.updateStageArea(missionId, vehicle, stageId, geoCoordinateStructs);
       });
     }
-  },
-  removeStageLayer: () => {},
-  getStageLayer: (missionId: number | null, vehicle: VehicleEnum, stageId: number) => {
+  };
+  const getStageLayer = (missionId: number | null, vehicle: VehicleEnum, stageId: number) => {
     if (missionId === null) return undefined;
-    const mission = get().layerTracking.missions[missionId];
+    const mission = mapState.value.layerTracking.missions[missionId];
     if (!mission) return undefined;
 
     const vehicleLayers = mission.vehicles[vehicle];
     if (!vehicleLayers) return undefined;
 
     return vehicleLayers.stages[stageId];
-  },
-  getZoneLayers: (missionId: number | null, type: ZoneType) => {
+  };
+  const getZoneLayers = (missionId: number | null, type: ZoneType) => {
     if (missionId === null) return [];
-    const mission = get().layerTracking.missions[missionId];
+    const mission = mapState.value.layerTracking.missions[missionId];
     if (!mission) return [];
     return mission.zones[type] as ZoneLayer[];
-  },
-  updateVehicleMarker: (vehicle: VehicleEnum, lat: number, lng: number) => {
-    set((state) => ({
-      vehicleMarkers: {
-        ...state.vehicleMarkers,
-        [vehicle]: L.latLng(lat, lng)
-      }
-    }));
-  },
-  updateMarkerCoords: (vehicle: VehicleEnum, coords: LatLngExpression) => {
+  };
+  const updateVehicleMarker = (vehicle: VehicleEnum, lat: number, lng: number) => {
+    mapState.value.vehicleMarkers = {
+      ...mapState.value.vehicleMarkers,
+      [vehicle]: L.latLng(lat, lng)
+    };
+  };
+  const updateMarkerCoords = (vehicle: VehicleEnum, coords: LatLngExpression) => {
     if (Array.isArray(coords) && coords.length === 2) {
-      set((state) => ({
-        vehicleMarkers: {
-          ...state.vehicleMarkers,
-          [vehicle]: L.latLng(coords[0], coords[1])
-        }
-      }));
+      mapState.value.vehicleMarkers = {
+        ...mapState.value.vehicleMarkers,
+        [vehicle]: L.latLng(coords[0], coords[1])
+      };
     }
-  },
-  getVehicleMarkers: () => {
-    return get().vehicleMarkers;
-  }
-}));
+  };
+  const getVehicleMarkers = () => {
+    return mapState.value.vehicleMarkers;
+  };
+  const removeStageLayer = () => {} //not sure what is for but it was in the original store
 
-// =============================================
-// Store Export and Watchers
-// =============================================
-const store: MapStore = reactive(mapStore.getState()) as MapStore;
-
-mapStore.subscribe((state) => {
-  Object.assign(store, state);
+  return {
+    mapState,
+    updateMapRef,
+    toggleDrawMode,
+    logMapStore,
+    removeStageLayer,
+    updateVehicleMarker,
+    updateMarkerCoords,
+    getVehicleMarkers,
+    updateStagePolygon,
+    updateZonePolygon,
+    getStageLayer,
+    getZoneLayers,
+    setZoneLayerVisibility,
+    setStageLayerVisibility,
+    updateLayerTracking,
+    rerenderLayers
+  };
 });
-
-watch(
-  () => missionStore.state,
-  (newState) => {
-    store.updateLayerTracking(newState as MissionsStruct);
-  },
-  { deep: true }
-);
-
-export default store;

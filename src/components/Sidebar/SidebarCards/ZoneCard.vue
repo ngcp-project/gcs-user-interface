@@ -5,7 +5,7 @@ import { computed, ref, watch } from "vue";
 import { Trash2, Eye, EyeOff, Pencil, Square, Plus, Check } from "lucide-vue-next";
 import { missionStore } from "@/lib/StoresSync";
 import { ZoneType } from "@/lib/bindings";
-import mapStore from "@/lib/MapStore";
+import { mapStore } from "@/lib/StoresSync";
 
 const props = defineProps<{
   zoneType: ZoneType;

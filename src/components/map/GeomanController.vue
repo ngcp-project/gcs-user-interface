@@ -16,7 +16,7 @@ import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 import "@geoman-io/leaflet-geoman-free";
 import { Button } from "@/components/ui/button";
 import { LControl } from "@vue-leaflet/vue-leaflet";
-import mapStore from "@/lib/MapStore";
+import { mapStore } from "@/lib/StoresSync";
 // import { onMounted } from "vue";
 
 interface opts extends L.ControlOptions {
