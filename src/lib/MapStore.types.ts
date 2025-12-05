@@ -1,7 +1,7 @@
 import { LMap } from "@vue-leaflet/vue-leaflet";
 import { LatLngTuple as LatLng, LatLngExpression } from "leaflet";
 import * as L from "leaflet";
-import { MissionsStruct, VehicleEnum, ZoneType } from "@/lib//bindings";
+import { VehicleEnum } from "@/lib//bindings";
 
 // =============================================
 // Types and Interfaces

@@ -5,9 +5,8 @@ import {
   VehicleEnum,
   ZoneType
 } from "@/lib/bindings";
-import { DeepReadonly, reactive, ref, computed } from "vue";
-import { MissionStore, ViewState, ViewType } from "@/lib/MissionStore.types";
-import { LatLng } from "leaflet";
+import { ref, computed } from "vue";
+import { ViewState, ViewType } from "@/lib/MissionStore.types";
 import { defineStore } from "pinia";
 
 // =============================================
