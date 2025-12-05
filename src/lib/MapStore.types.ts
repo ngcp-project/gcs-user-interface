@@ -49,7 +49,7 @@ export interface LeafletMapGeoman extends LeafletMap {
 }
 
 // =============================================
-// Store Interface
+// State Interface
 // =============================================
 export interface MapState {  
   map: LeafletMapGeoman | null;
