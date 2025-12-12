@@ -431,14 +431,12 @@ export const mapPiniaStore = defineStore('map', () => {
   const getVehicleMarkers = () => {
     return mapState.value.vehicleMarkers;
   };
-  const removeStageLayer = () => {} //not sure what is for but it was in the original store
 
   return {
     mapState,
     updateMapRef,
     toggleDrawMode,
     logMapStore,
-    removeStageLayer,
     updateVehicleMarker,
     updateMarkerCoords,
     getVehicleMarkers,

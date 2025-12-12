@@ -92,7 +92,6 @@ const handleStageNameChange = (event: Event) => {
 const handleDeleteStage = () => {
   if (currentMissionId === null || currentVehicleName === null) return;
   missionStore.deleteStage(currentMissionId, currentVehicleName, props.stageID);
-  mapStore.removeStageLayer(currentMissionId, currentVehicleName, props.stageID);
 };
 
 const handleEditStage = () => {
