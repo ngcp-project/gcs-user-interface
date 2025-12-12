@@ -6,8 +6,8 @@ import Battery from "@/components/VehicleStatus/VehicleBattery.vue";
 import Connection from "@/components/VehicleStatus/VehicleConnection.vue";
 import { constants } from "os";
 import { computed } from "vue";
-import { missionStore } from "@/lib/MissionStore";
-import { telemetryStore } from "@/lib/TelemetryStore";
+import { missionStore } from "@/lib/StoresSync";
+import { telemetryStore } from "@/lib/StoresSync";
 import { VehicleEnum } from "@/lib/bindings";
 
 // Define Props
@@ -21,10 +21,9 @@ const props = defineProps<{
   airspeed: number;
 }>();
 
-const vehicleTelemetry = computed(() => telemetryStore.state[props.vehicleName]);
-
-const currentMissionId = missionStore.view.currentMissionId;
-const currentVehicleName = missionStore.view.currentVehicleName;
+const vehicleTelemetry = telemetryStore.getVehicle(props.vehicleName)
+const currentMissionId = missionStore.getCurrentMissionId().value;
+const currentVehicleName = missionStore.getCurrentVehicleName().value;
 
 const currentStage = computed(() => {
   // Worry about stages later

@@ -5,19 +5,19 @@
       ref="mapRef"
       :zoom=16
       :use-global-leaflet="true"
-      :center="[mapStore.mapOrigin[0] as LatLng[0], mapStore.mapOrigin[1] as LatLng[1]]"
+      :center="[mapStore.mapState.mapOrigin[0] as LatLng[0], mapStore.mapState.mapOrigin[1] as LatLng[1]]"
       @ready="handleReady"
     >
       <GeomanController />
       <l-tile-layer
-        :url="mapStore.localTileURL"
+        :url="mapStore.mapState.localTileURL"
         :minZoom="14"
         :maxZoom="16"
         layer-type="base"
         name="CustomTiles"
       />
       <l-marker
-        v-for="(coords, vehicle) in mapStore.vehicleMarkers"
+        v-for="(coords, vehicle) in mapStore.mapState.vehicleMarkers"
         :key="vehicle"
         :lat-lng="coords"
         :icon="getVehicleIcon(vehicle)"
@@ -32,7 +32,8 @@ import "leaflet/dist/leaflet.css";
 import { ref, watch, onMounted, reactive } from "vue";
 import { LMap, LTileLayer, LPolygon, LMarker, LControl } from "@vue-leaflet/vue-leaflet";
 import { LeafletMouseEvent, LatLngTuple as LatLng, icon } from "leaflet";
-import mapStore, { LeafletMapGeoman } from "@/lib/MapStore";
+import { mapStore } from "@/lib/StoresSync";
+import { LeafletMapGeoman } from "@/lib/MapStore.types";
 import GeomanController from "@/components/map/GeomanController.vue";
 import { VehicleEnum } from "@/lib/bindings";
 

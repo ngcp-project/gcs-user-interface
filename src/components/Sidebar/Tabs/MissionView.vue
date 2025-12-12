@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import MissionCard from "@/components/Sidebar/SidebarCards/MissionCard.vue";
-import { missionStore } from "@/lib/MissionStore";
+import { missionStore} from "@/lib/StoresSync";
 import { ref, watch } from "vue";
 import { SidebarContent, SidebarFooter, SidebarGroup } from "@/components/ui/sidebar";
 import { Plus } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 
-const missions = missionStore.getAllMissions();
+const missions = missionStore.getAllMissions().value?.missions;
 const handleClick = (missionId: number) => {
   missionStore.setCurrentView("vehicle");
   missionStore.setCurrentMissionID(missionId);

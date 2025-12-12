@@ -1,9 +1,9 @@
 <template>
-   <l-control v-model:position="mapStore.controlPosition"
+   <l-control :position="mapStore.mapState.controlPosition"
     > <Button @click="mapStore.logMapStore">State Log</Button> <Button
       @click="mapStore.toggleDrawMode"
-      >Draw Mode</Button
-    > <Button @click="mapStore.createNewGeoJSON">Create Test GeoJSON</Button> <Button
+      >Draw Mode</Button> 
+      <Button
       @click="mapStore.rerenderLayers"
       >Rerender Map</Button
     > </l-control
@@ -16,7 +16,7 @@ import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 import "@geoman-io/leaflet-geoman-free";
 import { Button } from "@/components/ui/button";
 import { LControl } from "@vue-leaflet/vue-leaflet";
-import mapStore from "@/lib/MapStore";
+import { mapStore } from "@/lib/StoresSync";
 // import { onMounted } from "vue";
 
 interface opts extends L.ControlOptions {

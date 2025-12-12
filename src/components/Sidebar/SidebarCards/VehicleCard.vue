@@ -4,7 +4,7 @@ import { Card, CardContent, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { VehicleEnum } from "@/lib/bindings";
-import { missionStore } from "@/lib/MissionStore";
+import { missionStore } from "@/lib/StoresSync";
 import { set } from "@vueuse/core";
 
 // Define Props
@@ -12,7 +12,7 @@ const props = defineProps<{
   vehicleName: VehicleEnum;
 }>();
 
-const missionId = missionStore.view.currentMissionId;
+const missionId = missionStore.getCurrentMissionId().value;
 
 const vehicle =
   missionId !== null ? missionStore.getVehicleData(missionId, props.vehicleName) : null;

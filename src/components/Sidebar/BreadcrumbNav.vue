@@ -6,11 +6,11 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
-import { missionStore } from "@/lib/MissionStore";
+import { missionStore } from "@/lib/StoresSync";
 
 
 
-const currentView = computed(() => missionStore.view.currentView);
+const currentView = missionStore.getCurrentView();
 
 const handleClick = (targetView: "mission" | "vehicle" | "stage") => {
   if (targetView === "mission") {
@@ -24,12 +24,12 @@ const handleClick = (targetView: "mission" | "vehicle" | "stage") => {
   return;
 }
 
-const currentMissionId = computed(() => missionStore.view.currentMissionId);
-const currentVehicleName = computed(() => missionStore.view.currentVehicleName);
+const currentMissionId = missionStore.getCurrentMissionId();
+const currentVehicleName = missionStore.getCurrentVehicleName();
 
 const breadcrumbMissionName = computed(() => {
   if (currentMissionId.value !== null && currentView.value !== "mission") {
-    const missionName = missionStore.getMissionData(currentMissionId.value)?.mission_name;
+    const missionName = missionStore.getMissionData(currentMissionId.value).value?.mission_name;
     return missionName && missionName.length > 8 
       ? `${missionName.substring(0, 8)}...` 
       : missionName || "Missions";

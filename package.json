@@ -26,6 +26,7 @@
     "embla-carousel-vue": "^8.6.0",
     "express": "^4.21.2",
     "lucide-vue-next": "^0.477.0",
+    "pinia": "^3.0.4",
     "radix-vue": "^1.9.17",
     "reka-ui": "^2.2.1",
     "tailwind-merge": "^3.2.0",
@@ -35,8 +36,7 @@
     "vue-flight-indicators": "^0.1.1",
     "vue-router": "^4.5.1",
     "vue-sonner": "^2.0.0",
-    "ws": "^8.18.2",
-    "zustand": "^5.0.4"
+    "ws": "^8.18.2"
   },
   "devDependencies": {
     "@iconify-json/radix-icons": "^1.2.2",
