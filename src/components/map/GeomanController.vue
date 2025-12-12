@@ -1,5 +1,5 @@
 <template>
-   <l-control v-model:position="mapStore.controlPosition"
+   <l-control :position="mapStore.mapState.controlPosition"
     > <Button @click="mapStore.logMapStore">State Log</Button> <Button
       @click="mapStore.toggleDrawMode"
       >Draw Mode</Button

@@ -46,7 +46,8 @@ export const mapPiniaStore = defineStore('map', () => {
       MRA: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
       MEA: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1]),
       ERU: L.latLng(DEFAULT_MAP_ORIGIN[0], DEFAULT_MAP_ORIGIN[1])
-    }
+    },
+    controlPosition: "topright" as L.ControlPosition
   });
   const missionStore = missionPiniaStore();
 

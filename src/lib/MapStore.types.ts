@@ -59,5 +59,6 @@ export interface MapState {
   localTileURL: string;
   layerTracking: LayerTracking;
   vehicleMarkers: Record<VehicleEnum, LatLngExpression>;
+  controlPosition: L.ControlPosition;
 }
 
