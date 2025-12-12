@@ -1,3 +1,7 @@
+# ! ALERT !
+
+This is the archived repository for GCS User Interface/Database. Our teams have moved onto a [new repository](https://github.com/ngcp-project/GCS-2025-26).
+
 # GCS User Interface
 
 The GCS User Interface for the NGCP project.
