@@ -56,7 +56,8 @@ export const mapPiniaStore = defineStore('map', () => {
     const mapLeaflet = refValue?.leafletObject;
     if (!mapLeaflet) return;
 
-    mapState.value.map = refValue;
+    // Type assertion needed due to complex type inference with LeafletMapGeoman
+    (mapState.value as { map: LeafletMapGeoman | null }).map = refValue;
     // Assign preInitialized geoJSON to the map
     mapState.value.layers.addTo(mapLeaflet);
 
