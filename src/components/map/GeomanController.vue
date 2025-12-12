@@ -2,8 +2,8 @@
    <l-control :position="mapStore.mapState.controlPosition"
     > <Button @click="mapStore.logMapStore">State Log</Button> <Button
       @click="mapStore.toggleDrawMode"
-      >Draw Mode</Button
-    > <Button @click="mapStore.createNewGeoJSON">Create Test GeoJSON</Button> <Button
+      >Draw Mode</Button> 
+      <Button
       @click="mapStore.rerenderLayers"
       >Rerender Map</Button
     > </l-control
